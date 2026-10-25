@@ -1,0 +1,43 @@
+{
+    "plugin_version": "1.0.0",
+    "php_version": "8.3.33",
+    "generated_at": "2026-10-25T11:20:04+00:00",
+    "assertions": 99,
+    "failures": 0,
+    "pass_rate": 100,
+    "groups": {
+        "نصب و چیدمان پایگاه داده": {
+            "assertions": 12,
+            "failures": 0
+        },
+        "بارگذاری شرطی": {
+            "assertions": 8,
+            "failures": 0
+        },
+        "ثبت درخواست": {
+            "assertions": 20,
+            "failures": 0
+        },
+        "تأیید و لغو اشتراک": {
+            "assertions": 7,
+            "failures": 0
+        },
+        "موتور موجودی": {
+            "assertions": 12,
+            "failures": 0
+        },
+        "پایش تطبیقی": {
+            "assertions": 9,
+            "failures": 0
+        },
+        "صف ارسال": {
+            "assertions": 19,
+            "failures": 0
+        },
+        "کانال پیامک": {
+            "assertions": 12,
+            "failures": 0
+        }
+    },
+    "failed": []
+}

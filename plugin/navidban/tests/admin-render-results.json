@@ -1,0 +1,27 @@
+{
+    "plugin_version": "1.0.0",
+    "php_version": "8.3.33",
+    "generated_at": "2026-10-25T11:21:24+00:00",
+    "assertions": 47,
+    "failures": 0,
+    "pass_rate": 100,
+    "groups": {
+        "منو و سطوح دسترسی": {
+            "assertions": 6,
+            "failures": 0
+        },
+        "رندر صفحات": {
+            "assertions": 20,
+            "failures": 0
+        },
+        "قراردادهای خروجی": {
+            "assertions": 18,
+            "failures": 0
+        },
+        "سلامت اجرا": {
+            "assertions": 3,
+            "failures": 0
+        }
+    },
+    "failed": []
+}

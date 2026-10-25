@@ -1,0 +1,67 @@
+{
+    "plugin_version": "1.0.0",
+    "php_version": "8.3.33",
+    "generated_at": "2026-10-25T11:20:03+00:00",
+    "assertions": 197,
+    "failures": 0,
+    "pass_rate": 100,
+    "groups": {
+        "Validator / موبایل": {
+            "assertions": 29,
+            "failures": 0
+        },
+        "Validator / ایمیل": {
+            "assertions": 22,
+            "failures": 0
+        },
+        "Validator / کد ملی": {
+            "assertions": 10,
+            "failures": 0
+        },
+        "Validator / متن": {
+            "assertions": 3,
+            "failures": 0
+        },
+        "Jalali / تبدیل": {
+            "assertions": 20,
+            "failures": 0
+        },
+        "Persian / ارقام": {
+            "assertions": 4,
+            "failures": 0
+        },
+        "CSV / تزریق فرمول": {
+            "assertions": 20,
+            "failures": 0
+        },
+        "Masking / حداقل‌سازی داده": {
+            "assertions": 4,
+            "failures": 0
+        },
+        "FairSending / اعلام به تعداد موجودی": {
+            "assertions": 16,
+            "failures": 0
+        },
+        "Reconcile / پایش تطبیقی": {
+            "assertions": 13,
+            "failures": 0
+        },
+        "QueuePolicy / تلاش دوباره": {
+            "assertions": 9,
+            "failures": 0
+        },
+        "QueuePolicy / نرخ و پنجرهٔ ارسال": {
+            "assertions": 21,
+            "failures": 0
+        },
+        "Template / جای‌نگهدارها": {
+            "assertions": 8,
+            "failures": 0
+        },
+        "HttpGuard / SSRF": {
+            "assertions": 18,
+            "failures": 0
+        }
+    },
+    "failed": []
+}

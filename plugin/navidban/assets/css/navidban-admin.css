@@ -1,0 +1,132 @@
+/*
+ * Navidban — admin panel (RTL, Persian).
+ * Scoped to .nvb-wrap so we never restyle WordPress itself.
+ */
+
+.nvb-wrap {
+	--nvb-primary: #0e5c55;
+	--nvb-primary-hover: #14857b;
+	--nvb-accent: #f2a93b;
+	--nvb-line: #d8e3e0;
+	--nvb-bg: #f6f9f8;
+	--nvb-error: #c6483c;
+	--nvb-ok: #2e9e6b;
+
+	direction: rtl;
+}
+
+.nvb-wrap h1 {
+	font-weight: 700;
+}
+
+.nvb-sub {
+	margin-top: -0.4rem;
+	color: #50575e;
+}
+
+.nvb-muted {
+	color: #50575e;
+	font-size: 12px;
+}
+
+.nvb-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px;
+	margin: 16px 0 24px;
+}
+
+.nvb-card {
+	padding: 14px 16px;
+	border: 1px solid var(--nvb-line);
+	border-radius: 10px;
+	background: #fff;
+}
+
+.nvb-card h3 {
+	margin: 0 0 6px;
+	font-size: 14px;
+}
+
+.nvb-card p {
+	margin: 0 0 10px;
+	font-size: 12px;
+	line-height: 1.9;
+	color: #50575e;
+}
+
+.nvb-card__label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 12px;
+	color: #50575e;
+}
+
+.nvb-card__value {
+	font-size: 22px;
+	line-height: 1.4;
+	color: var(--nvb-primary);
+}
+
+.nvb-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 10px;
+	margin: 12px 0;
+	padding: 12px;
+	border: 1px solid var(--nvb-line);
+	border-radius: 10px;
+	background: var(--nvb-bg);
+}
+
+.nvb-filters label {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 12px;
+}
+
+.nvb-table {
+	margin-top: 12px;
+}
+
+.nvb-table th,
+.nvb-table td {
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+.nvb-bulk {
+	margin: 10px 0;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.nvb-ok {
+	color: var(--nvb-ok);
+	font-weight: 600;
+}
+
+.nvb-bad {
+	color: var(--nvb-error);
+	font-weight: 600;
+}
+
+.nvb-footer {
+	margin-top: 32px;
+	padding-top: 12px;
+	border-top: 1px solid var(--nvb-line);
+	font-size: 12px;
+	color: #787c82;
+}
+
+.nvb-wrap .form-table th {
+	font-weight: 600;
+}
+
+.nvb-wrap code {
+	direction: ltr;
+	unicode-bidi: embed;
+}

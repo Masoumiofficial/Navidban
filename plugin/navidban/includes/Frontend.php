@@ -1,0 +1,390 @@
+<?php
+/**
+ * Storefront: conditional asset loading, the "notify me" form and the public
+ * confirm/unsubscribe handlers.
+ *
+ * Core differentiator: nothing is enqueued unless the visitor is on a single
+ * product page whose product (or a variation of it) cannot be purchased.
+ * See docs/PERFORMANCE.md for the measurement method.
+ *
+ * @package Navidban
+ */
+
+namespace Navidban;
+
+use Navidban\Support\Validator;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class Frontend
+ */
+final class Frontend {
+
+	/**
+	 * Cached decision for the current request.
+	 *
+	 * @var bool|null
+	 */
+	private $should_load = null;
+
+	/**
+	 * Register hooks.
+	 *
+	 * @return void
+	 */
+	public function register_hooks() {
+		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue' ), 20 );
+		add_action( 'template_redirect', array( $this, 'handle_public_actions' ), 1 );
+		add_action( 'woocommerce_single_product_summary', array( $this, 'render_form' ), 35 );
+	}
+
+	/**
+	 * Should this request load any front-end asset at all?
+	 *
+	 * @return bool
+	 */
+	public function should_load() {
+		if ( null !== $this->should_load ) {
+			return $this->should_load;
+		}
+
+		$this->should_load = $this->evaluate_should_load();
+
+		return $this->should_load;
+	}
+
+	/**
+	 * Actual decision. Kept separate so the unit/integration harness can drive it.
+	 *
+	 * @return bool
+	 */
+	public function evaluate_should_load() {
+		if ( is_admin() || wp_doing_ajax_compat() || is_feed() || is_robots() ) {
+			return false;
+		}
+
+		if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+			return false;
+		}
+
+		if ( ! function_exists( 'wc_get_product' ) || ! function_exists( 'get_queried_object_id' ) ) {
+			return false;
+		}
+
+		$product_id = (int) get_queried_object_id();
+		if ( $product_id <= 0 ) {
+			return false;
+		}
+
+		$product = wc_get_product( $product_id );
+		if ( ! $product ) {
+			return false;
+		}
+
+		if ( ! $product->is_in_stock() ) {
+			return true;
+		}
+
+		// A variable product can be "in stock" as a whole while single
+		// variations are sold out. Only then do we need our assets.
+		return $this->has_out_of_stock_variation( $product );
+	}
+
+	/**
+	 * Does the product have at least one variation that cannot be bought?
+	 *
+	 * @param \WC_Product $product Product.
+	 * @return bool
+	 */
+	public function has_out_of_stock_variation( $product ) {
+		if ( ! is_object( $product ) || ! method_exists( $product, 'is_type' ) || ! $product->is_type( 'variable' ) ) {
+			return false;
+		}
+
+		if ( ! method_exists( $product, 'get_children' ) || ! function_exists( 'wc_get_product' ) ) {
+			return false;
+		}
+
+		$children = $product->get_children();
+
+		if ( empty( $children ) ) {
+			return false;
+		}
+
+		// Cap the loop: a product with hundreds of variations must not turn a
+		// page view into hundreds of object loads.
+		$children = array_slice( $children, 0, 100 );
+
+		foreach ( $children as $child_id ) {
+			$variation = wc_get_product( (int) $child_id );
+
+			if ( ! $variation ) {
+				continue;
+			}
+
+			if ( method_exists( $variation, 'variation_is_active' ) && ! $variation->variation_is_active() ) {
+				continue;
+			}
+
+			if ( ! $variation->is_in_stock() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Enqueue assets, but only when they are needed.
+	 *
+	 * @return void
+	 */
+	public function maybe_enqueue() {
+		if ( ! $this->should_load() ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'navidban-front',
+			NAVIDBAN_URL . 'assets/css/navidban-front.css',
+			array(),
+			NAVIDBAN_VERSION
+		);
+
+		wp_enqueue_script(
+			'navidban-front',
+			NAVIDBAN_URL . 'assets/js/navidban-front.js',
+			array(),
+			NAVIDBAN_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'navidban-front',
+			'NavidbanData',
+			array(
+				'restUrl'   => function_exists( 'rest_url' ) ? rest_url( 'navidban/v1/subscribe' ) : '',
+				'ajaxUrl'   => function_exists( 'admin_url' ) ? admin_url( 'admin-ajax.php' ) : '',
+				'nonce'     => wp_create_nonce( 'wp_rest' ),
+				'ajaxNonce' => wp_create_nonce( 'navidban_subscribe' ),
+				'channel'   => $this->channel_mode(),
+				'strings'   => array(
+					'duplicate'   => 'این شماره یا ایمیل پیش‌تر ثبت شده است. اگر پیام تأیید را دریافت نکردید، چند دقیقهٔ دیگر دوباره تلاش کنید.',
+					'invalid'     => 'شمارهٔ موبایل یا ایمیل را درست وارد کنید.',
+					'consent'     => 'برای ادامه باید رضایت خود را تأیید کنید.',
+					'network'     => 'ارتباط برقرار نشد. لطفاً دوباره تلاش کنید.',
+					'success'     => (string) Settings::get( 'success_message', '' ),
+					'confirmSent' => 'یک پیام تأیید برای شما ارسال شد. برای تکمیل ثبت، پیوند داخل آن را باز کنید.',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Which input(s) the form shows.
+	 *
+	 * @return string
+	 */
+	public function channel_mode() {
+		$email = Settings::enabled( 'email_enabled' );
+		$sms   = Settings::enabled( 'sms_enabled' );
+
+		if ( $email && $sms ) {
+			return 'both';
+		}
+
+		return $sms ? 'sms' : 'email';
+	}
+
+	/**
+	 * Render the waitlist form on the product page.
+	 *
+	 * @return void
+	 */
+	public function render_form() {
+		if ( ! $this->should_load() ) {
+			return;
+		}
+
+		$product_id = (int) get_queried_object_id();
+		$product    = wc_get_product( $product_id );
+
+		if ( ! $product ) {
+			return;
+		}
+
+		$variations = array();
+		if ( method_exists( $product, 'get_children' ) ) {
+			foreach ( $product->get_children() as $child_id ) {
+				$variation = wc_get_product( (int) $child_id );
+				if ( ! $variation ) {
+					continue;
+				}
+				$variations[] = array(
+					'id'       => (int) $child_id,
+					'label'    => \Navidban\Support\Persian::normalize( (string) $variation->get_name() ),
+					'in_stock' => (bool) $variation->is_in_stock(),
+				);
+			}
+		}
+
+		$default_channel = ( 'sms' === $this->channel_mode() ) ? 'sms' : 'email';
+		$user_id         = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
+
+		$prefill_email = '';
+		$prefill_phone = '';
+
+		if ( $user_id > 0 ) {
+			$user = function_exists( 'get_userdata' ) ? get_userdata( $user_id ) : null;
+			if ( $user ) {
+				$prefill_email = (string) $user->user_email;
+			}
+
+			$billing_phone = (string) get_user_meta( $user_id, 'billing_phone', true );
+			$normalized    = Validator::normalize_phone( $billing_phone );
+			if ( '' !== $normalized ) {
+				$prefill_phone = $normalized;
+			}
+		}
+
+		$notice = $this->read_notice();
+
+		$view = NAVIDBAN_DIR . 'admin/views/frontend-form.php';
+
+		if ( ! is_readable( $view ) ) {
+			return;
+		}
+
+		$settings = array(
+			'heading'     => (string) Settings::get( 'form_heading', '' ),
+			'intro'       => (string) Settings::get( 'form_intro', '' ),
+			'button'      => (string) Settings::get( 'button_label', '' ),
+			'consent'     => (string) Settings::get( 'consent_label', '' ),
+			'consent_req' => Consent::requires_checkbox(),
+			'privacy'     => Consent::privacy_url(),
+			'mode'        => $this->channel_mode(),
+			'notice'      => $notice,
+		);
+
+		include $view;
+	}
+
+	/**
+	 * Handle ?navidban_confirm= / ?navidban_unsubscribe= links.
+	 *
+	 * @return void
+	 */
+	public function handle_public_actions() {
+		if ( is_admin() ) {
+			return;
+		}
+
+		$token   = '';
+		$action  = '';
+		$product = 0;
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public,
+		// token-authenticated links; the token *is* the credential.
+		if ( isset( $_GET[ Consent::CONFIRM_VAR ] ) ) {
+			$token  = sanitize_text_field_compat( wp_unslash_compat( $_GET[ Consent::CONFIRM_VAR ] ) );
+			$action = 'confirm';
+		} elseif ( isset( $_GET[ Consent::UNSUBSCRIBE_VAR ] ) ) {
+			$token  = sanitize_text_field_compat( wp_unslash_compat( $_GET[ Consent::UNSUBSCRIBE_VAR ] ) );
+			$action = 'unsubscribe';
+		}
+		// phpcs:enable
+
+		if ( '' === $action ) {
+			return;
+		}
+
+		$row = WaitlistRepository::get_by_token( $token );
+
+		if ( null !== $row ) {
+			$product = (int) $row['product_id'];
+		}
+
+		if ( 'confirm' === $action ) {
+			$result  = WaitlistRepository::confirm_by_token( $token );
+			$notice  = ( 'confirmed' === $result || 'already' === $result ) ? 'confirmed' : $result;
+		} else {
+			$result = WaitlistRepository::unsubscribe_by_token( $token );
+			$notice = ( 'unsubscribed' === $result || 'already' === $result ) ? 'unsubscribed' : $result;
+		}
+
+		Logger::log( 'info', 'public_' . $action, (string) $notice, Consent::ip_hash() );
+
+		$target = ( $product > 0 && function_exists( 'get_permalink' ) ) ? (string) get_permalink( $product ) : '';
+
+		if ( '' === $target ) {
+			$target = function_exists( 'home_url' ) ? home_url( '/' ) : '/';
+		}
+
+		$target = add_query_arg_compat( 'navidban_notice', $notice, $target );
+
+		if ( function_exists( 'wp_safe_redirect' ) ) {
+			wp_safe_redirect( $target, 302 );
+			exit;
+		}
+	}
+
+	/**
+	 * Read the one-shot notice code from the URL.
+	 *
+	 * @return string
+	 */
+	private function read_notice() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$notice = isset( $_GET['navidban_notice'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['navidban_notice'] ) ) : '';
+
+		$allowed = array( 'confirmed', 'already', 'expired', 'invalid', 'unsubscribed' );
+
+		return in_array( $notice, $allowed, true ) ? $notice : '';
+	}
+}
+
+/**
+ * wp_doing_ajax() exists since WP 4.7; the harness needs a fallback.
+ *
+ * @return bool
+ */
+function wp_doing_ajax_compat() {
+	if ( function_exists( 'wp_doing_ajax' ) ) {
+		return (bool) wp_doing_ajax();
+	}
+
+	return false;
+}
+
+/**
+ * sanitize_text_field() fallback.
+ *
+ * @param mixed $value Value.
+ * @return string
+ */
+function sanitize_text_field_compat( $value ) {
+	if ( function_exists( 'sanitize_text_field' ) ) {
+		return (string) sanitize_text_field( $value );
+	}
+
+	return trim( strip_tags( (string) $value ) );
+}
+
+/**
+ * wp_unslash() fallback.
+ *
+ * @param mixed $value Value.
+ * @return mixed
+ */
+function wp_unslash_compat( $value ) {
+	if ( function_exists( 'wp_unslash' ) ) {
+		return wp_unslash( $value );
+	}
+
+	if ( is_array( $value ) ) {
+		return array_map( 'wp_unslash_compat', $value );
+	}
+
+	return is_string( $value ) ? stripslashes( $value ) : $value;
+}

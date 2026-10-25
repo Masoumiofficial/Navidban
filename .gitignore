@@ -1,0 +1,5 @@
+# development only — never shipped
+node_modules/
+__smoke_bootstrap.php
+.DS_Store
+*.log

@@ -1,0 +1,149 @@
+# معماری نویدبان
+
+## ۱) اصل حاکم
+
+> هر بایتی که در یک صفحهٔ غیرهدف ارسال شود، یک باگ است.
+
+کل معماری حول همین یک قاعده چیده شده است: تصمیم «آیا این صفحه به نویدبان
+نیاز دارد؟» پیش از هر صف‌کردن فایل و پیش از هر کوئری گرفته می‌شود
+(`Frontend::evaluate_should_load()`). هیچ استایل/اسکریپتی بدون شرط ثبت نمی‌شود.
+
+## ۲) نقشهٔ فایل‌ها
+
+```
+navidban.php              هدر افزونه، ثابت‌ها، بوت
+uninstall.php             حذف کامل (فقط با گزینهٔ صریح مدیر)
+includes/
+  Autoloader.php          PSR-4 دست‌ساز، بدون Composer
+  Plugin.php              سیم‌کشی سرویس‌ها، گارد نسخهٔ ووکامرس
+  Activator.php           ساخت جدول، پیش‌فرض تنظیمات، زمان‌بندی، snapshot اولیه
+  Deactivator.php         پاک‌کردن رویدادهای cron و قفل صف
+  Capabilities.php        navidban_manage / navidban_view_reports
+  Database.php            چهار جدول InnoDB + مهاجرت + force_innodb()
+  Settings.php            یک آپشن، خواندن کش‌شده، sanitize بر اساس نوع
+  Frontend.php            بارگذاری شرطی، فرم، هندل تأیید/لغو
+  Rest.php                POST navidban/v1/subscribe
+  Ajax.php                همان مسیر برای سایت‌هایی که REST را بسته‌اند
+  Subscribe.php           اعتبارسنجی، rate limit، ثبت، صف تأیید
+  Consent.php             توکن ۶۴ کاراکتری، URL تأیید/لغو
+  WaitlistRepository.php  تمام کوئری‌های جدول انتظار
+  Queue.php               صف، قفل نرم، ارسال دسته‌ای، backoff
+  Notifier.php            انتخاب کانال + رندر پیام
+  StockWatcher.php        هوک‌های ووکامرس + پایش تطبیقی
+  Logger.php              لاگ امنیتی و rate limit بر پایهٔ هش IP
+  Scheduler.php           سه رویداد cron
+  Logic/                  منطق خالص و تست‌پذیر (بدون وردپرس)
+  Support/                ابزار متن، عدد فارسی، تاریخ شمسی، CSV، ماسک
+  Channels/               یک interface + ایمیل + ۳ پیامک + REST عمومی
+admin/
+  class-admin.php         منوها، ذخیرهٔ تنظیمات، عملیات ابزار، CSV
+  views/                  داشبورد، لیست انتظار، تنظیمات، ابزارها، راهنما، فرم
+assets/                   css/js فرانت و ادمین (بدون build)
+languages/                قالب ترجمه
+tests/  tools/  docs/     توسعه — از بستهٔ انتشار حذف می‌شوند
+```
+
+## ۳) چرخهٔ عمر یک درخواست فرانت
+
+```
+wp_enqueue_scripts
+  └─ Frontend::maybe_enqueue()
+       └─ evaluate_should_load()
+            ├─ is_admin/feed/robots/ajax  → false
+            ├─ ! is_product()             → false
+            ├─ wc_get_product(id) خالی    → false
+            ├─ محصول ناموجود              → true
+            └─ محصول متغیر با تنوع ناموجود → true
+       اگر true: ۱ استایل + ۱ اسکریپت + wp_localize_script(NavidbanData)
+```
+
+`should_load()` در همان درخواست memoize می‌شود تا `render_form()` دوباره
+همان محاسبه را انجام ندهد (یک تصمیم، یک بار).
+
+## ۴) چرخهٔ ثبت درخواست
+
+```
+JS ──POST──> /wp-json/navidban/v1/subscribe  (X-WP-Nonce)
+             یا admin-ajax.php?action=navidban_subscribe
+        └─ Subscribe::handle()
+             ├─ nonce (S1) و referer هم‌مبنا
+             ├─ هانی‌پات خالی (ربات)
+             ├─ rate limit: ۵ درخواست/ساعت بر پایهٔ هش IP نمکی (S6)
+             ├─ اعتبارسنجی: ^09\d{9}$ برای موبایل، is_email برای ایمیل (S3)
+             ├─ رضایت (اگر اجباری باشد)
+             ├─ درج اتمی ردیف (uniq_subscriber مانع تکرار)
+             └─ صف کردن پیام تأیید (double opt-in)
+```
+
+پاسخ‌ها همیشه یک شکل دارند: `{ ok: bool, code: string, message: string }`.
+کدها: `confirmation_sent`, `already_confirmed`, `invalid_phone`,
+`invalid_email`, `consent_required`, `rate_limited`, `channel_disabled`.
+
+## ۵) چرخهٔ تشخیص بازگشت موجودی
+
+```
+هوک ووکامرس (set_stock_status / set_stock / reduce_order_stock / save_post)
+        │
+        ├─ StockWatcher::handle_restock()
+        │     ├─ مقایسه با snapshot قبلی
+        │     ├─ به‌روزرسانی اتمی snapshot (announced_qty, announced_at)  ← ضد تکرار
+        │     └─ اگر گذار «ناموجود → موجود» بود: announce()
+        │
+        └─ announce(): fair sending → Queue::enqueue() برای N نفر قدیمی‌تر
+```
+
+پایش تطبیقی همان تابع `announce()` را صدا می‌زند، بنابراین دو لایه هرگز دو
+مسیر جدا از هم برای ارسال ندارند. `event_key` هر بازگشت موجودی یکتا است
+(`restock:<UTC timestamp>:<random8>`)، و `WaitlistRepository::confirmed_for()`
+با `NOT EXISTS` روی صف، از اعلان دوباره به کسی که برای همان بازگشت در صف
+است جلوگیری می‌کند.
+
+## ۶) چرخهٔ صف
+
+```
+cron هر ۵ دقیقه → Queue::process_batch()
+  ├─ قفل نرم (navidban_queue_lock، TTL ۳۰۰ ثانیه)
+  ├─ بازهٔ مجاز ارسال؟  اگر نه → تلاش بعدی، بدون خطا
+  ├─ سقف دسته (پیش‌فرض ۵۰) و سقف دقیقه (پیش‌فرض ۶۰)
+  ├─ SELECT ... FOR UPDATE ‏(یا UPDATE شرطی) برای برداشتن یک ردیف
+  ├─ Notifier::dispatch() → کانال
+  ├─ موفق: status=sent, sent_at
+  └─ ناموفق: attempts++، backoff ۱۵m/۱h/۶h، بعد از ۳ تلاش status=failed
+```
+
+## ۷) منطق خالص در برابر چسب وردپرس
+
+پوشهٔ `includes/Logic` هیچ تابع وردپرسی صدا نمی‌زند:
+
+| کلاس | مسئولیت | چرا جدا شد |
+|---|---|---|
+| `FairSending` | محاسبهٔ «چند نفر، چه کسانی» | قابل تست بدون دیتابیس |
+| `QueuePolicy` | backoff، بازهٔ ارسال، سقف نرخ | قابل تست بدون زمان واقعی |
+| `Reconcile` | دیف وضعیت انبار | قابل تست با آرایهٔ ساده |
+| `Template` | جانشینی متغیرهای پیام | قابل تست با رشته |
+| `HttpGuard` | allowlist پروتکل و IP | قابل تست بدون شبکه |
+
+همین جداسازی است که اجازه می‌دهد `tests/run.php` بدون نصب وردپرس اجرا شود.
+
+## ۸) تصمیم‌های معماری و دلیلشان
+
+1. **جدول اختصاصی به‌جای postmeta** — ردیف لیست انتظار موجودیت درجه‌یک است؛
+   با postmeta هر جست‌وجو/خروجی به join سنگین روی `wp_postmeta` تبدیل می‌شود.
+2. **`email`/`phone` به‌صورت `NOT NULL DEFAULT ''`** — MySQL در UNIQUE،
+   NULLها را متمایز می‌داند؛ با NULL یک بازدیدکننده می‌توانست دو بار ثبت شود.
+3. **یک آپشن برای همهٔ تنظیمات** — یک ردیف، یک autoload، صفر کوئری اضافه.
+4. **قفل نرم روی گزینه** — بدون جدول قفل و بدون وابستگی به object cache.
+5. **`event_key` در صف** — کلید یکتای `(waitlist_id, payload_hash)` باعث
+   می‌شود صف برای یک رویداد تکراری، دو پیام نسازد.
+6. **بدون `random_bytes` اجباری** — روی هاست‌های اشتراکی قدیمی موجود نیست؛
+   `Consent::generate_token()` ابتدا آن را امتحان می‌کند و بعد به
+   `wp_generate_password` و در نهایت `uniqid` برمی‌گردد. توکن همیشه ۶۴ کاراکتر
+   hex است.
+7. **REST + AJAX** — بعضی فروشگاه‌ها REST را می‌بندند؛ fallback اجباری نیست،
+   اما وجود دارد.
+
+## ۹) نقاط توسعه
+
+- کانال جدید: `Channels/ChannelInterface.php` را پیاده کنید
+  (`name`, `label`, `is_configured`, `send`) و در `Notifier::channel()` اضافه کنید.
+- رویداد جدید: `event_type` در جدول انتظار یک رشته است؛ مهاجرت ستون لازم نیست.

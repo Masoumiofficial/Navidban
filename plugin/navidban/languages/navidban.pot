@@ -1,0 +1,19 @@
+# Copyright (C) 2026 اتحاد وردپرس
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Navidban 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/Masoumiofficial/Navidban/issues\n"
+"POT-Creation-Date: 2026-10-25T00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: navidban tools (hand-maintained template)\n"
+"X-Domain: navidban\n"
+
+#: includes/Scheduler.php:58
+msgid "هر ۵ دقیقه (نویدبان)"
+msgstr ""

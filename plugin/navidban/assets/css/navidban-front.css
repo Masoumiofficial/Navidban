@@ -1,0 +1,166 @@
+/*
+ * Navidban — storefront form.
+ * Loaded only on a single product page whose product (or a variation) is unavailable.
+ * No !important: the theme must always be able to override these rules.
+ */
+
+.nvb-form {
+	--nvb-primary: #0e5c55;
+	--nvb-primary-hover: #14857b;
+	--nvb-accent: #f2a93b;
+	--nvb-ink: #10201e;
+	--nvb-line: #d8e3e0;
+	--nvb-bg: #f6f9f8;
+	--nvb-error: #c6483c;
+	--nvb-ok: #2e9e6b;
+
+	margin: 1.5rem 0;
+	padding: 1.25rem;
+	border: 1px solid var(--nvb-line);
+	border-radius: 12px;
+	background: var(--nvb-bg);
+	color: var(--nvb-ink);
+	text-align: right;
+}
+
+.nvb-form__title {
+	margin: 0 0 0.5rem;
+	font-size: 1.15rem;
+	line-height: 1.6;
+}
+
+.nvb-form__intro {
+	margin: 0 0 1rem;
+	font-size: 0.95rem;
+	line-height: 1.9;
+}
+
+.nvb-form__notice {
+	margin: 0 0 1rem;
+	padding: 0.6rem 0.9rem;
+	border-inline-start: 4px solid var(--nvb-ok);
+	background: #fff;
+	border-radius: 6px;
+}
+
+.nvb-form__channels {
+	margin: 0 0 0.9rem;
+	padding: 0;
+	border: 0;
+}
+
+.nvb-form__channels legend {
+	margin-bottom: 0.35rem;
+	font-size: 0.9rem;
+	font-weight: 500;
+}
+
+.nvb-form__channels label {
+	margin-inline-end: 1rem;
+}
+
+.nvb-form__field {
+	margin: 0 0 0.85rem;
+}
+
+.nvb-form__field label {
+	display: block;
+	margin-bottom: 0.3rem;
+	font-size: 0.9rem;
+	font-weight: 500;
+}
+
+.nvb-form__field input {
+	width: 100%;
+	max-width: 22rem;
+	padding: 0.6rem 0.75rem;
+	border: 1px solid var(--nvb-line);
+	border-radius: 8px;
+	background: #fff;
+	color: var(--nvb-ink);
+	font-size: 1rem;
+	line-height: 1.6;
+}
+
+.nvb-form__field input:focus-visible,
+.nvb-form__channels input:focus-visible,
+.nvb-button:focus-visible {
+	outline: 3px solid var(--nvb-accent);
+	outline-offset: 2px;
+}
+
+.nvb-form__consent {
+	margin: 0 0 1rem;
+	font-size: 0.85rem;
+	line-height: 1.9;
+}
+
+.nvb-form__consent a {
+	margin-inline-start: 0.35rem;
+	text-decoration: underline;
+}
+
+.nvb-form__hp {
+	position: absolute;
+	inset-inline-start: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.nvb-button {
+	display: inline-block;
+	padding: 0.7rem 1.4rem;
+	border: 0;
+	border-radius: 8px;
+	background: var(--nvb-primary);
+	color: #fff;
+	font-size: 1rem;
+	font-weight: 500;
+	line-height: 1.6;
+	cursor: pointer;
+}
+
+.nvb-button:hover {
+	background: var(--nvb-primary-hover);
+}
+
+.nvb-button[disabled] {
+	opacity: 0.65;
+	cursor: progress;
+}
+
+.nvb-form__message {
+	margin: 0.9rem 0 0;
+	font-size: 0.9rem;
+	line-height: 1.8;
+}
+
+.nvb-form__message.is-error {
+	color: var(--nvb-error);
+}
+
+.nvb-form__message.is-success {
+	color: var(--nvb-ok);
+}
+
+/* A variation is selected and it is available: the form is not relevant. */
+.nvb-form.is-hidden {
+	display: none;
+}
+
+@media (max-width: 480px) {
+	.nvb-form {
+		padding: 1rem;
+	}
+
+	.nvb-form__field input {
+		max-width: 100%;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.nvb-form__message {
+		transition: color 120ms ease-in;
+	}
+}
