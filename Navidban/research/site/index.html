@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>APEX Ω∞ — نسخهٔ نمایشی گزارش</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet"><style>
+:root{
+  --bg:#0d1117; --panel:#151b23; --panel2:#1b232d; --line:#2a3441;
+  --fg:#e6edf3; --mut:#9fb0c0; --acc:#4ea1ff; --acc2:#7ee787;
+  --warn:#f0b429; --bad:#ff7b72; --code:#1f2933;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font-family:Vazirmatn,'Segoe UI',Tahoma,'Noto Sans Arabic',sans-serif;
+  font-size:15.5px;line-height:2.05;
+}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+code{
+  font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+  background:var(--code);padding:.1em .4em;border-radius:4px;
+  font-size:.86em;direction:ltr;unicode-bidi:embed;color:#a5d6ff;
+}
+.layout{display:flex;align-items:flex-start;gap:0}
+/* ---- فهرست جانبی ---- */
+.toc{
+  position:sticky;top:0;width:330px;flex:0 0 330px;height:100vh;overflow-y:auto;
+  background:var(--panel);border-inline-start:1px solid var(--line);
+  padding:22px 18px 60px;
+}
+.toc h2{font-size:14px;margin:0 0 4px;color:var(--acc2);letter-spacing:.02em}
+.toc .sub{font-size:11.5px;color:var(--mut);margin-bottom:16px;line-height:1.7}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:s}
+.toc li{counter-increment:s;margin:0}
+.toc li a{
+  display:block;padding:7px 10px;border-radius:7px;color:var(--mut);
+  font-size:13px;line-height:1.75;border-inline-start:2px solid transparent;
+}
+.toc li a:hover{background:var(--panel2);color:var(--fg);text-decoration:none}
+.toc li a.on{color:#fff;background:var(--panel2);border-inline-start-color:var(--acc)}
+.toc .tools{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:8px}
+.toc .tools a{
+  font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:20px;
+  color:var(--fg);background:var(--panel2)
+}
+.toc .tools a:hover{border-color:var(--acc);text-decoration:none}
+/* ---- محتوا ---- */
+main{flex:1 1 auto;min-width:0;padding:34px 46px 120px;max-width:1180px}
+.doc{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:34px 38px 46px;margin-bottom:26px}
+h1{font-size:27px;line-height:1.6;margin:.2em 0 .8em;color:#fff;
+  padding-bottom:.45em;border-bottom:2px solid var(--line)}
+h2{font-size:21px;line-height:1.65;margin:1.9em 0 .8em;color:var(--acc);
+  padding-bottom:.35em;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+h3{font-size:17px;line-height:1.7;margin:1.6em 0 .6em;color:var(--acc2);
+  scroll-margin-top:16px}
+h4{font-size:15.5px;margin:1.3em 0 .5em;color:#fff}
+p{margin:.75em 0}
+ul,ol{margin:.7em 0;padding-inline-start:1.55em}
+li{margin:.34em 0}
+li::marker{color:var(--acc)}
+hr{border:0;border-top:1px solid var(--line);margin:2.2em 0}
+strong{color:#fff;font-weight:700}
+em{color:var(--warn);font-style:normal}
+blockquote{
+  margin:1.1em 0;padding:.75em 1.15em;background:var(--panel2);
+  border-inline-start:3px solid var(--acc);border-radius:0 8px 8px 0;color:#dfe9f2
+}
+blockquote p{margin:.35em 0}
+pre{
+  background:var(--code);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;direction:ltr;text-align:left;
+  font-size:13px;line-height:1.75
+}
+pre code{background:none;padding:0;color:#c9d1d9;font-size:13px}
+/* ---- جدول ---- */
+.tw{overflow-x:auto;margin:1.1em 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13.4px;line-height:1.85}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);
+  text-align:right;vertical-align:top}
+th{background:var(--panel2);color:#fff;font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even){background:rgba(255,255,255,.022)}
+tbody tr:hover{background:rgba(78,161,255,.075)}
+td:first-child{font-weight:500}
+/* ---- نشان‌ها ---- */
+.badge{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--mut)}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
+.kicker{font-size:12px;color:var(--mut);letter-spacing:.04em}
+@media(max-width:1000px){
+  .layout{display:block}
+  .toc{position:static;width:auto;height:auto;flex:none;
+    border-inline-start:0;border-bottom:1px solid var(--line)}
+  main{padding:20px 14px 80px}
+  .doc{padding:20px 16px 30px;border-radius:10px}
+}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .toc,.tools{display:none}
+  main{padding:0;max-width:none}
+  .doc{border:0;background:#fff;padding:0}
+  h1,h2,h3,strong{color:#000}
+  a{color:#000;text-decoration:underline}
+  th,td{border-color:#bbb}
+  blockquote,pre,.tw{border-color:#bbb;background:#f6f6f6}
+}
+
+.hero{padding:40px 38px}
+.hero h1{border:0;margin-bottom:.3em}
+.hero .lead{color:var(--mut);font-size:15px;max-width:70ch}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 6px}
+.btns a{padding:11px 20px;border-radius:10px;border:1px solid var(--line);
+background:var(--panel2);color:#fff;font-size:14px}
+.btns a.p{background:var(--acc);border-color:var(--acc);color:#04121f;font-weight:700}
+.btns a:hover{text-decoration:none;border-color:var(--acc)}
+.grid{display:flex;flex-wrap:wrap;gap:18px;margin-top:8px}
+.ans{background:linear-gradient(180deg,rgba(78,161,255,.10),transparent);
+border-inline-start:3px solid var(--acc)}
+</style></head><body><main style="max-width:1000px;margin:0 auto;padding:34px 20px 90px">
+<div class="doc hero">
+<div class="top"><span class="badge">Ω∞ 1.0</span><span class="badge">۳ آبان ۱۴۰۵</span>
+<span class="badge">اتحاد وردپرس</span></div>
+<h1>گزارش تحقیق بازار و انتخاب فرصت محصول</h1>
+<p class="lead">خروجی موتور APEX Ω∞ برای بازار افزونهٔ وردپرس فارسی —
+کشف، اعتبارسنجی، رتبه‌بندی و انتخاب یک فرصت محصول، بر پایهٔ شواهد قابل
+ارجاع از راست‌چین، ژاکت و wordpress.org.</p>
+<div class="btns">
+<a class="p" href="report.html">📄 گزارش کامل (۱۶ بخش)</a>
+<a href="evidence.html">🗂 دفترچهٔ شواهد</a>
+<a class="p" href="brand.html">🎨 بستهٔ برند «نویدبان»</a>
+<a class="p" href="build-prompt.html">🛠 پرامپت ساخت</a>
+<a href="APEX-report.md" download>⬇ Markdown گزارش</a>
+<a href="BRAND.md" download>⬇ Markdown برند</a>
+<a href="build-prompt.md" download>⬇ Markdown پرامپت</a>
+<a href="evidence-log.md" download>⬇ Markdown شواهد</a>
+<a href="#" onclick="window.print();return false">🖨 چاپ / PDF</a>
+</div>
+</div>
+
+<div class="doc ans">
+<h3 style="margin-top:0">پاسخ کوتاه</h3>
+<p>اگر امروز فقط یک افزونهٔ جدید برای بازار وردپرس فارسی ساخته شود:
+<strong>«نویدبان» — مرکز اعلان و لیست انتظار بومی، سبک و امن برای ووکامرس</strong>،
+برای فروشگاه‌های با موجودی متناوب و کسب‌وکارهای نوبتی.
+امتیاز <strong>۷۷ از ۱۰۰</strong>، اطمینان <strong>متوسط</strong>،
+مشروط به عبور از ۶ آزمون اعتبارسنجی ۱۴ روزهٔ پیش از کدنویسی.</p>
+<p style="color:var(--mut);font-size:13.5px">نام نهایی در آزمون T5 پاک شد
+(«موجودبان» در ممیزی رد شد — یک محصول زنده با همین نام در راست‌چین وجود دارد).
+بستهٔ کامل برند و پرامپت ساخت خودبسنده در همین سایت منتشر شده‌اند.</p>
+<p style="color:var(--mut);font-size:13.5px;margin-bottom:0">
+جزئیات، استدلال، نقد خصمانه و برنامهٔ آزمون در بخش‌های ۱۰ تا ۱۴ گزارش.</p>
+</div>
+
+<div class="doc" style="margin-top:18px">
+<h3 style="margin-top:0">چهار سند تحویلی</h3>
+<div class="grid" style="margin-top:4px">
+<div style="flex:1 1 300px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--panel2)">
+<h4 style="margin:0 0 6px"><a href="report.html">📄 گزارش نهایی APEX Ω∞</a></h4>
+<p style="color:var(--mut);font-size:13.5px;margin:0">۱۶ بخش + ۳ پیوست · کشف ۲۲ فرصت، غربال به ۵ کارت ۱۷فیلدی، امتیازدهی وزنی از ۱۰۰،
+نقد خصمانه، طراحی MVP و انتخاب نهایی. شامل «پیوست پ» با اصلاحات پس از ممیزی نام.</p>
+</div>
+<div style="flex:1 1 300px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--panel2)">
+<h4 style="margin:0 0 6px"><a href="evidence.html">🗂 دفترچهٔ شواهد</a></h4>
+<p style="color:var(--mut);font-size:13.5px;margin:0">دادهٔ خام مشاهده‌شده با نشانی کامل، تاریخ دسترسی و نقل‌قول مستقیم.
+هر ادعای گزارش به یک ردیف در این دفترچه برمی‌گردد.</p>
+</div>
+<div style="flex:1 1 300px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--panel2)">
+<h4 style="margin:0 0 6px"><a href="brand.html">🎨 بستهٔ برند «نویدبان»</a></h4>
+<p style="color:var(--mut);font-size:13.5px;margin:0">نام نهایی و ممیزی تداخل ۷ نام · جایگاه‌سازی · ۳ ستون تمایز · شعار · صدا و لحن ·
+هویت بصری با پالت رنگ و مشخصات نشان · <strong>متن آمادهٔ کپی‌پیست صفحهٔ محصول مارکت</strong> ·
+جدول نام‌های فنی · چک‌لیست پیش از لانچ.</p>
+</div>
+<div style="flex:1 1 300px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--panel2)">
+<h4 style="margin:0 0 6px"><a href="build-prompt.html">🛠 پرامپت ساخت APEX Ω∞ BUILD 1.0</a></h4>
+<p style="color:var(--mut);font-size:13.5px;margin:0">پرامپت خودبسندهٔ ساخت، آمادهٔ دادن به یک عامل کدنویس.
+۱۰ نقش مهندسی · محدودیت‌های سخت · زمینهٔ بازار جاسازی‌شده ·
+<strong>مرحلهٔ ۰ = دروازهٔ اعتبارسنجی پیش از هر خط کد</strong> · ۱۲ مرحله با دروازهٔ خروج ·
+طرح کامل دیتابیس · ماتریس امنیت ۱۵ آیتمی · بودجهٔ عملکرد با الزام اثبات HAR · ۸ شرط توقف.</p>
+</div>
+</div>
+</div>
+
+<div class="grid"><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۱۶</h3><p style="color:var(--mut);font-size:13.5px;margin:0">بخش گزارش، به همان ترتیب خواسته‌شده</p></div><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۲۲</h3><p style="color:var(--mut);font-size:13.5px;margin:0">فرصت اولیهٔ شناسایی‌شده و غربال‌شده</p></div><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۵</h3><p style="color:var(--mut);font-size:13.5px;margin:0">کارت تحلیلی با ۱۷ فیلد</p></div><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۶۰+</h3><p style="color:var(--mut);font-size:13.5px;margin:0">محصول با سنجهٔ مستند از راست‌چین و ژاکت</p></div><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۸</h3><p style="color:var(--mut);font-size:13.5px;margin:0">محدودیت دادهٔ ثبت‌شده (L1–L8)</p></div><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۶</h3><p style="color:var(--mut);font-size:13.5px;margin:0">آزمون اعتبارسنجی پیش از کدنویسی</p></div><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۷</h3><p style="color:var(--mut);font-size:13.5px;margin:0">نام ممیزی‌شده؛ «نویدبان» پاک شد</p></div><div class="doc" style="flex:1 1 260px;margin:0 0 18px"><h3 style="margin-top:0">۱۲</h3><p style="color:var(--mut);font-size:13.5px;margin:0">مرحلهٔ پرامپت ساخت با دروازهٔ خروج</p></div></div>
+
+<div class="doc">
+<h3 style="margin-top:0">راهنمای مطالعه</h3>
+<ul>
+<li><strong>فهرست جانبی</strong> در نسخهٔ گزارش، بخش فعال را هنگام پیمایش برجسته می‌کند.</li>
+<li>نشانهٔ <strong>[D]</strong> = دادهٔ مستقیم، <strong>[I]</strong> = استنباط تحلیلی،
+<strong>[H]</strong> = فرضیهٔ اثبات‌نشده. این سه در سراسر گزارش تفکیک شده‌اند.</li>
+<li>عبارت <strong>«داده در دسترس نیست»</strong> در هر موردی که عدد یا شاهدی
+قابل مشاهده نبود، بدون جایگزینی با برآورد، درج شده است.</li>
+<li>محدودیت‌های دسترسی (L1 تا L8) در بخش ۲.۲ و منابع بررسی‌نشده در بخش ۱۶.۸
+صریحاً فهرست شده‌اند.</li>
+</ul>
+</div>
+</main></body></html>

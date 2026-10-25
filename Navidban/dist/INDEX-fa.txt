@@ -1,0 +1,17 @@
+بستهٔ تحویلی APEX Ω∞ 1.0 — نویدبان
+=====================================
+
+اسناد:
+  research/APEX-report.md        گزارش نهایی ۱۶ بخش + پیوست الف/ب/پ
+  research/data/evidence-log.md  دفترچهٔ شواهد خام
+  research/brand/BRAND.md        بستهٔ برند «نویدبان»
+  research/build-prompt.md       پرامپت ساخت APEX Ω∞ BUILD 1.0
+دارایی‌های برند:
+  research/brand/logo/navidban-logo.png     نشان خطی ۱۰۴×۰۲۴
+  research/brand/logo/navidban-banner.png   زمینهٔ بنر بدون متن
+  research/brand/logo/banner-1050x520.html  منبع صادرات بنر RTL با وزیرمتن
+نسخهٔ وب:
+  research/site/*.html           index / report / evidence / brand / build-prompt
+  research/site/build.py         سازندهٔ سایت، بدون وابستگی خارجی
+
+نام محصول: نویدبان (Navidban)

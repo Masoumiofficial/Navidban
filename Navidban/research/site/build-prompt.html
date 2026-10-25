@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>APEX Ω∞ BUILD 1.0 — پرامپت ساخت افزونهٔ «نویدبان» — اتحاد وردپرس</title>
+<meta name="description" content="گزارش تحقیق بازار و انتخاب فرصت محصول افزونه وردپرس — اتحاد وردپرس">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117; --panel:#151b23; --panel2:#1b232d; --line:#2a3441;
+  --fg:#e6edf3; --mut:#9fb0c0; --acc:#4ea1ff; --acc2:#7ee787;
+  --warn:#f0b429; --bad:#ff7b72; --code:#1f2933;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font-family:Vazirmatn,'Segoe UI',Tahoma,'Noto Sans Arabic',sans-serif;
+  font-size:15.5px;line-height:2.05;
+}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+code{
+  font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+  background:var(--code);padding:.1em .4em;border-radius:4px;
+  font-size:.86em;direction:ltr;unicode-bidi:embed;color:#a5d6ff;
+}
+.layout{display:flex;align-items:flex-start;gap:0}
+/* ---- فهرست جانبی ---- */
+.toc{
+  position:sticky;top:0;width:330px;flex:0 0 330px;height:100vh;overflow-y:auto;
+  background:var(--panel);border-inline-start:1px solid var(--line);
+  padding:22px 18px 60px;
+}
+.toc h2{font-size:14px;margin:0 0 4px;color:var(--acc2);letter-spacing:.02em}
+.toc .sub{font-size:11.5px;color:var(--mut);margin-bottom:16px;line-height:1.7}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:s}
+.toc li{counter-increment:s;margin:0}
+.toc li a{
+  display:block;padding:7px 10px;border-radius:7px;color:var(--mut);
+  font-size:13px;line-height:1.75;border-inline-start:2px solid transparent;
+}
+.toc li a:hover{background:var(--panel2);color:var(--fg);text-decoration:none}
+.toc li a.on{color:#fff;background:var(--panel2);border-inline-start-color:var(--acc)}
+.toc .tools{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:8px}
+.toc .tools a{
+  font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:20px;
+  color:var(--fg);background:var(--panel2)
+}
+.toc .tools a:hover{border-color:var(--acc);text-decoration:none}
+/* ---- محتوا ---- */
+main{flex:1 1 auto;min-width:0;padding:34px 46px 120px;max-width:1180px}
+.doc{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:34px 38px 46px;margin-bottom:26px}
+h1{font-size:27px;line-height:1.6;margin:.2em 0 .8em;color:#fff;
+  padding-bottom:.45em;border-bottom:2px solid var(--line)}
+h2{font-size:21px;line-height:1.65;margin:1.9em 0 .8em;color:var(--acc);
+  padding-bottom:.35em;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+h3{font-size:17px;line-height:1.7;margin:1.6em 0 .6em;color:var(--acc2);
+  scroll-margin-top:16px}
+h4{font-size:15.5px;margin:1.3em 0 .5em;color:#fff}
+p{margin:.75em 0}
+ul,ol{margin:.7em 0;padding-inline-start:1.55em}
+li{margin:.34em 0}
+li::marker{color:var(--acc)}
+hr{border:0;border-top:1px solid var(--line);margin:2.2em 0}
+strong{color:#fff;font-weight:700}
+em{color:var(--warn);font-style:normal}
+blockquote{
+  margin:1.1em 0;padding:.75em 1.15em;background:var(--panel2);
+  border-inline-start:3px solid var(--acc);border-radius:0 8px 8px 0;color:#dfe9f2
+}
+blockquote p{margin:.35em 0}
+pre{
+  background:var(--code);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;direction:ltr;text-align:left;
+  font-size:13px;line-height:1.75
+}
+pre code{background:none;padding:0;color:#c9d1d9;font-size:13px}
+/* ---- جدول ---- */
+.tw{overflow-x:auto;margin:1.1em 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13.4px;line-height:1.85}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);
+  text-align:right;vertical-align:top}
+th{background:var(--panel2);color:#fff;font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even){background:rgba(255,255,255,.022)}
+tbody tr:hover{background:rgba(78,161,255,.075)}
+td:first-child{font-weight:500}
+/* ---- نشان‌ها ---- */
+.badge{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--mut)}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
+.kicker{font-size:12px;color:var(--mut);letter-spacing:.04em}
+@media(max-width:1000px){
+  .layout{display:block}
+  .toc{position:static;width:auto;height:auto;flex:none;
+    border-inline-start:0;border-bottom:1px solid var(--line)}
+  main{padding:20px 14px 80px}
+  .doc{padding:20px 16px 30px;border-radius:10px}
+}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .toc,.tools{display:none}
+  main{padding:0;max-width:none}
+  .doc{border:0;background:#fff;padding:0}
+  h1,h2,h3,strong{color:#000}
+  a{color:#000;text-decoration:underline}
+  th,td{border-color:#bbb}
+  blockquote,pre,.tw{border-color:#bbb;background:#f6f6f6}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><h2>APEX Ω∞ 1.0</h2><div class="sub">پرامپت ساخت نویدبان</div><ol><li><a href="#s1-APEX-Ω-BUILD-10-پرامپت-ساخت-افزونهٔ-نویدبان" >APEX Ω∞ BUILD 1.0 — پرامپت ساخت افزونهٔ «نویدبان»</a></li><li><a href="#s2-۰-نقش-تو" >۰. نقش تو</a></li><li><a href="#s3-۱-مأموریت" >۱. مأموریت</a></li><li><a href="#s4-۲-محدودیتهای-سخت-تخطی-کار-مردود" >۲. محدودیت‌های سخت (تخطی = کار مردود)</a></li><li><a href="#s5-۲۱-صداقت-داده" style="padding-inline-start:13px">۲.۱ صداقت داده</a></li><li><a href="#s6-۲۲-معماری-و-وابستگی" style="padding-inline-start:13px">۲.۲ معماری و وابستگی</a></li><li><a href="#s7-۲۳-دامنهٔ-محصول-اینها-را-نساز" style="padding-inline-start:13px">۲.۳ دامنهٔ محصول — این‌ها را نساز</a></li><li><a href="#s8-۲۴-قانونی" style="padding-inline-start:13px">۲.۴ قانونی</a></li><li><a href="#s9-۳-زمینهٔ-بازار-خودبسنده-لازم-نیست-جای-دیگری-را-بخوانی" >۳. زمینهٔ بازار (خودبسنده — لازم نیست جای دیگری را بخوانی)</a></li><li><a href="#s10-۳۱-چرا-این-محصول" style="padding-inline-start:13px">۳.۱ چرا این محصول</a></li><li><a href="#s11-۳۲-ضعفهای-مستند-رقبا-نقل-مستقیم" style="padding-inline-start:13px">۳.۲ ضعف‌های مستند رقبا (نقل مستقیم)</a></li><li><a href="#s12-۳۳-آنچه-رقیب-رایگان-خوب-انجام-میدهد-اینها-کفِ-جدولاند،-نه-مز" style="padding-inline-start:13px">۳.۳ آنچه رقیب رایگان خوب انجام می‌دهد — این‌ها کفِ جدول‌اند، نه مزیت</a></li><li><a href="#s13-۳۴-مزیتهای-واقعی-ما-اینها-را-باید-بسازی" style="padding-inline-start:13px">۳.۴ مزیت‌های واقعی ما (این‌ها را باید بسازی)</a></li><li><a href="#s14-۳۵-قوانین-مارکت-که-طراحی-را-مقید-میکند" style="padding-inline-start:13px">۳.۵ قوانین مارکت که طراحی را مقید می‌کند</a></li><li><a href="#s15-۴-مرحلهٔ-۰-دروازهٔ-اعتبارسنجی-اجباری،-پیش-از-هر-خط-کد" >۴. مرحلهٔ ۰ — دروازهٔ اعتبارسنجی (اجباری، پیش از هر خط کد)</a></li><li><a href="#s16-۵-گردش-کار-۱۲-مرحلهای" >۵. گردش کار ۱۲ مرحله‌ای</a></li><li><a href="#s17-۶-مشخصات-فنی" >۶. مشخصات فنی</a></li><li><a href="#s18-۶۱-ساختار-پوشه" style="padding-inline-start:13px">۶.۱ ساختار پوشه</a></li><li><a href="#s19-۶۲-طرح-پایگاهداده-InnoDB،-بدون-استثنا" style="padding-inline-start:13px">۶.۲ طرح پایگاه‌داده — InnoDB، بدون استثنا</a></li><li><a href="#s20-۶۳-موتور-تشخیص-موجودی-دو-لایه" style="padding-inline-start:13px">۶.۳ موتور تشخیص موجودی — دو لایه</a></li><li><a href="#s21-۶۴-بارگذاری-شرطی-هستهٔ-تمایز،-قابل-اندازهگیری" style="padding-inline-start:13px">۶.۴ بارگذاری شرطی — هستهٔ تمایز، قابل اندازه‌گیری</a></li><li><a href="#s22-۶۵-صف-ارسال" style="padding-inline-start:13px">۶.۵ صف ارسال</a></li><li><a href="#s23-۶۶-سازگاری-ماتریس-اجباری-تست" style="padding-inline-start:13px">۶.۶ سازگاری — ماتریس اجباری تست</a></li><li><a href="#s24-۷-ماتریس-امنیت-همه-اجباری" >۷. ماتریس امنیت (همه اجباری)</a></li><li><a href="#s25-۸-رابط-کاربری" >۸. رابط کاربری</a></li><li><a href="#s26-۸۱-فرم-فرانت" style="padding-inline-start:13px">۸.۱ فرم فرانت</a></li><li><a href="#s27-۸۲-پنل-مدیریت" style="padding-inline-start:13px">۸.۲ پنل مدیریت</a></li><li><a href="#s28-۸۳-خروجی-CSV-الزام-امنیتی" style="padding-inline-start:13px">۸.۳ خروجی CSV — الزام امنیتی</a></li><li><a href="#s29-۹-دروازههای-کیفیت-و-ابزار-الزامی" >۹. دروازه‌های کیفیت و ابزار (الزامی)</a></li><li><a href="#s30-۱۰-سیاست-نسخه،-changelog-و-انتشار" >۱۰. سیاست نسخه، changelog و انتشار</a></li><li><a href="#s31-۱۱-بستهٔ-انتشار-بازار-مرحلهٔ-۱۲" >۱۱. بستهٔ انتشار بازار (مرحلهٔ ۱۲)</a></li><li><a href="#s32-۱۲-شرایط-توقف" >۱۲. شرایط توقف</a></li><li><a href="#s33-۱۳-قالب-گزارشدهی" >۱۳. قالب گزارش‌دهی</a></li><li><a href="#s34-۱۴-معیار-موفقیت-نهایی-۹۰-روز-پس-از-انتشار" >۱۴. معیار موفقیت نهایی (۹۰ روز پس از انتشار)</a></li><li><a href="#s35-۱۵-نقشهٔ-راه-نسخهها" >۱۵. نقشهٔ راه نسخه‌ها</a></li><li><a href="#s36-۱۶-اولین-اقدام-تو" >۱۶. اولین اقدام تو</a></li></ol><div class="tools"><a href="index.html">🏠 خانه</a><a href="report.html">📄 گزارش</a><a href="evidence.html">🗂 شواهد</a><a href="brand.html">🎨 برند</a><a href="build-prompt.html">🛠 پرامپت ساخت</a><a href="APEX-report.md" download>⬇ Markdown گزارش</a><a href="BRAND.md" download>⬇ Markdown برند</a><a href="build-prompt.md" download>⬇ Markdown پرامپت</a><a href="#" onclick="window.print();return false">🖨 چاپ/PDF</a></div></nav>
+<main>
+<div class="top">
+  <span class="badge">۳ آبان ۱۴۰۵</span>
+  <span class="badge">داده‌ها مشاهده‌شده در ۲۰۲۶-۱۰-۲۵</span>
+  <span class="badge">اتحاد وردپرس / EtehadWP</span>
+  <span class="kicker">نسخهٔ نمایشی — متن کامل در ریپوی GitHub</span>
+</div>
+<div class="doc">
+<h1>APEX Ω∞ BUILD 1.0 — پرامپت ساخت افزونهٔ «نویدبان»</h1>
+<blockquote><p><strong>نحوهٔ استفاده:</strong> کل این پرونده را به‌عنوان پرامپت به یک عامل کدنویس (یا به تیم توسعه) بدهید.</p><p>خودبسنده است: همهٔ شواهد بازار، نام‌های فنی و محدودیت‌ها داخل خودش هست و به سند دیگری نیاز ندارد.</p><p><strong>مرجع تصمیم:</strong> <code>research/APEX-report.md</code> (فرصت O1، امتیاز ۷۷/۱۰۰) و <code>research/brand/BRAND.md</code>.</p></blockquote>
+<hr>
+<h2 id="s2-۰-نقش-تو">۰. نقش تو</h2>
+<p>تو یک <strong>تیم یکپارچهٔ مهندسی محصول</strong> هستی، نه یک دستیار کدنویس. هم‌زمان در این نقش‌ها کار می‌کنی و بین آن‌ها داوری می‌کنی:</p>
+<div class="tw"><table><thead><tr><th>نقش</th><th>مسئولیت</th></tr></thead><tbody><tr><td>معمار وردپرس</td><td>ساختار پلاگین، بارگذاری، چرخهٔ حیات، سازگاری نسخه‌ها</td></tr><tr><td>متخصص ووکامرس</td><td>هوک‌های موجودی، HPOS، محصول متغیر، order meta</td></tr><tr><td>مهندس پایگاه‌داده</td><td>طرح جدول، ایندکس، InnoDB، همزمانی، مقیاس‌پذیری</td></tr><tr><td>مهندس امنیت</td><td>nonce/capability، اعتبارسنجی ورودی، خروجی، rate limit، سطح حمله</td></tr><tr><td>مهندس عملکرد</td><td>بودجهٔ بارگذاری، صف پس‌زمینه، کش، رفتار روی هاست اشتراکی</td></tr><tr><td>طراح UX راست‌چین</td><td>پنل RTL فارسی، فرم فرانت، دسترس‌پذیری، پیام‌های خطا</td></tr><tr><td>مهندس QA</td><td>ماتریس تست، خودکارسازی، دروازهٔ انتشار</td></tr><tr><td>مهندس انتشار</td><td>بسته‌بندی zip، changelog، کنترل نسخه، ابزار verify</td></tr><tr><td>نویسندهٔ فنی</td><td>مستندات کاربر و توسعه‌دهنده، FAQ، راهنمای عیب‌یابی</td></tr><tr><td>استراتژیست بازار</td><td>صفحهٔ محصول مارکت، صداقت محصول، حمایت از گرید پشتیبانی</td></tr></tbody></table></div>
+<hr>
+<h2 id="s3-۱-مأموریت">۱. مأموریت</h2>
+<p>ساخت نسخهٔ ۱.۰ افزونهٔ <strong>«نویدبان» (Navidban)</strong> — لیست انتظار و مرکز اعلان رویداد برای ووکامرس — به‌گونه‌ای که:</p>
+<ol><li>روی <strong>صفحهٔ محصولِ ناموجود</strong> یک فرم «خبرم کن» نمایش دهد؛</li><li>موبایل/ایمیل مشتری را با رضایت ثبت و <strong>تأیید دومرحله‌ای</strong> کند؛</li><li>وقتی موجودی برگشت، با <strong>صف پس‌زمینه و کنترل نرخ</strong> از راه پیامک یا ایمیل خبر دهد؛</li><li>و در همهٔ صفحات دیگر سایت، <strong>صفر بایت</strong> بارگذاری کند.</li></ol>
+<p><strong>خروجی نهایی:</strong> یک بستهٔ zip قابل انتشار در راست‌چین و ژاکت + مستندات کامل + ابزار انتشار خودکار + گزارش تست.</p>
+<hr>
+<h2 id="s4-۲-محدودیتهای-سخت-تخطی-کار-مردود">۲. محدودیت‌های سخت (تخطی = کار مردود)</h2>
+<h3 id="s5-۲۱-صداقت-داده">۲.۱ صداقت داده</h3>
+<ul><li><strong>هیچ عدد، بنچمارک، درصد بهبود یا ادعای عملکردی را جعل نکن.</strong> اگر چیزی را اندازه نگرفتی، بنویس «اندازه‌گیری نشد».</li><li>هر ادعای عملکردی در صفحهٔ محصول یا مستندات باید به یک <strong>آزمون قابل تکرار</strong> با اسکریپت و خروجی ذخیره‌شده ارجاع دهد.</li><li>اگر یک قابلیت را پیاده نکردی، <strong>هرگز</strong> در صفحهٔ محصول، README یا changelog ننویس که دارد.</li></ul>
+<h3 id="s6-۲۲-معماری-و-وابستگی">۲.۲ معماری و وابستگی</h3>
+<ul><li><strong>بدون Composer. بدون npm. بدون مرحلهٔ build اجباری.</strong> PHP خالص با autoloader اختصاصی PSR-4 (همان الگوی <code>newsdesk</code>).</li><li><strong>بدون IonCube</strong> و بدون هیچ رمزگذار/obfuscator تجاری. (الزام PHP 8.1–8.3 + IonCube v15 در محصول رقیب، یک مانع واقعی روی هاست اشتراکی است — ما آن را تکرار نمی‌کنیم.)</li><li><strong>هیچ تماس خروجی اجباری با سرور خودمان یا سرور خارجی برای فعال ماندن قابلیت‌ها.</strong> بدون license server. (درس مستقیم: CheckoutWC پس از ۳۰ روز عدم دسترسی به <code>checkoutwc.com</code> قابلیت‌های پریمیوم را غیرفعال می‌کند.)</li><li><strong>هیچ وابستگی به سرویس بیرونی که ما کنترلش نمی‌کنیم</strong> (پست، بانک، واسط واتساپ).</li><li>سازگاری با <strong>PHP 7.4</strong> به‌عنوان کف (همان الگوی <code>lint-php.js</code> گپینه که با گرامر ۷.۴ و ۸.۳ پارس می‌کند).</li></ul>
+<h3 id="s7-۲۳-دامنهٔ-محصول-اینها-را-نساز">۲.۳ دامنهٔ محصول — این‌ها را نساز</h3>
+<ul><li>❌ اطلاعیهٔ وضعیت سفارش ووکامرس (بازار آن در دست افزونه‌های <strong>رایگان</strong> ارائه‌دهندگان پیامک است)</li><li>❌ واتساپ (وابسته به واسط پولی خارجی)</li><li>❌ لیست انتظار نوبت‌دهی/زمان رزرو (نسخهٔ ۱.۱، <strong>فقط پس از آزمون T3</strong>)</li><li>❌ باشگاه مشتریان، امتیاز، کش‌بک</li><li>❌ بیش از ۳ adapter پیامک اختصاصی + ۱ adapter عمومی REST</li><li>❌ چندزبانه</li><li>❌ فرم در سبد خرید، صفحهٔ پرداخت یا Block Checkout</li><li>❌ اپلیکیشن دسکتاپ/موبایل</li><li>❌ drag &amp; drop builder</li></ul>
+<blockquote><p><strong>دلیل این لیست:</strong> هر مورد بالا یا بازارش توسط رقیب رایگان اشغال شده، یا هزینهٔ پشتیبانی‌اش از درآمدش بیشتر است، یا تقاضایش اثبات نشده. افزودنشان <strong>ارزش ایجاد نمی‌کند، فقط بدهی پشتیبانی می‌سازد.</strong></p></blockquote>
+<h3 id="s8-۲۴-قانونی">۲.۴ قانونی</h3>
+<ul><li>کد ۱۰۰٪ اختصاصی. کپی از کد رقیب ممنوع — حتی GPL. تحلیل رفتار مجاز است، بازنویسی کد نه.</li><li>الگوریتم‌های اعتبارسنجی (کد ملی/موبایل) از <strong>مشخصات</strong> پیاده‌سازی شوند، نه از کد موجود در آموزش‌های آنلاین.</li><li>خروجی تحت <strong>GPLv2+</strong> با پروندهٔ <code>license.txt</code>.</li><li>نام «خبرم کنید»، «دیجی‌کالا»، «YITH» در هیچ‌جای برند/اسلاگ/متا استفاده نشود.</li></ul>
+<hr>
+<h2 id="s9-۳-زمینهٔ-بازار-خودبسنده-لازم-نیست-جای-دیگری-را-بخوانی">۳. زمینهٔ بازار (خودبسنده — لازم نیست جای دیگری را بخوانی)</h2>
+<h3 id="s10-۳۱-چرا-این-محصول">۳.۱ چرا این محصول</h3>
+<p>تحقیق بازار در ۲۰۲۶-۱۰-۲۵ روی راست‌چین، ژاکت و wordpress.org انجام شد. نتیجه:</p>
+<div class="tw"><table><thead><tr><th>سنجه</th><th>رهبر بازار (راست‌چین)</th></tr></thead><tbody><tr><td>فروش موفق</td><td><strong>۹۲۱</strong></td></tr><tr><td>قیمت</td><td>۱٬۱۹۸٬۰۰۰ تومان</td></tr><tr><td>رضایت محصول</td><td>۸۱٪ از <strong>۱۶ رأی</strong></td></tr><tr><td><strong>رضایت پشتیبانی</strong></td><td><strong>۲۷٪ از ۹ رأی — گرید D</strong></td></tr><tr><td>تعداد پرسش در صفحهٔ محصول</td><td>۲۴۵</td></tr></tbody></table></div>
+<h3 id="s11-۳۲-ضعفهای-مستند-رقبا-نقل-مستقیم">۳.۲ ضعف‌های مستند رقبا (نقل مستقیم)</h3>
+<p><strong>الف) عملکرد — علت ترک محصول توسط یک خریدار:</strong></p>
+<blockquote><p>«بشه تنظیم کرد که کدها در دسته‌بندی محصولات نمایش داده نشه. <strong>باعث کندی سایت میشه چون در کل سایت داره لود میشه</strong> و در بخش‌هایی که لازم نیست اصلاً فراخوانی میشود. <strong>همین باعث شده من دیگه ازش استفاده نکنم چون DOM Loaded سایت رو بالا میبره.</strong> … در مواردی که محصول در صفحه موجود هست اصلاً کدهای افزونه لود نشه فقط زمانی که محصول ناموجود شد کدها فراخوانی بشه.»</p><p>— کاربر <code>pishdadweb</code>، ۱۴۰۵-۰۴-۱۹</p></blockquote>
+<p>پاسخ فروشنده (۱۴۰۵-۰۵-۰۲): «این موردم حتماً اعمال می شود در آپدیت های بعد.» ⇒ <strong>در نسخهٔ ۶.۴ (مشاهدهٔ ۱۴۰۵-۰۷) اثری از آن نیست.</strong></p>
+<p><strong>ب) امنیت — پاسخ دفعی به گزارش یک کاربر فنی:</strong></p>
+<blockquote><p>کاربر <code>nassis1360</code> گزارش داد که لاگ Wordfence تلاش هدفمند آی‌پی‌های مشکوک برای دسترسی به <code>/wp-content/plugins/letmeknow/src/js/date/date/</code> را نشان می‌دهد، و پرسید چرا changelog نسخهٔ ۶ فقط «بهینه‌سازی» را ذکر کرده و اشاره‌ای به رفع مشکل امنیتی نشده.</p><p>پاسخ توسعه‌دهنده (یک‌ونیم ساعت بعد): «خیالتون راحت این فایل هیچگونه مشکلی ندارد و دسترسی بهش هیچگونه مشکل امنیتی به وجود نمی آورد.» — <strong>بدون ارجاع، بدون CVE، بدون تحلیل.</strong></p></blockquote>
+<p><strong>ج) شکاف قابلیت — تأییدشده توسط خود فروشنده:</strong></p>
+<ul><li>لیست انتظار نوبت‌دهی/آرایشگاه → «درحال حاضر خیر، این افزونه صرفاً جهت اطلاع‌رسانی از وضعیت موجودی یا تخفیفات محصولات…»</li><li>اطلاعیهٔ وضعیت سفارش → «خیر این مورد را ندارد. امکان دارد در آینده اضافه شود.»</li><li>اطلاع در زمان پاسخ به دیدگاه → موجود نیست</li></ul>
+<p><strong>د) رقیب رایگان (wordpress.org) — ضعف مهندسی مستند:</strong></p>
+<blockquote><p>«این افزونه چنل ادمین رو بشدت کند می کنه. <strong>جداولش توی دیتابیس بهینه نیستند و همینطور MyISAM هستند.</strong> همچنین php 8.4 افزونه کار میکرد ولی تنظیمات کاملا بهم ریخته بود.»</p><p>— دیدگاه روی <code>persian-woocommerce-sms</code> (افزونهٔ رایگان با «خبرنامهٔ موجود شدن محصولات» و پشتیبانی از ۱۱۰+ درگاه پیامک)</p></blockquote>
+<h3 id="s12-۳۳-آنچه-رقیب-رایگان-خوب-انجام-میدهد-اینها-کفِ-جدولاند،-نه-مز">۳.۳ آنچه رقیب رایگان <strong>خوب</strong> انجام می‌دهد — این‌ها کفِ جدول‌اند، نه مزیت</h3>
+<p>رهبر رایگان جهانی (<code>back-in-stock-notifier-for-woocommerce</code>، ۲۰٬۰۰۰+ نصب فعال، به‌روز ۵ روز پیش از تحقیق) این‌ها را دارد و <strong>ما هم باید داشته باشیم</strong>:</p>
+<ul><li>صف پس‌زمینه برای ارسال انبوه («حتی با ۱۰٬۰۰۰+ مشترک، بدون crash سرور، بدون timeout، بدون ایمیل تکراری که افزونه‌های حلقه‌ای دچارش می‌شوند»)</li><li>کنترل تکرار: یک اعلان به ازای هر بازگشت موجودی</li><li>«اعلام به تعداد موجودی» (fair sending): اگر ۵ واحد موجود شد، فقط به ۵ نفر اول خبر بده</li><li>محدودیت نرخ ارسال برای رعایت سقف هاست/SMTP</li><li>duplicate check per product</li></ul>
+<h3 id="s13-۳۴-مزیتهای-واقعی-ما-اینها-را-باید-بسازی">۳.۴ مزیت‌های واقعی ما (این‌ها را باید بسازی)</h3>
+<ol><li><strong>بارگذاری شرطی</strong> — فقط صفحهٔ محصولِ ناموجود (رقیب: بارگذاری سراسری، مستند)</li><li><strong>InnoDB + طرح بهینه</strong> در برابر MyISAM رقیب رایگان</li><li><strong>پایش تطبیقی موجودی</strong> — شناسایی نوشتن مستقیم دیتابیس/CSV/ERP که هوک را شلیک نمی‌کند</li><li><strong>پیامک ایرانی با الگو</strong> — رایگان‌های جهانی ایمیل‌محورند و زبان فارسی ثبت‌شده ندارند</li><li><strong>صفر وابستگی به سرور خارجی</strong> برای فعال ماندن</li><li><strong>صداقت محصول</strong> — بخش «چیزهایی که ندارد» در صفحهٔ محصول</li></ol>
+<h3 id="s14-۳۵-قوانین-مارکت-که-طراحی-را-مقید-میکند">۳.۵ قوانین مارکت که طراحی را مقید می‌کند</h3>
+<ul><li>عدم پاسخگویی فروشنده تا <strong>۲۴ ساعت کاری</strong> ⇒ بازگشت وجه خودکار + <strong>حذف محصول از حساب خریدار</strong></li><li><strong>وعدهٔ آپدیت اجرانشده ⇒ بازگشت وجه غیرقابل اجتناب</strong> ⇒ پس هیچ «به‌زودی» بدون تاریخ در صفحهٔ محصول</li><li>جریمهٔ فروشنده در هر مرجوعی: <strong>۵۰٪ قیمت محصول</strong></li><li>«این روال شامل <strong>عدم تطابق محصول با هاست</strong> نخواهد شد» ⇒ سازگاری هاست به نفع ماست، نه به ضرر ما</li></ul>
+<hr>
+<h2 id="s15-۴-مرحلهٔ-۰-دروازهٔ-اعتبارسنجی-اجباری،-پیش-از-هر-خط-کد">۴. مرحلهٔ ۰ — دروازهٔ اعتبارسنجی (اجباری، پیش از هر خط کد)</h2>
+<p>⚠️ <strong>این مرحله قابل رد شدن نیست.</strong> تحقیق بازار، این انتخاب را با اطمینان <strong>متوسط</strong> (نه بالا) توصیه کرد و یک فرضیهٔ اثبات‌نشدهٔ کلیدی دارد.</p>
+<div class="tw"><table><thead><tr><th>آزمون</th><th>فرضیه</th><th>روش</th><th>پذیرش</th><th>رد</th></tr></thead><tbody><tr><td><strong>T1</strong></td><td>«بارگذاری سراسری ⇒ کندی» یک مشکل <strong>فراگیر</strong> است، نه یک شکایت منفرد</td><td>خواندن <strong>همهٔ ۲۴۵ پرسش</strong> صفحهٔ محصول رقیب + همهٔ ۱۶ رأی + جست‌وجوی وب + پرسش در ۲ گروه/انجمن وردپرس فارسی</td><td><strong>≥ ۱۵ شاهد مستقل</strong> که کندی/بارگذاری سراسری را ذکر کرده باشند</td><td><strong>&lt; ۵ شاهد ⇒ توقف و گزارش</strong></td></tr><tr><td><strong>T2</strong></td><td>خریدار ایرانی حاضر است برای جایگزین بومی، رایگانِ فارسی‌سازی‌شده را کنار بگذارد</td><td>صفحهٔ فرود با ادعای دقیق «۰ درخواست اضافه در صفحات غیر محصول» + CTA</td><td><strong>≥ ۴۰ ثبت ایمیل در ۱۴ روز</strong></td><td>&lt; ۱۵ ⇒ توقف</td></tr><tr><td><strong>T3</strong></td><td>لیست انتظار نوبت‌دهی تقاضا دارد</td><td>پرسش در ۳ گروه کسب‌وکار نوبتی</td><td>≥ ۸ پاسخ مثبت مشخص</td><td>⇒ از نقشهٔ ۱.۱ <strong>حذف</strong> شود (مانع ۱.۰ نیست)</td></tr><tr><td><strong>T4</strong></td><td>رقیب در نسخهٔ جاری <strong>واقعاً</strong> بارگذاری شرطی ندارد</td><td>بررسی changelog کامل نسخهٔ ۶.۴ + دمؤ</td><td>تأیید نبودِ بارگذاری شرطی</td><td>اگر دارد ⇒ مزیت #۱ باطل؛ <strong>توقف و بازنگری جایگاه‌سازی</strong></td></tr><tr><td><strong>T5</strong></td><td>نام «نویدبان» آزاد است</td><td>استعلام راست‌چین (انجام شد: ۰ نتیجه ✅) + ژاکت + wordpress.org + سامانهٔ علامت تجاری</td><td>تأیید نهایی</td><td>تغییر نام طبق جدول پشتیبان در <code>BRAND.md</code></td></tr><tr><td><strong>T6</strong></td><td>هزینهٔ پشتیبانی هر adapter پیامک قابل قبول است</td><td>پیاده‌سازی <strong>یک</strong> adapter به‌عنوان spike</td><td>≤ ۲۰ نفر-ساعت</td><td>&gt; ۴۰ ⇒ کاهش به یک adapter عمومی</td></tr></tbody></table></div>
+<p><strong>اگر T1 یا T4 رد شد:</strong> کدنویسی را <strong>شروع نکن</strong>. گزارش بده که دروازه رد شده و گزینهٔ پشتیبان «موتور کمپین زمان‌دار» (O2 در گزارش) جایگزین می‌شود. وفاداری به شواهد مهم‌تر از ساختن محصول است.</p>
+<hr>
+<h2 id="s16-۵-گردش-کار-۱۲-مرحلهای">۵. گردش کار ۱۲ مرحله‌ای</h2>
+<p>هر مرحله یک <strong>دروازهٔ خروج</strong> دارد. تا دروازه پاس نشده، به مرحلهٔ بعد نرو.</p>
+<div class="tw"><table><thead><tr><th>#</th><th>مرحله</th><th>خروجی</th><th>دروازهٔ خروج</th></tr></thead><tbody><tr><td>۱</td><td>دروازهٔ اعتبارسنجی</td><td>گزارش T1–T6</td><td>T1 و T4 پاس شده باشند</td></tr><tr><td>۲</td><td>مشخصات محصول</td><td><code>docs/SPEC.md</code> — فهرست قابلیت، داستان کاربر، مرزها</td><td>مرز «ندارد»ها صریح نوشته شده باشد</td></tr><tr><td>۳</td><td>معماری و طرح داده</td><td><code>docs/ARCHITECTURE.md</code>, <code>docs/DATA-STRUCTURE.md</code></td><td>همهٔ جدول‌ها InnoDB با ایندکس توجیه‌شده</td></tr><tr><td>۴</td><td>اسکلت پلاگین</td><td>ساختار پوشه، autoloader، activator/deactivator، uninstall</td><td><code>lint-php</code> روی ۷.۴ و ۸.۳ پاس</td></tr><tr><td>۵</td><td>موتور تشخیص موجودی</td><td>هوک‌ها + reconcile تطبیقی + کنترل تکرار</td><td>تست واحد: ۱۲ سناریوی تغییر موجودی</td></tr><tr><td>۶</td><td>فرم فرانت + بارگذاری شرطی</td><td>UI صفحهٔ محصول، consent، double opt-in</td><td><strong>گزارش HAR: ۰ درخواست اضافه در صفحات غیرهدف</strong></td></tr><tr><td>۷</td><td>صف ارسال</td><td>scheduler، batch، rate limit، retry/backoff</td><td>تست بار ۱۰٬۰۰۰ رکورد روی <code>max_execution_time=30</code></td></tr><tr><td>۸</td><td>کانال‌های ارسال</td><td>ایمیل + ۳ adapter پیامک + adapter عمومی</td><td>spike T6 پاس شده باشد</td></tr><tr><td>۹</td><td>پنل مدیریت</td><td>RTL فارسی، شمسی، فیلتر، خروجی CSV، آمار</td><td>بازبینی دسترس‌پذیری + اسکرین‌شات</td></tr><tr><td>۱۰</td><td>امنیت و سخت‌سازی</td><td>ماتریس کامل بخش ۷</td><td>همهٔ آیتم‌های چک‌لیست امنیتی پاس</td></tr><tr><td>۱۱</td><td>QA و سازگاری</td><td>ماتریس PHP×WP×WC×HPOS</td><td>همهٔ خانه‌های ماتریس سبز یا «داده در دسترس نیست» مستند</td></tr><tr><td>۱۲</td><td>انتشار و بستهٔ بازار</td><td>zip، changelog، صفحهٔ محصول، مستندات</td><td><code>verify-release</code> پاس + بخش «ندارد»ها در صفحهٔ محصول</td></tr></tbody></table></div>
+<hr>
+<h2 id="s17-۶-مشخصات-فنی">۶. مشخصات فنی</h2>
+<h3 id="s18-۶۱-ساختار-پوشه">۶.۱ ساختار پوشه</h3>
+<pre><code>navidban/
+├── navidban.php              # پروندهٔ اصلی — فقط هدر + bootstrap
+├── uninstall.php             # حذف کامل داده (پیش‌فرض: غیرفعال، با تأیید صریح)
+├── license.txt               # GPLv2+
+├── readme.txt                # فرمت استاندارد wordpress.org
+├── SECURITY.md               # سیاست افشای آسیب‌پذیری + مسیر گزارش
+├── CHANGELOG.md              # سیاست: هر تغییر ثبت شود، حتی کوچک
+├── includes/
+│   ├── Autoloader.php        # PSR-4 اختصاصی، بدون Composer
+│   ├── Plugin.php            # bootstrap
+│   ├── Activator.php         # dbDelta، seed گزینه‌ها، زمان‌بندی cron
+│   ├── Deactivator.php       # پاک‌سازی cron (داده حفظ شود)
+│   ├── Database.php          # ایجاد/ارتقای جدول‌ها
+│   ├── Validator.php         # اعتبارسنجی موبایل/ایمیل/کد ملی
+│   ├── StockWatcher.php      # هوک‌ها + reconcile
+│   ├── WaitlistRepository.php# CRUD روی جدول‌ها
+│   ├── Queue.php             # صف + batch + rate limit + retry/backoff
+│   ├── Scheduler.php         # رویدادهای cron
+│   ├── Notifier.php          # ارکستراسیون کانال‌ها
+│   ├── Consent.php           # double opt-in، توکن، انقضا
+│   ├── Rest.php              # WP_REST_Controller
+│   ├── Ajax.php              # endpoint فرانت (با nonce)
+│   ├── Capabilities.php      # نگاشت نقش‌ها
+│   └── Channels/
+│       ├── ChannelInterface.php
+│       ├── EmailChannel.php
+│       ├── SmsMelipayamak.php
+│       ├── SmsIpPanel.php
+│       ├── SmsKavenegar.php
+│       └── SmsGenericRest.php   # درگاه عمومی با تنظیم نشانی/پارامتر
+├── admin/
+│   ├── class-admin.php
+│   └── views/                # داشبورد، لیست انتظارها، تنظیمات، ابزارها، راهنما
+├── assets/                   # فقط CSS/JS نهایی — بدون افشای ساختار src/
+├── languages/navidban-fa_IR.{po,mo}
+├── docs/
+│   ├── SPEC.md  ARCHITECTURE.md  DATA-STRUCTURE.md  SCHEDULER-POLICY.md
+│   ├── PERFORMANCE.md   ← شامل گزارش HAR واقعی
+│   ├── SECURITY.md  TROUBLESHOOTING.md  QA-CHECKLIST.md  TEST-REPORT.md
+├── tests/
+│   ├── run.php  run_with_python.py  results.json
+│   └── cases/…
+└── tools/
+    ├── verify-release.py   # نشتی، سازگاری نسخه، ساختار uninstall، static یتیم
+    ├── lint-php.js         # پارس با گرامر PHP 7.4 و 8.3
+    ├── check-methods.js
+    ├── smoke-php.mjs       # دودآزمای واقعی با PHP در WebAssembly
+    └── build-assets.sh</code></pre>
+<blockquote><p><strong>الزام امنیتی مسیرها:</strong> هیچ دایرکتوری <code>src/</code> در بستهٔ منتشرشده وجود نداشته باشد و هیچ مسیر داخلی قابل حدسی (مثل <code>src/js/date/date/</code>) ساخته نشود. دارایی‌ها فقط در <code>assets/</code> با نام‌های عمومی.</p></blockquote>
+<h3 id="s19-۶۲-طرح-پایگاهداده-InnoDB،-بدون-استثنا">۶.۲ طرح پایگاه‌داده — <strong>InnoDB، بدون استثنا</strong></h3>
+<pre><code>-- لیست انتظارها
+CREATE TABLE {prefix}nvb_waitlists (
+  id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  token         CHAR(64)     NOT NULL,          -- توکن یک‌بارمصرف برای لغو/تأیید
+  product_id    BIGINT UNSIGNED NOT NULL,
+  variation_id  BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  event_type    VARCHAR(32)  NOT NULL DEFAULT 'restock',
+  channel       VARCHAR(16)  NOT NULL DEFAULT 'email',   -- email|sms
+  email         VARCHAR(190) DEFAULT NULL,
+  phone         VARCHAR(20)  DEFAULT NULL,
+  user_id       BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  status        VARCHAR(16)  NOT NULL DEFAULT 'pending', -- pending|confirmed|notified|expired|unsubscribed
+  consent_at    DATETIME     DEFAULT NULL,
+  confirmed_at  DATETIME     DEFAULT NULL,
+  notified_at   DATETIME     DEFAULT NULL,
+  stock_at_signup INT UNSIGNED NOT NULL DEFAULT 0,
+  ip_hash       CHAR(64)     DEFAULT NULL,      -- SHA-256 با salt، نه IP خام
+  created_at    DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_token (token),
+  UNIQUE KEY uniq_subscriber (product_id, variation_id, email, phone),
+  KEY idx_status_product (status, product_id, variation_id),
+  KEY idx_status_created (status, created_at),
+  KEY idx_phone (phone),
+  KEY idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- نسخهٔ اولیهٔ موجودی برای پایش تطبیقی
+CREATE TABLE {prefix}nvb_stock_snapshots (
+  product_id    BIGINT UNSIGNED NOT NULL,
+  variation_id  BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  stock_status  VARCHAR(16)  NOT NULL,
+  stock_qty     INT          NOT NULL DEFAULT 0,
+  checked_at    DATETIME     NOT NULL,
+  PRIMARY KEY (product_id, variation_id),
+  KEY idx_status (stock_status, checked_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- صف ارسال
+CREATE TABLE {prefix}nvb_queue (
+  id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  waitlist_id   BIGINT UNSIGNED NOT NULL,
+  channel       VARCHAR(16)  NOT NULL,
+  payload_hash  CHAR(64)     NOT NULL,          -- جلوگیری از صف‌شدن تکراری
+  attempts      TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  status        VARCHAR(16)  NOT NULL DEFAULT 'queued', -- queued|processing|sent|failed|skipped
+  next_run_at   DATETIME     NOT NULL,
+  last_error    VARCHAR(255) DEFAULT NULL,
+  locked_at     DATETIME     DEFAULT NULL,      -- قفل نرم برای همزمانی cron
+  sent_at       DATETIME     DEFAULT NULL,
+  created_at    DATETIME     NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_payload (waitlist_id, payload_hash),
+  KEY idx_run (status, next_run_at),
+  KEY idx_waitlist (waitlist_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;</code></pre>
+<p><strong>الزامات طرح:</strong></p>
+<ul><li><code>ENGINE=InnoDB</code> در همهٔ جدول‌ها. <strong>MyISAM ممنوع</strong> — این مستقیماً ضعف مستند رقیب رایگان است.</li><li>از <code>postmeta</code> برای دادهٔ لیست انتظار استفاده <strong>نشود</strong> (کوئری انبوه مقیاس‌پذیر نیست).</li><li><code>uniq_payload</code> جلوی صف‌شدن تکراری را می‌گیرد؛ <code>uniq_subscriber</code> جلوی ثبت تکراری.</li><li>IP خام ذخیره نشود — فقط هش با salt (حداقل‌سازی داده).</li><li>همهٔ عملیات «ثبت + صف‌کردن» داخل یک <strong>transaction</strong> با <code>ROLLBACK</code> در خطا.</li><li>قفل نرم (<code>locked_at</code>) برای جلوگیری از اجرای هم‌زمان دو رویداد cron.</li></ul>
+<h3 id="s20-۶۳-موتور-تشخیص-موجودی-دو-لایه">۶.۳ موتور تشخیص موجودی — دو لایه</h3>
+<p><strong>لایهٔ ۱ — هوک‌های ووکامرس (واکنش فوری):</strong></p>
+<pre><code>woocommerce_product_set_stock_status
+woocommerce_product_set_stock
+woocommerce_variation_set_stock_status
+woocommerce_reduce_order_stock
+save_post_product / pre_post_update
+woocommerce_product_set_backorders</code></pre>
+<p><strong>لایهٔ ۲ — پایش تطبیقی (reconcile) برای نوشتن‌هایی که هوک شلیک نمی‌کنند:</strong></p>
+<pre><code>navidban_reconcile_stock  →  هر ۱۵ دقیقه (قابل تنظیم)</code></pre>
+<ul><li>مقایسهٔ <code>nvb_stock_snapshots</code> با وضعیت فعلی</li><li>شناسایی گذار <code>outofstock → instock</code> و <strong>فقط</strong> در همان حالت اعلان بساز</li><li><strong>اجرای نخست پس از فعال‌سازی فقط snapshot می‌گیرد و هیچ اعلانی نمی‌فرستد</strong> (درس مستقیم از changelog رقیب رایگان v7.4.4 که دقیقاً همین باگ را رفع کرد)</li><li>پردازش <strong>مرحله‌ای</strong> با ذخیرهٔ موقعیت، تا در هاست اشتراکی وسط کار نمیرد</li><li>پشتیبانی از <code>wc_get_products</code> در هر دو حالت HPOS روشن/خاموش</li></ul>
+<p><strong>منطق «اعلام به تعداد موجودی» (fair sending):</strong></p>
+<pre><code>واحد آزاد = موجودی فعلی − موجودی در زمان ثبت آخرین اعلان
+اگر گزینه فعال باشد: فقط به همان تعداد از ابتدای صف (به ترتیب created_at) خبر بده
+بقیه status=notified نمی‌گیرند و برای بازگشت بعدی می‌مانند</code></pre>
+<h3 id="s21-۶۴-بارگذاری-شرطی-هستهٔ-تمایز،-قابل-اندازهگیری">۶.۴ بارگذاری شرطی — <strong>هستهٔ تمایز، قابل اندازه‌گیری</strong></h3>
+<pre><code>add_action( 'wp_enqueue_scripts', function () {
+    if ( ! is_product() ) { return; }                     // فقط تک‌محصول
+    $product = wc_get_product( get_queried_object_id() );
+    if ( ! $product instanceof WC_Product ) { return; }
+    if ( $product-&gt;is_in_stock() &amp;&amp; ! self::has_oos_variation( $product ) ) {
+        return;                                           // موجود ⇒ هیچ‌چیز بار نشود
+    }
+    // فقط اینجا enqueue شود
+}, 20 );</code></pre>
+<p><strong>بودجهٔ عملکرد (اجباری):</strong></p>
+<div class="tw"><table><thead><tr><th>سنجه</th><th>سقف</th></tr></thead><tbody><tr><td>درخواست HTTP اضافه در صفحات غیرِ محصولِ ناموجود</td><td><strong>۰</strong></td></tr><tr><td>بایت اضافه در همان صفحات</td><td><strong>۰ KB</strong></td></tr><tr><td>اندازهٔ کل CSS+JS فرانت (فشرده)</td><td>≤ <strong>۱۲ KB</strong></td></tr><tr><td>کوئری دیتابیس اضافه در صفحهٔ محصولِ ناموجود</td><td>≤ <strong>۳</strong></td></tr><tr><td>افزایش TTFB در صفحهٔ محصولِ ناموجود</td><td>≤ <strong>۵ ms</strong></td></tr></tbody></table></div>
+<p><strong>الزام اثبات:</strong> یک فایل <code>tools/har-audit.sh</code> بنویس که با <code>curl</code>/مرورگر هدلس از ۶ نوع صفحه (خانه، آرشیو، دسته، جست‌وجو، سبد، پرداخت، محصولِ موجود، محصولِ ناموجود) HAR بگیرد و گزارش <code>docs/PERFORMANCE.md</code> را <strong>تولید خودکار</strong> کند. ادعای «۰ بار اضافه» فقط با خروجی این اسکریپت مجاز است.</p>
+<p><strong>دو قاعدهٔ اضافی:</strong></p>
+<ul><li>هیچ اسکریپت/استایلی با <code>wp_enqueue_scripts</code> بدون شرط ثبت نشود — حتی با <code>in_footer=true</code>.</li><li>CSS فرانت <strong>بدون <code>!important</code></strong> مگر برای بازنویسی قطعی قالب، و در آن صورت با مستندسازی دلیل.</li></ul>
+<h3 id="s22-۶۵-صف-ارسال">۶.۵ صف ارسال</h3>
+<ul><li><code>navidban_process_queue</code> هر <strong>۵ دقیقه</strong> (قابل تنظیم)</li><li>اندازهٔ دسته: پیش‌فرض <strong>۵۰</strong>، سقف قابل تنظیم تا ۵۰۰</li><li>محدودیت نرخ: حداکثر N ارسال در دقیقه (پیش‌فرض ۶۰) — قابل تنظیم برای سقف هاست/درگاه</li><li>retry با <strong>backoff نمایی</strong>: ۱۵ دقیقه → ۱ ساعت → ۶ ساعت؛ پس از ۳ بار ⇒ <code>failed</code></li><li>زمان‌بندی ارسال در <strong>بازهٔ مجاز</strong> (مثلاً ۰۸:۰۰–۲۲:۰۰) — درخواست مستند کاربران رقیب</li><li>هر ارسال در transaction؛ <code>locked_at</code> برای جلوگیری از پردازش هم‌زمان</li><li>اگر <code>WP_CRON_LOCKED</code> یا اجرای طولانی تشخیص داده شد، دسته را بشکن و خارج شو</li></ul>
+<h3 id="s23-۶۶-سازگاری-ماتریس-اجباری-تست">۶.۶ سازگاری — ماتریس اجباری تست</h3>
+<div class="tw"><table><thead><tr><th>بُعد</th><th>مقادیر</th></tr></thead><tbody><tr><td>PHP</td><td>7.4 · 8.1 · 8.3 · 8.4</td></tr><tr><td>وردپرس</td><td>6.4 · 6.7 · 6.9 · 7.0 · 7.1</td></tr><tr><td>ووکامرس</td><td>9.x · 10.x · 11.x</td></tr><tr><td>HPOS</td><td>روشن · خاموش</td></tr><tr><td>نوع محصول</td><td>ساده · متغیر · گروهی · خارجی · دارای backorder</td></tr><tr><td>حالت موجودی</td><td>مدیریت موجودی روشن · خاموش · «در انبار نیست» دستی</td></tr><tr><td>چندسایتی</td><td>تک‌سایت · شبکه (network-activate)</td></tr><tr><td>هاست</td><td>اشتراکی با <code>max_execution_time=30</code> و <code>memory_limit=128M</code></td></tr></tbody></table></div>
+<blockquote><p><strong>الزام صداقت:</strong> هر خانه‌ای از ماتریس که واقعاً تست نشد، با عبارت <strong>«داده در دسترس نیست»</strong> ثبت شود — نه تیک سبز.</p></blockquote>
+<hr>
+<h2 id="s24-۷-ماتریس-امنیت-همه-اجباری">۷. ماتریس امنیت (همه اجباری)</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>کنترل</th><th>الزام</th></tr></thead><tbody><tr><td>S1</td><td>CSRF</td><td>nonce در <strong>همهٔ</strong> فرم‌ها و endpointهای AJAX/REST</td></tr><tr><td>S2</td><td>مجوز</td><td>بررسی <code>current_user_can('navidban_manage')</code> در همهٔ عملیات مدیریتی</td></tr><tr><td>S3</td><td>اعتبارسنجی ورودی</td><td><code>sanitize_*</code> متناسب با نوع؛ موبایل با الگوی <code>^09\d{9}$</code>؛ ایمیل با <code>is_email</code></td></tr><tr><td>S4</td><td>خروجی</td><td><code>esc_html</code> / <code>esc_attr</code> / <code>esc_url</code> در همهٔ خروجی‌ها — <strong>بدون استثنا</strong></td></tr><tr><td>S5</td><td>تزریق SQL</td><td>فقط <code>$wpdb-&gt;prepare()</code>؛ <strong>هیچ</strong> الحاق رشته‌ای در کوئری</td></tr><tr><td>S6</td><td>Rate limit</td><td>محدودیت ثبت درخواست بر اساس هش IP در بازهٔ زمانی (پیش‌فرض ۵ در ساعت) + nonce یک‌بارمصرف</td></tr><tr><td>S7</td><td>SSRF</td><td>افزونه <strong>هیچ</strong> واکشی نشانی دلخواه از ورودی کاربر ندارد. adapter عمومی REST فقط به نشانی‌ای که <strong>مدیر</strong> در تنظیمات ذخیره کرده وصل می‌شود، با allowlist پروتکل <code>https</code> و بلاک نشانی‌های خصوصی/محلی</td></tr><tr><td>S8</td><td>Path traversal</td><td>هیچ مسیری از ورودی کاربر ساخته نشود</td></tr><tr><td>S9</td><td>XSS ذخیره‌شده</td><td>متن‌های کاربر (یادداشت، نام) پیش از ذخیره sanitize و پیش از نمایش escape</td></tr><tr><td>S10</td><td>افشای مسیر</td><td>حذف <code>src/</code> از بستهٔ انتشار؛ نام‌های عمومی در <code>assets/</code></td></tr><tr><td>S11</td><td>حداقل‌سازی داده</td><td>IP خام ذخیره نشود؛ توکن‌ها هش‌شده؛ <code>uninstall</code> کامل</td></tr><tr><td>S12</td><td>Double opt-in</td><td>توکن یک‌بارمصرف با انقضا (پیش‌فرض ۴۸ ساعت) برای تأیید ایمیل/موبایل</td></tr><tr><td>S13</td><td>لغو اشتراک</td><td>پیوند لغو در <strong>هر</strong> پیام، بدون نیاز به ورود</td></tr><tr><td>S14</td><td>لاگ امنیتی</td><td>ثبت تلاش‌های ناموفق ثبت‌نام با نرخ غیرعادی (کمک به تشخیص ربات)</td></tr><tr><td>S15</td><td>وابستگی‌ها</td><td>صفر کتابخانهٔ خارجی bundled ⇒ صفر سطح حملهٔ زنجیرهٔ تأمین</td></tr></tbody></table></div>
+<p><strong>الزام مستندسازی:</strong> <code>SECURITY.md</code> عمومی با مسیر گزارش آسیب‌پذیری و تعهد زمانی پاسخ. وقتی کاربری مسئلهٔ امنیتی گزارش کرد، پاسخ <strong>باید</strong> شامل بررسی واقعی باشد — نه «خیالتان راحت مشکلی ندارد».</p>
+<hr>
+<h2 id="s25-۸-رابط-کاربری">۸. رابط کاربری</h2>
+<h3 id="s26-۸۱-فرم-فرانت">۸.۱ فرم فرانت</h3>
+<ul><li>دکمه/فرم <strong>فقط</strong> وقتی محصول یا تنوع ناموجود است</li><li>برای کاربر واردشده: موبایل/ایمیل از پروفایل پیش‌پر شود (قابل ویرایش)</li><li>برای مهمان: فیلد موبایل <strong>یا</strong> ایمیل (نه هر دو اجباری)</li><li>انتخاب کانال (پیامک/ایمیل) وقتی هر دو فعال‌اند</li><li>چک‌باکس رضایت با پیوند به سیاست حریم خصوصی — <strong>پیش‌فرض: خاموش</strong></li><li>پیام موفقیت با <code>aria-live="polite"</code>؛ بدون رفرش صفحه (AJAX)</li><li>پیام خطای مشخص و انسانی: «این شماره پیش‌تر ثبت شده — اگر دسترسی ندارید، پیامک را بررسی کنید»</li><li>اگر محصول متغیر است، فرم به <strong>تنوع انتخاب‌شده</strong> متصل شود و با تغییر تنوع به‌روز شود</li><li>کنتراست رنگ ≥ 4.5:1؛ ناوبری کامل با کیبورد؛ برچسب متصل به همهٔ ورودی‌ها</li></ul>
+<h3 id="s27-۸۲-پنل-مدیریت">۸.۲ پنل مدیریت</h3>
+<ul><li><strong>RTL کامل</strong>، فارسی، فونت وزیرمتن</li><li>تاریخ <strong>شمسی</strong> و ارقام <strong>فارسی</strong> در همهٔ نمایش‌ها</li><li>ارقام <strong>لاتین</strong> فقط در خروجی CSV و لاگ‌ها</li><li>صفحات: داشبورد · لیست انتظارها · تنظیمات · ابزارها · راهنما</li><li>داشبورد: شمارندهٔ در انتظار/تأییدشده/اعلان‌شده، نرخ تبدیل لیست→سفارش، آخرین زمان reconcile، وضعیت صف</li><li>لیست انتظارها: فیلتر (محصول، وضعیت، کانال، بازهٔ تاریخ)، جست‌وجو، مرتب‌سازی، عملیات گروهی (تأیید/حذف/اعلان دستی)، <strong>خروجی CSV با BOM برای اکسل فارسی</strong></li><li>تنظیمات: دسته‌بندی‌شده (عمومی / متن پیام‌ها / درگاه‌ها / زمان‌بندی / حریم خصوصی / پیشرفته) با <strong>پیش‌فرض‌های آمادهٔ کارکرد</strong> — نصب و فعال‌سازی بدون هیچ تنظیمی باید کار کند</li><li>ابزارها: بازسازی snapshot، تخلیهٔ صف، پاک‌سازی رکوردهای قدیمی، اجرای آزمایشی ارسال</li><li>راهنما: عیب‌یابی گام‌به‌گام («پیامک نرسید؟ این ۵ مورد را چک کنید»)</li></ul>
+<h3 id="s28-۸۳-خروجی-CSV-الزام-امنیتی">۸.۳ خروجی CSV — الزام امنیتی</h3>
+<p>سلول‌هایی که با <code>=</code>، <code>+</code>، <code>-</code>، <code>@</code> شروع می‌شوند با پیشوند <code>'</code> محافظت شوند (جلوگیری از CSV Injection) — همان الگویی که در محصولات موفق بازار دیده شد.</p>
+<hr>
+<h2 id="s29-۹-دروازههای-کیفیت-و-ابزار-الزامی">۹. دروازه‌های کیفیت و ابزار (الزامی)</h2>
+<p>این ابزارها را <strong>بازاستفاده/بازنویسی</strong> کن از الگوی موجود در مخازن خودمان (<code>pasokhban</code>, <code>newsdesk</code>, <code>AWPSCS</code>):</p>
+<div class="tw"><table><thead><tr><th>ابزار</th><th>کار</th><th>دروازه</th></tr></thead><tbody><tr><td><code>tools/lint-php.js</code></td><td>پارس همهٔ پرونده‌های PHP با گرامر <strong>۷.۴ و ۸.۳</strong></td><td>هیچ خطای پارس در هیچ‌کدام</td></tr><tr><td><code>tools/check-methods.js</code></td><td>بررسی وجود/امضای متدهای ارجاع‌شده</td><td>صفر ارجاع شکسته</td></tr><tr><td><code>tools/smoke-php.mjs</code></td><td>دودآزمای واقعی با PHP در WebAssembly (فعال‌سازی، اجرای مسیر بحرانی)</td><td>پاس بدون DB/وردپرس</td></tr><tr><td><code>tools/verify-release.py</code></td><td>روی <strong>بستهٔ استخراج‌شده</strong>: نشتی پروندهٔ توسعه، سازگاری نسخهٔ هدر با CHANGELOG، ساختار <code>uninstall.php</code>, استاتیک‌های یتیم, نبود <code>src/</code>, نبود <code>.git</code>/<code>node_modules</code></td><td><strong>صفر خطا</strong> — این دروازهٔ نهایی است</td></tr><tr><td><code>tests/run.php</code> + <code>results.json</code></td><td>تست واحد مستقل از DB و وردپرس (الگوی ۸۰۲ assertion)</td><td><strong>نرخ قبولی ۱۰۰٪</strong></td></tr><tr><td><code>tools/har-audit.sh</code></td><td>تولید خودکار گزارش عملکرد از HAR واقعی</td><td>بودجهٔ بخش ۶.۴ رعایت شده باشد</td></tr></tbody></table></div>
+<p><strong>قاعدهٔ تست:</strong> تست‌ها باید <strong>بدون نیاز به DB یا وردپرس</strong> اجرا شوند (الگوی <code>newsdesk</code>) تا در CI و روی ماشین توسعه در چند ثانیه پاس شوند. منطق خالص (Validator، Queue policy، fair-sending math، reconcile diff) را از کد وابسته به وردپرس جدا کن تا قابل تست باشد.</p>
+<p><strong>تست‌های حداقلی مورد نیاز:</strong></p>
+<ul><li>Validator: ۳۰+ مورد موبایل/ایمیل معتبر و نامعتبر</li><li>کنترل تکرار: دو گذار پشت‌سرهم ⇒ فقط یک اعلان</li><li>reconcile: گذار واقعی / گذار کاذب / نوشتن مستقیم دیتابیس / اجرای نخست پس از نصب</li><li>fair sending: موجودی ۵ با ۲۰۰ مشترک ⇒ دقیقاً ۵ اعلان</li><li>Queue: retry، backoff، قفل هم‌زمانی، شکستن دسته در سقف زمان</li><li>CSV injection: ۸ payload مخرب</li><li>Transaction: خطای میانی ⇒ rollback کامل، بدون رکور نیمه</li></ul>
+<hr>
+<h2 id="s30-۱۰-سیاست-نسخه،-changelog-و-انتشار">۱۰. سیاست نسخه، changelog و انتشار</h2>
+<ul><li><strong>نسخه‌بندی:</strong> SemVer. <code>1.0.0</code> برای انتشار نخست.</li><li>هدر <code>Version:</code> در <code>navidban.php</code> <strong>باید</strong> با آخرین ورودی <code>CHANGELOG.md</code> یکسان باشد (توسط <code>verify-release.py</code> بررسی می‌شود).</li><li><strong>سیاست changelog (واکنش مستقیم به ضعف رقیب):</strong> هر انتشار — حتی یک اصلاح کوچک — یک ورودی با تاریخ شمسی و میلادی و شرح <strong>واقعاً گویا</strong> بگیرد. عبارت «بهینه‌سازی» به‌تنهایی <strong>ممنوع</strong> است. اگر اصلاح امنیتی است، صریحاً بنویس «اصلاح امنیتی» و سطح خطر را بگو.</li><li><code>readme.txt</code> با <code>Stable tag</code> هماهنگ.</li><li>گزینهٔ «حذف داده هنگام حذف پلاگین» <strong>پیش‌فرض خاموش</strong> — حذف پلاگین نباید بی‌خبر دادهٔ مشتری را ببرد.</li><li>بستهٔ انتشار: فقط پرونده‌های لازم. <code>tests/</code>, <code>tools/</code>, <code>docs/dev/</code>, <code>.github/</code> در zip <strong>نباشند</strong> (ولی در ریپو بمانند).</li></ul>
+<hr>
+<h2 id="s31-۱۱-بستهٔ-انتشار-بازار-مرحلهٔ-۱۲">۱۱. بستهٔ انتشار بازار (مرحلهٔ ۱۲)</h2>
+<p>این‌ها را تولید کن — متن آماده در <code>research/brand/BRAND.md</code> بخش ۷ هست، آن را مبنا قرار بده و نهایی کن:</p>
+<ol><li><strong>عنوان:</strong> <code>افزونه نویدبان | لیست انتظار و اطلاع‌رسانی موجودی محصول ووکامرس</code></li><li><strong>توضیح کوتاه</strong> و <strong>تیتر دوم بنر</strong></li><li><strong>فهرست قابلیت‌ها</strong> (فقط آنچه واقعاً پیاده شده — با <code>verify-release.py</code> تطبیق بده)</li><li><strong>⭐ بخش «چیزهایی که نویدبان ندارد»</strong> — اجباری، بدون حذف</li><li><strong>پرسش‌های متداول</strong> (۸ مورد)</li><li><strong>متن کامل changelog نسخهٔ ۱.۰.۰</strong></li><li><strong>فهرست اسکرین‌شات‌ها</strong> (حداقل ۸): فرم فرانت روی محصول ناموجود · فرم روی تنوع ناموجود · پیام موفقیت · ایمیل دریافتی · پیامک دریافتی · داشبورد · لیست انتظارها با فیلتر · تنظیمات درگاه‌ها · گزارش عملکرد</li><li><strong>بنر ۱۰۵۰×۵۲۰</strong> راست‌چین (مشخصات در <code>BRAND.md</code> بخش ۵)</li><li><strong>راهنمای عیب‌یابی</strong> برای کاهش بار تیکت: «پیامک نرسید»، «اعلان ارسال نشد»، «تداخل با افزونهٔ انبارداری»، «سایت کند شد»</li><li><strong>مستندات کاربر</strong> به فارسی، با تصویر، به‌صورت <code>docs/USER-GUIDE.md</code></li></ol>
+<blockquote><p><strong>چرا مورد ۴ حیاتی است:</strong> طراح یک محصول پرفروش (۲٬۲۷۳ فروش) علت امتیاز پایین محصولش را این‌طور گفت: خریدارانی که «انتظار داشتند امکاناتی در افزونه وجود داشته باشد که در توضیحات محصول کوچکترین اشاره‌ای به آن‌ها نشده بود». ⇒ فهرست صریح «ندارد»ها، مکانیزم تولید نارضایتی را از ریشه قطع می‌کند.</p></blockquote>
+<hr>
+<h2 id="s32-۱۲-شرایط-توقف">۱۲. شرایط توقف</h2>
+<p>در هر نقطه، اگر یکی از این‌ها رخ داد، <strong>کار را متوقف و گزارش کن</strong> — نه اینکه با حدس ادامه بدهی:</p>
+<ol><li>T1 یا T4 رد شد (فرضیهٔ اصلی مزیت رقابتی بی‌پایه بود)</li><li>برای رفع یک باگ لازم شد قابلیت‌های خارج از دامنهٔ بخش ۲.۳ اضافه شود</li><li>بودجهٔ عملکرد بخش ۶.۴ با معماری پیشنهادی قابل دستیابی نبود</li><li>سازگاری با یک نسخهٔ فعلی وردپرس/ووکامرس بدون hack ناپایدار ممکن نبود</li><li>یک adapter پیامک بیش از ۴۰ نفر-ساعت هزینه داشت (T6 رد)</li><li>برای پیادهٔسازی لازم شد به سرویس خارجی پولی یا سرور خودمان وابسته شویم</li><li>زمان تخمینی MVP از ۱۸۰ نفر-ساعت فراتر رفت ⇒ دامنه را کاهش بده و گزارش کن</li><li>هر جایی که مجبور شدی عددی را <strong>بدون اندازه‌گیری</strong> در مستندات یا صفحهٔ محصول بنویسی</li></ol>
+<hr>
+<h2 id="s33-۱۳-قالب-گزارشدهی">۱۳. قالب گزارش‌دهی</h2>
+<p>پس از هر مرحله، این را تحویل بده:</p>
+<pre><code>## مرحلهٔ N — &lt;نام&gt;
+### چه ساخته شد
+### دروازهٔ خروج: پاس / رد (با دلیل)
+### شواهد
+  - مسیر پرونده‌ها
+  - خروجی تست‌ها (تعداد assertion / نرخ قبولی)
+  - سنجه‌های اندازه‌گیری‌شدهٔ واقعی
+### آنچه اندازه‌گیری نشد
+  &lt;صریحاً: «داده در دسترس نیست»&gt;
+### تصمیم‌های معماری و دلیل آن‌ها
+### ریسک باقی‌مانده
+### اقدام لازم از سوی من</code></pre>
+<p><strong>قاعده:</strong> «انجام شد» بدون شاهد، پذیرفته نیست. هر ادعا باید یا به پرونده/خروجی تست ارجاع دهد یا «داده در دسترس نیست» باشد.</p>
+<hr>
+<h2 id="s34-۱۴-معیار-موفقیت-نهایی-۹۰-روز-پس-از-انتشار">۱۴. معیار موفقیت نهایی (۹۰ روز پس از انتشار)</h2>
+<div class="tw"><table><thead><tr><th>سنجه</th><th>هدف</th><th>حد بازنگری</th></tr></thead><tbody><tr><td>فروش در ۶۰ روز نخست</td><td>≥ ۳۰</td><td>&lt; ۵ ⇒ بازنگری در قیمت و صفحهٔ محصول، نه در محصول</td></tr><tr><td>گرید پشتیبانی راست‌چین</td><td>A یا A+</td><td>C یا پایین‌تر ⇒ توقف توسعهٔ ۱.۱ و تمرکز کامل بر پشتیبانی</td></tr><tr><td>رضایت محصول</td><td>≥ ۸۵٪</td><td>&lt; ۷۰٪ با ≥ ۵ رأی ⇒ بررسی فوری علت</td></tr><tr><td>نرخ مرجوعی</td><td>≤ ۳٪</td><td>&gt; ۸٪ ⇒ <strong>توقف فروش</strong> (جریمهٔ ۵۰٪ در هر مرجوعی)</td></tr><tr><td>زمان پاسخ تیکت</td><td>≤ ۴ ساعت</td><td>حتی یک مورد &gt; ۲۴ ساعت کاری ⇒ خطر بازگشت وجه خودکار</td></tr><tr><td>بودجهٔ عملکرد</td><td>حفظ «۰ بار اضافه» در هر انتشار</td><td>هر نقض ⇒ بلاک انتشار</td></tr></tbody></table></div>
+<hr>
+<h2 id="s35-۱۵-نقشهٔ-راه-نسخهها">۱۵. نقشهٔ راه نسخه‌ها</h2>
+<div class="tw"><table><thead><tr><th>نسخه</th><th>محتوا</th><th>زمان</th></tr></thead><tbody><tr><td><strong>۱.۰</strong></td><td>هستهٔ کامل بخش ۶ — فرم، consent، reconcile، صف، ایمیل + ۳ درگاه پیامک، پنل RTL، خروجی CSV، بارگذاری شرطی</td><td>هفتهٔ ۳–۴</td></tr><tr><td><strong>۱.۱</strong></td><td>اعلان <strong>افت قیمت</strong> · اعلان <strong>عرضهٔ محصول آینده</strong> · پیام‌های قابل شخصی‌سازی با placeholder · آمار نرخ تبدیل · <strong>لیست انتظار نوبت‌دهی</strong> <em>(فقط اگر T3 پاس شد)</em></td><td>هفتهٔ ۶–۸</td></tr><tr><td><strong>۱.۲</strong></td><td>درگاه عمومی REST کامل · وب‌هوک خروجی · سازگاری با افزونه‌های انبارداری رایج · سطح فروشنده در دکان</td><td>هفتهٔ ۱۰–۱۴</td></tr><tr><td><strong>۲.۰</strong></td><td>«مرکز اعلان فروشگاه» — موتور قاعدهٔ واحد برای همهٔ رویدادها. <strong>زودتر از ۶ ماه ساخته نشود</strong> و هرگز وارد اطلاعیهٔ وضعیت سفارش نشوید (بازار در دست رقبای رایگان).</td><td>—</td></tr></tbody></table></div>
+<p><strong>اصل اولویت‌بندی برای هر قابلیت جدید:</strong></p>
+<pre><code>(ارزش مستند مشتری × احتمال پرداخت) ÷ (هزینهٔ توسعه + هزینهٔ نگهداری دائمی)</code></pre>
+<p>نه جذابیت ظاهری، نه درخواست یک کاربر منفرد.</p>
+<hr>
+<h2 id="s36-۱۶-اولین-اقدام-تو">۱۶. اولین اقدام تو</h2>
+<p><strong>همین حالا کد ننویس.</strong> ترتیب اجباری:</p>
+<ol><li>اجرا/بررسی مرحلهٔ ۰ (T1–T6) و گزارش نتیجه با شاهد.</li><li>اگر T1 و T4 پاس شدند ⇒ نوشتن <code>docs/SPEC.md</code> و <code>docs/ARCHITECTURE.md</code> و ارائه برای تأیید.</li><li><strong>فقط پس از تأیید انسان</strong> ⇒ شروع مرحلهٔ ۴.</li></ol>
+<p>اگر T1 یا T4 رد شد ⇒ توقف کامل، گزارش دلیل، و پیشنهاد گزینهٔ پشتیبان (O2: موتور کمپین زمان‌دار).</p>
+<hr>
+<p><em>پایان پرامپت — APEX Ω∞ BUILD 1.0 · نویدبان · اتحاد وردپرس</em></p>
+</div>
+</main>
+</div>
+<script>
+// برجسته‌سازی بخش فعال در فهرست
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.toc li a[href^="#"]'));
+  if(!links.length) return;
+  var map={};
+  links.forEach(function(a){var id=a.getAttribute('href').slice(1);
+    var el=document.getElementById(id); if(el) map[id]=a;});
+  var ids=Object.keys(map);
+  function on(){
+    var best=ids[0],by=-1e9;
+    ids.forEach(function(id){
+      var r=document.getElementById(id).getBoundingClientRect();
+      if(r.top<=140 && r.top>by){by=r.top;best=id;}
+    });
+    links.forEach(function(a){a.classList.remove('on')});
+    if(map[best]){map[best].classList.add('on');
+      map[best].scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',on,{passive:true});
+  window.addEventListener('resize',on);on();
+})();
+</script>
+</body>
+</html>

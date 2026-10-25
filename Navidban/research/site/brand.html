@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>بستهٔ برند — «نویدبان» — اتحاد وردپرس</title>
+<meta name="description" content="گزارش تحقیق بازار و انتخاب فرصت محصول افزونه وردپرس — اتحاد وردپرس">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117; --panel:#151b23; --panel2:#1b232d; --line:#2a3441;
+  --fg:#e6edf3; --mut:#9fb0c0; --acc:#4ea1ff; --acc2:#7ee787;
+  --warn:#f0b429; --bad:#ff7b72; --code:#1f2933;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font-family:Vazirmatn,'Segoe UI',Tahoma,'Noto Sans Arabic',sans-serif;
+  font-size:15.5px;line-height:2.05;
+}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+code{
+  font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+  background:var(--code);padding:.1em .4em;border-radius:4px;
+  font-size:.86em;direction:ltr;unicode-bidi:embed;color:#a5d6ff;
+}
+.layout{display:flex;align-items:flex-start;gap:0}
+/* ---- فهرست جانبی ---- */
+.toc{
+  position:sticky;top:0;width:330px;flex:0 0 330px;height:100vh;overflow-y:auto;
+  background:var(--panel);border-inline-start:1px solid var(--line);
+  padding:22px 18px 60px;
+}
+.toc h2{font-size:14px;margin:0 0 4px;color:var(--acc2);letter-spacing:.02em}
+.toc .sub{font-size:11.5px;color:var(--mut);margin-bottom:16px;line-height:1.7}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:s}
+.toc li{counter-increment:s;margin:0}
+.toc li a{
+  display:block;padding:7px 10px;border-radius:7px;color:var(--mut);
+  font-size:13px;line-height:1.75;border-inline-start:2px solid transparent;
+}
+.toc li a:hover{background:var(--panel2);color:var(--fg);text-decoration:none}
+.toc li a.on{color:#fff;background:var(--panel2);border-inline-start-color:var(--acc)}
+.toc .tools{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:8px}
+.toc .tools a{
+  font-size:12px;padding:6px 11px;border:1px solid var(--line);border-radius:20px;
+  color:var(--fg);background:var(--panel2)
+}
+.toc .tools a:hover{border-color:var(--acc);text-decoration:none}
+/* ---- محتوا ---- */
+main{flex:1 1 auto;min-width:0;padding:34px 46px 120px;max-width:1180px}
+.doc{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:34px 38px 46px;margin-bottom:26px}
+h1{font-size:27px;line-height:1.6;margin:.2em 0 .8em;color:#fff;
+  padding-bottom:.45em;border-bottom:2px solid var(--line)}
+h2{font-size:21px;line-height:1.65;margin:1.9em 0 .8em;color:var(--acc);
+  padding-bottom:.35em;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+h3{font-size:17px;line-height:1.7;margin:1.6em 0 .6em;color:var(--acc2);
+  scroll-margin-top:16px}
+h4{font-size:15.5px;margin:1.3em 0 .5em;color:#fff}
+p{margin:.75em 0}
+ul,ol{margin:.7em 0;padding-inline-start:1.55em}
+li{margin:.34em 0}
+li::marker{color:var(--acc)}
+hr{border:0;border-top:1px solid var(--line);margin:2.2em 0}
+strong{color:#fff;font-weight:700}
+em{color:var(--warn);font-style:normal}
+blockquote{
+  margin:1.1em 0;padding:.75em 1.15em;background:var(--panel2);
+  border-inline-start:3px solid var(--acc);border-radius:0 8px 8px 0;color:#dfe9f2
+}
+blockquote p{margin:.35em 0}
+pre{
+  background:var(--code);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow-x:auto;direction:ltr;text-align:left;
+  font-size:13px;line-height:1.75
+}
+pre code{background:none;padding:0;color:#c9d1d9;font-size:13px}
+/* ---- جدول ---- */
+.tw{overflow-x:auto;margin:1.1em 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13.4px;line-height:1.85}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);
+  text-align:right;vertical-align:top}
+th{background:var(--panel2);color:#fff;font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even){background:rgba(255,255,255,.022)}
+tbody tr:hover{background:rgba(78,161,255,.075)}
+td:first-child{font-weight:500}
+/* ---- نشان‌ها ---- */
+.badge{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--mut)}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px}
+.kicker{font-size:12px;color:var(--mut);letter-spacing:.04em}
+@media(max-width:1000px){
+  .layout{display:block}
+  .toc{position:static;width:auto;height:auto;flex:none;
+    border-inline-start:0;border-bottom:1px solid var(--line)}
+  main{padding:20px 14px 80px}
+  .doc{padding:20px 16px 30px;border-radius:10px}
+}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .toc,.tools{display:none}
+  main{padding:0;max-width:none}
+  .doc{border:0;background:#fff;padding:0}
+  h1,h2,h3,strong{color:#000}
+  a{color:#000;text-decoration:underline}
+  th,td{border-color:#bbb}
+  blockquote,pre,.tw{border-color:#bbb;background:#f6f6f6}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><h2>APEX Ω∞ 1.0</h2><div class="sub">بستهٔ برند نویدبان</div><ol><li><a href="#s1-بستهٔ-برند-نویدبان" >بستهٔ برند — «نویدبان»</a></li><li><a href="#s2-۱-نام-انتخابی" >۱. نام انتخابی</a></li><li><a href="#s3-نویدبان" >نویدبان</a></li><li><a href="#s4-Navidban" style="padding-inline-start:13px">Navidban</a></li><li><a href="#s5-چرا-این-نام" style="padding-inline-start:13px">چرا این نام</a></li><li><a href="#s6-ممیزی-تداخل-نام-همه-در-۲۰۲۶-۱۰-۲۵-بررسی-شد" style="padding-inline-start:13px">ممیزی تداخل نام — همه در ۲۰۲۶-۱۰-۲۵ بررسی شد</a></li><li><a href="#s7-ریسک-باقیماندهٔ-نام-صداقت" style="padding-inline-start:13px">ریسک باقی‌ماندهٔ نام (صداقت)</a></li><li><a href="#s8-۲-معماری-برند" >۲. معماری برند</a></li><li><a href="#s9-۳-جایگاهسازی" >۳. جایگاه‌سازی</a></li><li><a href="#s10-بیانیهٔ-جایگاه-Positioning-Statement" style="padding-inline-start:13px">بیانیهٔ جایگاه (Positioning Statement)</a></li><li><a href="#s11-سه-ستون-تمایز-بهترتیب-قدرت-اثبات" style="padding-inline-start:13px">سه ستون تمایز (به‌ترتیب قدرت اثبات)</a></li><li><a href="#s12-شعار-Tagline" style="padding-inline-start:13px">شعار (Tagline)</a></li><li><a href="#s13-۴-لحن-و-صدا" >۴. لحن و صدا</a></li><li><a href="#s14-واژهنامهٔ-اجباری" style="padding-inline-start:13px">واژه‌نامهٔ اجباری</a></li><li><a href="#s15-۵-هویت-بصری" >۵. هویت بصری</a></li><li><a href="#s16-پالت-رنگ" style="padding-inline-start:13px">پالت رنگ</a></li><li><a href="#s17-تایپوگرافی" style="padding-inline-start:13px">تایپوگرافی</a></li><li><a href="#s18-مفهوم-لوگو" style="padding-inline-start:13px">مفهوم لوگو</a></li><li><a href="#s19-آیکونهای-درونمحصول" style="padding-inline-start:13px">آیکون‌های درون‌محصول</a></li><li><a href="#s20-۶-پیامرسانی-به-تفکیک-مخاطب" >۶. پیام‌رسانی به تفکیک مخاطب</a></li><li><a href="#s21-۷-متن-آمادهٔ-صفحهٔ-محصول-مارکت" >۷. متن آمادهٔ صفحهٔ محصول (مارکت)</a></li><li><a href="#s22-۷۱-عنوان" style="padding-inline-start:13px">۷.۱ عنوان</a></li><li><a href="#s23-۷۲-توضیح-کوتاه-چکیده" style="padding-inline-start:13px">۷.۲ توضیح کوتاه (چکیده)</a></li><li><a href="#s24-۷۳-تیتر-دوم-بنر" style="padding-inline-start:13px">۷.۳ تیتر دوم (بنر)</a></li><li><a href="#s25-۷۴-فهرست-قابلیتها-نسخهٔ-۱۰" style="padding-inline-start:13px">۷.۴ فهرست قابلیت‌ها (نسخهٔ ۱.۰)</a></li><li><a href="#s26-۷۵-بخشی-که-رقیب-ندارد-و-برندهٔ-اصلی-شماست" style="padding-inline-start:13px">۷.۵ ⭐ بخشی که رقیب ندارد و برندهٔ اصلی شماست</a></li><li><a href="#s27-۷۶-پرسشهای-متداول-آماده" style="padding-inline-start:13px">۷.۶ پرسش‌های متداول آماده</a></li><li><a href="#s28-۷۷-قیمتگذاری-پیشنهادی" style="padding-inline-start:13px">۷.۷ قیمت‌گذاری پیشنهادی</a></li><li><a href="#s29-۸-نامگذاری-فنی-برای-اجرا،-نه-فقط-برند" >۸. نام‌گذاری فنی (برای اجرا، نه فقط برند)</a></li><li><a href="#s30-۹-الزامات-حقوقی-و-مالکیت-فکری" >۹. الزامات حقوقی و مالکیت فکری</a></li><li><a href="#s31-۱۰-چکلیست-اجرای-برند-قبل-از-انتشار" >۱۰. چک‌لیست اجرای برند (قبل از انتشار)</a></li></ol><div class="tools"><a href="index.html">🏠 خانه</a><a href="report.html">📄 گزارش</a><a href="evidence.html">🗂 شواهد</a><a href="brand.html">🎨 برند</a><a href="build-prompt.html">🛠 پرامپت ساخت</a><a href="APEX-report.md" download>⬇ Markdown گزارش</a><a href="BRAND.md" download>⬇ Markdown برند</a><a href="build-prompt.md" download>⬇ Markdown پرامپت</a><a href="#" onclick="window.print();return false">🖨 چاپ/PDF</a></div></nav>
+<main>
+<div class="top">
+  <span class="badge">۳ آبان ۱۴۰۵</span>
+  <span class="badge">داده‌ها مشاهده‌شده در ۲۰۲۶-۱۰-۲۵</span>
+  <span class="badge">اتحاد وردپرس / EtehadWP</span>
+  <span class="kicker">نسخهٔ نمایشی — متن کامل در ریپوی GitHub</span>
+</div>
+<div class="doc">
+<h1>بستهٔ برند — «نویدبان»</h1>
+<p><strong>محصول:</strong> لیست انتظار و مرکز اعلان رویداد برای ووکامرس</p>
+<p><strong>برند مادر:</strong> اتحاد وردپرس (EtehadWP)</p>
+<p><strong>نسخهٔ سند:</strong> ۱.۰ · <strong>تاریخ:</strong> ۲۰۲۶-۱۰-۲۵ (۳ آبان ۱۴۰۵)</p>
+<p><strong>منبع تصمیم:</strong> <code>research/APEX-report.md</code> — فرصت O1، امتیاز ۷۷/۱۰۰</p>
+<hr>
+<h2 id="s2-۱-نام-انتخابی">۱. نام انتخابی</h2>
+<h1 id="s3-نویدبان">نویدبان</h1>
+<h3 id="s4-Navidban">Navidban</h3>
+<p><strong>ساختواژه:</strong> نوید (مژده، خبر خوش) + بان (پسوند نگهبان/پاینده — مانند دیده‌بان، نگهبان، مرزبان، صندوقبان)</p>
+<p><strong>معنا:</strong> «نگهبانِ مژده» — کسی که می‌پاید تا خبر خوش را برساند.</p>
+<p><strong>تلفظ:</strong> na‑vid‑BĀN · <strong>اسلاگ لاتین:</strong> <code>navidban</code></p>
+<h3 id="s5-چرا-این-نام">چرا این نام</h3>
+<p>کل کارِ این محصول رساندن یک <strong>لحظهٔ خوش</strong> است: «کالایی که می‌خواستی برگشت.» نویدبان دقیقاً همان لحظه را نام‌گذاری می‌کند، نه صرفاً مکانیزم فنی (موجودی/اعلان) را. این یک انتخاب عمدی است: نام‌های رقیب همه در سطح مکانیزم مانده‌اند («خبرم کنید»، «یادآوری به مشتری»، «لیست انتظار»).</p>
+<h3 id="s6-ممیزی-تداخل-نام-همه-در-۲۰۲۶-۱۰-۲۵-بررسی-شد">ممیزی تداخل نام — همه در ۲۰۲۶-۱۰-۲۵ بررسی شد</h3>
+<div class="tw"><table><thead><tr><th>نام نامزد</th><th>نتیجه</th><th>شاهد</th></tr></thead><tbody><tr><td><strong>نویدبان</strong></td><td>✅ <strong>آزاد</strong></td><td>جست‌وجوی راست‌چین: <strong>«متاسفانه محصولی یافت نشد!» (۰ نتیجه)</strong>؛ جست‌وجوی وب: هیچ برند نرم‌افزاری با این نام یافت نشد</td></tr><tr><td>دیده‌بان</td><td>❌ <strong>رد — دو تداخل</strong></td><td>۱) افزونهٔ پیگیری سفارش در راست‌چین با ۶۰ فروش ۲) <code>didehban.com</code> — آژانس روابط‌عمومی و برندینگ با بیش از ۳۰ سال سابقه</td></tr><tr><td>موجودبان</td><td>❌ <strong>رد</strong></td><td>جست‌وجوی راست‌چین مستقیماً به <code>rtl-theme.com/mojoodban-wordpress-plugin/</code> رفت: «افزونه موجود بان، برنامه‌ریزی خرید مجدد و مدیریت موجودی»، نسخهٔ ۱.۰.۰، ۷۹۵٬۰۰۰ تومان، ۱ فروش</td></tr><tr><td>خبربان</td><td>❌ <strong>رد</strong></td><td>راست‌چین ۰ نتیجه بود، <strong>ولی</strong> <code>khabarban.com</code> یک خبرخوان فعال است که صفحهٔ اختصاصی «اخبار وردپرس» دارد ⇒ تداخل در همان اکوسیستم</td></tr><tr><td>یادآور</td><td>❌ <strong>رد</strong></td><td>«افزونه یادآور موجودی ووکامرس» از قبل در چند مارکت ایرانی عرضه شده (wpthem.ir، digiscript.ir)</td></tr><tr><td>خبرم کنید / خبرم‌کن</td><td>❌ <strong>رد</strong></td><td>نام رهبر بازار — ریسک رقابت مکارانه و جایگاه‌سازی مشتق</td></tr><tr><td>قاصدک</td><td>❌ <strong>رد</strong></td><td><code>Ghasedak.me</code> یکی از درگاه‌های پیامکی فهرست‌شده در همان اکوسیستم است</td></tr></tbody></table></div>
+<blockquote><p>⚠️ <strong>اقدام فوری:</strong> ثبت <code>navidban.ir</code> و <code>navidban.com</code> و رزرو <code>@navidban</code> در شبکه‌های اجتماعی، <strong>پیش از انتشار محصول</strong>. بررسی رسمی ثبت علامت تجاری در سامانهٔ مرکز مالکیت معنوی (<code>iripo.ssaa.ir</code>) نیز انجام شود — من به آن سامانه دسترسی نداشتم، پس این مورد <strong>بدون تأیید نهایی</strong> مانده است.</p></blockquote>
+<h3 id="s7-ریسک-باقیماندهٔ-نام-صداقت">ریسک باقی‌ماندهٔ نام (صداقت)</h3>
+<p>«نوید» یک نام رایج فارسی است و چند کسب‌وکار کوچک از آن استفاده می‌کنند (<code>navidno.com</code> کشاورزی، <code>navidashigh.ir</code> طراحی سایت، «نوید زر شیمی»). هیچ‌کدام نرم‌افزار وردپرسی نیستند و هیچ‌کدام از ترکیب «نویدبان» استفاده نمی‌کنند. ⇒ ریسک <strong>پایین</strong>، ولی <strong>رقیق‌شدن در جست‌وجو</strong> ممکن است. راه‌حل: همیشه به‌صورت ترکیبی «نویدبان» ارائه شود، هرگز «نوید» به‌تنهایی.</p>
+<hr>
+<h2 id="s8-۲-معماری-برند">۲. معماری برند</h2>
+<pre><code>اتحاد وردپرس  (EtehadWP)          ← برند مادر / ناشر / تضمین کیفیت
+      │
+      ├── گپینه  (Gapineh)        ← پشتیبانی و گفت‌وگو
+      └── نویدبان (Navidban)      ← لیست انتظار و اعلان رویداد</code></pre>
+<p><strong>الگوی نام‌گذاری خانواده:</strong> ریشهٔ فارسی + پسوند. خودِ مخزن گپینه <code>pasokhban</code> (پاسخ‌بان) نام‌گذاری شده، یعنی پسوند «ـبان» از قبل در عادت نام‌گذاری داخلی شما هست. نویدبان همین خط را ادامه می‌دهد و خانواده را منسجم می‌کند.</p>
+<p><strong>قاعدهٔ امضا:</strong> در پاورقی پنل مدیریت و در صفحهٔ محصول مارکت، همیشه:</p>
+<blockquote><p>«نویدبان — محصولی از اتحاد وردپرس»</p></blockquote>
+<p>این امضا دو کار می‌کند: اعتبار گپینه را به نویدبان منتقل می‌کند و برعکس؛ و یک برند ناشر می‌سازد که بعداً محصولات بیشتر را حمل کند.</p>
+<hr>
+<h2 id="s9-۳-جایگاهسازی">۳. جایگاه‌سازی</h2>
+<h3 id="s10-بیانیهٔ-جایگاه-Positioning-Statement">بیانیهٔ جایگاه (Positioning Statement)</h3>
+<blockquote><p>برای <strong>صاحبان فروشگاه ووکامرس ایرانی</strong> که کالای ناموفق‌شان هر روز به یک فروش از دست رفته تبدیل می‌شود،</p><p><strong>نویدبان</strong> یک افزونهٔ لیست انتظار و مرکز اعلان است</p><p>که <strong>بدون سنگین‌کردن سایت</strong>، مشتری را در لحظهٔ بازگشت موجودی بازمی‌گرداند؛</p><p>برخلاف <strong>رهبر فعلی بازار</strong> که دارایی‌هایش را در همهٔ صفحات بارگذاری می‌کند و رضایت پشتیبانی‌اش ۲۷٪ است،</p><p>و برخلاف <strong>افزونه‌های رایگان خارجی</strong> که جدول‌هایشان MyISAM است و پیامک ایرانی ندارند.</p></blockquote>
+<h3 id="s11-سه-ستون-تمایز-بهترتیب-قدرت-اثبات">سه ستون تمایز (به‌ترتیب قدرت اثبات)</h3>
+<div class="tw"><table><thead><tr><th>#</th><th>ستون</th><th>چرا باورپذیر است</th><th>چطور قابل اثبات است</th></tr></thead><tbody><tr><td>۱</td><td><strong>سبک است — واقعاً، نه در شعار</strong></td><td>شکایت مستند خریدار رقیب: «در کل سایت لود میشه… DOM Loaded رو بالا میبره… دیگه ازش استفاده نکنم»</td><td>فایل HAR منتشرشده: «۰ درخواست و ۰ کیلوبایت اضافه در صفحات غیرِ محصولِ ناموجود»</td></tr><tr><td>۲</td><td><strong>مهندسی مالی-درست</strong></td><td>دیدگاه مستند روی افزونهٔ رایگان رقیب: «جداولش توی دیتابیس بهینه نیستند و همینطور <strong>MyISAM</strong> هستند» + «چنل ادمین رو بشدت کند می‌کنه»</td><td>اینجن با InnoDB، کلیدهای پوششی، صف پس‌زمینه؛ گزارش <code>EXPLAIN</code> در مستندات</td></tr><tr><td>۳</td><td><strong>پشتیبانی که گرید A+ می‌گیرد</strong></td><td>گرید پشتیبانی رقیب <strong>D</strong> (۲۷٪ از ۹ رأی) و <strong>عموماً پیش از خرید دیده می‌شود</strong></td><td>SLA عمومی ≤ ۴ ساعت، changelog صادقانه، سیاست امنیتی منتشرشده</td></tr></tbody></table></div>
+<h3 id="s12-شعار-Tagline">شعار (Tagline)</h3>
+<div class="tw"><table><thead><tr><th>پیشنهاد</th><th>کاربرد</th></tr></thead><tbody><tr><td><strong>«نگهبانِ خبرهای خوب فروشگاه شما»</strong></td><td>شعار اصلی برند — صفحهٔ محصول، بنر، سایت</td></tr><tr><td>«هر ناموجودی، یک مشتریِ بازگشتی»</td><td>کمپین‌های تبلیغاتی — مزیت را به درآمد وصل می‌کند</td></tr><tr><td>«سبک می‌پاید، زود خبر می‌دهد»</td><td>تأکید فنی — برای مخاطب توسعه‌دهنده/فنی</td></tr><tr><td>«صفر بار اضافه. صفر مشتریِ از دست رفته.»</td><td>بنر مقایسه‌ای — عددی و قابل آزمون</td></tr></tbody></table></div>
+<p><strong>پیشنهاد نهایی:</strong> شعار اصلی = «نگهبانِ خبرهای خوب فروشگاه شما»؛ در مارکت‌ها از «صفر بار اضافه. صفر مشتریِ از دست رفته.» به‌عنوان تیتر دوم استفاده شود چون <strong>قابل اندازه‌گیری</strong> است.</p>
+<hr>
+<h2 id="s13-۴-لحن-و-صدا">۴. لحن و صدا</h2>
+<div class="tw"><table><thead><tr><th>اصل</th><th>درست</th><th>نادرست</th></tr></thead><tbody><tr><td>عدد بده، صفت نده</td><td>«در ۱۲۰ صفحهٔ تست، ۰ درخواست اضافه ثبت شد»</td><td>«بسیار سبک و بهینه»</td></tr><tr><td>محدودیت را خودت بگو</td><td>«این افزونه اطلاعیهٔ وضعیت سفارش ندارد»</td><td>(سکوت — همان کاری که گرید D ساخت)</td></tr><tr><td>فارسیِ روان، نه ترجمهٔ تحت‌اللفظی</td><td>«وقتی کالا برگشت، خبر می‌دهیم»</td><td>«نوتیفیکیشن ری‌استاک ارسال می‌شود»</td></tr><tr><td>واژهٔ فنی فقط وقتی لازم است</td><td>«صف پس‌زمینه با WP-Cron» (در مستندات فنی)</td><td>«صف پس‌زمینه» (در صفحهٔ فروش)</td></tr><tr><td>هرگز وعدهٔ «به‌زودی» نده</td><td>«در نسخهٔ ۱.۱ اضافه می‌شود — تاریخ: آذر ۱۴۰۵» یا <strong>اصلاً ننویس</strong></td><td>«به‌زودی اضافه خواهد شد»</td></tr></tbody></table></div>
+<blockquote><p>⚠️ <strong>قاعدهٔ سخت:</strong> طبق قوانین راست‌چین، «وعدهٔ آپدیتِ اجرانشده ⇒ بازگشت وجه غیرقابل اجتناب». پس هیچ «به‌زودی» بدون تاریخ در صفحهٔ محصول نوشته نشود. یا تاریخ قطعی، یا سکوت.</p></blockquote>
+<h3 id="s14-واژهنامهٔ-اجباری">واژه‌نامهٔ اجباری</h3>
+<div class="tw"><table><thead><tr><th>بگو</th><th>نگو</th></tr></thead><tbody><tr><td>لیست انتظار</td><td>ویت‌لیست</td></tr><tr><td>خبرم‌کردن / اعلان</td><td>نوتیفیکیشن</td></tr><tr><td>بازگشت موجودی</td><td>ری‌استاک</td></tr><tr><td>مشترکِ لیست انتظار</td><td>سابسکرایبر</td></tr><tr><td>صف ارسال</td><td>کویو</td></tr><tr><td>پیامک</td><td>اس‌ام‌اس (مگر در متن فنی)</td></tr><tr><td>صفحهٔ محصول</td><td>پروداکت پیج</td></tr></tbody></table></div>
+<hr>
+<h2 id="s15-۵-هویت-بصری">۵. هویت بصری</h2>
+<h3 id="s16-پالت-رنگ">پالت رنگ</h3>
+<div class="tw"><table><thead><tr><th>نقش</th><th>نام</th><th>HEX</th><th>کاربرد</th></tr></thead><tbody><tr><td>اصلی</td><td>سبز-آبی عمیق «پایداری»</td><td><code>#0E5C55</code></td><td>لوگو، هدر پنل، دکمهٔ اصلی</td></tr><tr><td>اصلی روشن</td><td>—</td><td><code>#14857B</code></td><td>hover، نمودارها</td></tr><tr><td>تأکید</td><td>کهربایی «نوید»</td><td><code>#F2A93B</code></td><td>زنگ/آیکون اعلان، نقطهٔ درخشش، badge</td></tr><tr><td>مرکب</td><td>—</td><td><code>#10201E</code></td><td>متن اصلی</td></tr><tr><td>زمینه</td><td>—</td><td><code>#F6F9F8</code></td><td>پس‌زمینهٔ پنل</td></tr><tr><td>خط</td><td>—</td><td><code>#D8E3E0</code></td><td>مرزها، جداکننده‌ها</td></tr><tr><td>موفقیت</td><td>—</td><td><code>#2E9E6B</code></td><td>وضعیت «ارسال شد»</td></tr><tr><td>هشدار</td><td>—</td><td><code>#C6483C</code></td><td>وضعیت «شکست»، خطا</td></tr></tbody></table></div>
+<p><strong>چرا این پالت:</strong> آبیِ پیش‌فرض وردپرس <code>#2271b1</code> است. سبز-آبی عمیق در پیشخوان وردپرس <strong>متمایز</strong> دیده می‌شود ولی با آن نمی‌جنگد، و کهربایی دقیقاً همان «لحظهٔ مژده» را رمزگذاری می‌کند.</p>
+<h3 id="s17-تایپوگرافی">تایپوگرافی</h3>
+<ul><li><strong>فارسی:</strong> وزیرمتن (Vazirmatn) — همان انتخاب گپینه و عرف بازار ⇒ یکپارچگی خانواده.</li><li><strong>لاتین/اعداد:</strong> همان Vazirmatn (دارای لاتین) یا <code>Inter</code> در مستندات فنی.</li><li><strong>اعداد در پنل:</strong> فارسی (<code>۱۲۳۴</code>) در همهٔ تاریخ‌ها و شمارنده‌ها؛ <strong>ارقام لاتین فقط در کد، لاگ و خروجی CSV</strong> تا با اکسل و ابزارهای حسابداری نشکند.</li><li><strong>وزن‌ها:</strong> ۴۰۰ متن، ۵۰۰ برچسب، ۷۰۰ عنوان. هیچ وزن سبک‌تر از ۴۰۰ (خوانایی روی هاست‌های قدیمی و مانیتورهای ضعیف).</li></ul>
+<h3 id="s18-مفهوم-لوگو">مفهوم لوگو</h3>
+<p><strong>هندسه:</strong> یک زنگ (نماد جهانی اعلان) که بدنه‌اش از نیم‌رخ یک <strong>سپر</strong> ساخته شده (نماد «بان» = نگهبان). نقطهٔ درخشش کوچک کهربایی بالای زنگ = «نوید».</p>
+<p><strong>نشان تولیدشده (۱۴۰۵-۰۸-۰۳):</strong> <code>research/brand/logo/navidban-logo.png</code> — ۱۰۲۴×۱۰۲۴، زنگ تک‌خط (monoline) به رنگ <code>#0E5C55</code> داخل سپر هم‌رنگ، با زبانهٔ کهربایی <code>#F2A93B</code> به‌جای نقطهٔ درخشش، روی زمینهٔ <code>#F6F9F8</code>. از میان دو کاندیدا انتخاب شد.</p>
+<p><strong>دو واریانت از همین نشان لازم است:</strong></p>
+<ol><li><strong>واریانت خطی (تولیدشده):</strong> برای سایت، مستندات، هدر پنل، چاپ تک‌رنگ.</li><li><strong>واریانت کاشی اپ:</strong> همان نشان به رنگ سفید خالص <code>#FFFFFF</code> روی کاشی مربع گوشه‌گرد</li></ol>
+<p>(radius ≈ ۲۲٪ عرض) با گرادیان <code>#0E5C55 → #14857B</code> از بالا-راست به پایین-چپ — برای آیکون افزونهٔ وردپرس و بندانگشتنی مارکت.</p>
+<p><strong>مشخصات اجرایی:</strong></p>
+<ul><li>اندازه‌های لازم: <strong>۵۱۲×۵۱۲</strong> (آیکون افزونهٔ وردپرس و بندانگشتی مارکت)، ۲۵۶، ۱۲۸، ۶۴، ۳۲ (favicon)</li><li><strong>بنر مارکت:</strong> زمینهٔ تولیدشده <code>research/brand/logo/navidban-banner.png</code> (۲۸۸۰×۱۳۷۶،</li></ul>
+<p>بدون متن، نشان در سمت راست، فضای خالی تایپوگرافی در سمت چپ).</p>
+<p><strong>منبع صادرات نهایی ۱۰۵۰×۵۲۰:</strong> <code>research/brand/logo/banner-1050x520.html</code> — تایپوگرافی فارسی (نام + شعار + ۳ چیپس) با وزیرمتن روی همان زمینه چیده شده؛ در مرورگر باز کنید و از عنصر <code>.banner</code> گزینهٔ «Capture node screenshot» را بزنید. ⚠️ متن فارسی را <strong>هرگز</strong> با تولید تصویر خودکار روی بنر نگذارید — اتصال‌ها می‌شکنند.</p>
+<ul><li>ژاکت: اندازهٔ بنر باید از صفحهٔ قوانین طراحان استعلام شود (داده در دسترس نیست)</li><li>حالت تک‌رنگ: باید روی سفید و روی مشکی بدون افت خوانایی کار کند (برای چاپ فاکتور و مستندات)</li><li><strong>قاعدهٔ سخت:</strong> در ۳۲×۳۲ پیکسل هنوز قابل تشخیص باشد — چون در منوی پیشخوان وردپرس در همین اندازه دیده می‌شود</li></ul>
+<h3 id="s19-آیکونهای-درونمحصول">آیکون‌های درون‌محصول</h3>
+<p>مجموعهٔ خطی (stroke 1.5px)، گوشهٔ گرد، از همان خانوادهٔ زنگ: زنگ، زنگ-خاموش، ساعت، بسته، نمودار، سپر، خروجی. ترجیحاً از یک مجموعهٔ بازمتن با لایسنس سازگار (MIT/Apache) استفاده و <strong>در فایل <code>LICENSE-ICONS</code> ذکر شود</strong> — کپی از مجموعهٔ اختصاصی رقیب ممنوع.</p>
+<hr>
+<h2 id="s20-۶-پیامرسانی-به-تفکیک-مخاطب">۶. پیام‌رسانی به تفکیک مخاطب</h2>
+<div class="tw"><table><thead><tr><th>مخاطب</th><th>درد</th><th>پیام</th></tr></thead><tbody><tr><td><strong>فروشگاه پوشاک سایزبندی‌شده</strong></td><td>«سایز ۴۲ تمام شد، مشتری رفت و دیگر برنگشت»</td><td>«هر سایزی که تمام می‌شود، یک لیست انتظار می‌سازد. وقتی برگشت، همان مشتری خبردار می‌شود — نه همه.»</td></tr><tr><td><strong>فروشگاه قطعات/لوازم جانبی</strong></td><td>«موجودی را با اکسل وارد می‌کنم، افزونه‌ها نمی‌فهمند»</td><td>«پایش تطبیقی: چه موجودی را دستی عوض کنید، چه با اکسل درون‌ریزی کنید، چه افزونهٔ انبارداری بنویسد — نویدبان می‌فهمد.»</td></tr><tr><td><strong>کسب‌وکار نوبتی (کلینیک/آرایشگاه)</strong></td><td>«وقتی وقتم پر است، مشتری می‌رود»</td><td><em>(نسخهٔ ۱.۱ — فقط اگر آزمون T3 تأیید کرد)</em></td></tr><tr><td><strong>توسعه‌دهنده/طراح سایت</strong></td><td>«هر افزونه‌ای نصب می‌کنم سایتم کند می‌شود»</td><td>«فقط در صفحهٔ محصولِ ناموجود بارگذاری می‌شود. فایل HAR را خودتان ببینید.»</td></tr><tr><td><strong>مدیر فروشگاه با بودجهٔ کم</strong></td><td>«روی هاست اشتراکی همه‌چیز می‌سوزد»</td><td>«بدون IonCube، بدون Composer، بدون تماس اجباری با سرور خارجی. روی هاست اشتراکی با <code>max_execution_time=30</code> تست شده.»</td></tr></tbody></table></div>
+<hr>
+<h2 id="s21-۷-متن-آمادهٔ-صفحهٔ-محصول-مارکت">۷. متن آمادهٔ صفحهٔ محصول (مارکت)</h2>
+<h3 id="s22-۷۱-عنوان">۷.۱ عنوان</h3>
+<pre><code>افزونه نویدبان | لیست انتظار و اطلاع‌رسانی موجودی محصول ووکامرس</code></pre>
+<p><em>(برند اول، کلیدواژه‌ها بعد — الگوی عنوان‌های موفق مارکت)</em></p>
+<h3 id="s23-۷۲-توضیح-کوتاه-چکیده">۷.۲ توضیح کوتاه (چکیده)</h3>
+<pre><code>وقتی کالایی تمام می‌شود، مشتری شما نمی‌رود؛ در لیست انتظار می‌ماند. نویدبان
+موبایل یا ایمیل او را می‌گیرد و در لحظهٔ بازگشت موجودی — با پیامک یا ایمیل —
+خبرش می‌کند. فقط در همان صفحه‌ای بارگذاری می‌شود که لازم است؛ بقیهٔ سایت شما
+دست‌نخورده و سریع می‌ماند.</code></pre>
+<h3 id="s24-۷۳-تیتر-دوم-بنر">۷.۳ تیتر دوم (بنر)</h3>
+<pre><code>صفر بار اضافه. صفر مشتریِ از دست رفته.</code></pre>
+<h3 id="s25-۷۴-فهرست-قابلیتها-نسخهٔ-۱۰">۷.۴ فهرست قابلیت‌ها (نسخهٔ ۱.۰)</h3>
+<pre><code>- دکمهٔ «خبرم کن» روی محصول ناموجود — برای مهمان و کاربر واردشده
+- پشتیبانی از محصول متغیر در سطح هر تنوع (سایز/رنگ جداگانه)
+- ارسال با پیامک یا ایمیل، با متن کاملاً قابل شخصی‌سازی
+- سه درگاه پیامک ایرانی به‌صورت پیش‌فرض + یک درگاه عمومی REST برای بقیه
+- صف ارسال پس‌زمینه با کنترل نرخ — ساخته‌شده برای هاست اشتراکی
+- اعلام به تعداد موجودی: اگر ۵ عدد دارید، فقط به ۵ نفر اول خبر می‌دهد
+- پایش تطبیقی موجودی: تغییر دستی، درون‌ریزی اکسل و نوشتن افزونهٔ دیگر را هم می‌فهمد
+- تأیید دومرحله‌ای (double opt-in) و ثبت رضایت کاربر
+- کنترل تکرار: به ازای هر بازگشت موجودی، فقط یک اعلان
+- پنل مدیریت فارسی/راست‌چین با تاریخ شمسی و خروجی CSV
+- سازگار با HPOS ووکامرس
+- بدون IonCube، بدون Composer، بدون تماس اجباری با سرور خارجی</code></pre>
+<h3 id="s26-۷۵-بخشی-که-رقیب-ندارد-و-برندهٔ-اصلی-شماست">۷.۵ ⭐ بخشی که رقیب ندارد و برندهٔ اصلی شماست</h3>
+<pre><code>## چیزهایی که نویدبان ندارد (قبل از خرید بخوانید)
+
+ما ترجیح می‌دهیم قبل از خرید بدانید چه چیزی در کار نیست، تا بعد از خرید
+غافلگیر نشوید:
+
+- ❌ اطلاعیهٔ وضعیت سفارش ووکامرس (در حال پردازش، ارسال شد و…) — این کار را
+  افزونه‌های پیامک ووکامرس انجام می‌دهند و ما عمداً وارد آن نشده‌ایم.
+- ❌ واتساپ — چون به سرویس واسط پولی خارجی وابسته است.
+- ❌ لیست انتظار نوبت‌دهی و زمان رزرو — در نسخهٔ ۱.۱ بررسی می‌شود،
+  نه در این نسخه.
+- ❌ باشگاه مشتریان، امتیاز و کش‌بک — محصول متفاوتی است.
+- ❌ ارسال به ۳۰ درگاه پیامک — فقط ۳ درگاه پرکاربرد + یک درگاه عمومی.
+  اگر درگاه شما در فهرست نیست، قبل از خرید بپرسید.
+- ❌ چندزبانه — فقط فارسی.
+- ❌ فرم در سبد خرید یا صفحهٔ پرداخت — فقط در صفحهٔ محصول.
+
+اگر هر مورد بالا را لازم دارید، لطفاً قبل از خرید تیکت بزنید.</code></pre>
+<blockquote><p><strong>چرا این بخش حیاتی است:</strong> طراح «پیشنهاد شگفت‌انگیز دیجی‌کالا» با ۲٬۲۷۳ فروش، علت امتیاز پایین محصولش را این‌گونه توضیح داد: <em>«خریدارانی که انتظار داشتند امکاناتی در افزونه وجود داشته باشد که در توضیحات محصول کوچکترین اشاره‌ای به آن‌ها نشده بود… و بدون توجه به توضیحات محصول را خریداری کردند.»</em> ⇒ فهرست صریح «ندارد»ها، مستقیماً مکانیزم تولید نارضایتی را از بین می‌برد. این ارزان‌ترین مزیت رقابتی کل بسته است.</p></blockquote>
+<h3 id="s27-۷۶-پرسشهای-متداول-آماده">۷.۶ پرسش‌های متداول آماده</h3>
+<pre><code>۱) آیا افزونه روی همهٔ صفحات سایت بارگذاری می‌شود؟
+خیر. اسکریپت و استایل نویدبان فقط وقتی در صف قرار می‌گیرد که کاربر روی
+صفحهٔ تک‌محصول باشد و آن محصول (یا آن تنوع) ناموجود باشد. در صفحهٔ اصلی،
+آرشیو، سبد خرید و پرداخت هیچ فایلی از افزونه بارگذاری نمی‌شود. گزارش HAR
+تست را در مستندات می‌توانید ببینید.
+
+۲) با درون‌ریزی اکسل موجودی هم کار می‌کند؟
+بله. افزونه علاوه بر هوک‌های ووکامرس، یک نسخهٔ اولیه از وضعیت موجودی
+نگه می‌دارد و در زمان‌بندی تعیین‌شده آن را با وضعیت فعلی مقایسه می‌کند.
+پس تغییر دستی در دیتابیس، درون‌ریزی CSV/اکسل و نوشتن افزونه‌های انبارداری
+هم شناسایی می‌شود.
+
+۳) اگر ۳ عدد موجودی داشته باشم و ۲۰۰ نفر در انتظار باشند؟
+با گزینهٔ «اعلام به تعداد موجودی»، فقط به ۳ نفر اول (به ترتیب ثبت) خبر
+داده می‌شود. بقیه در لیست می‌مانند تا بازگشت موجودی بعدی.
+
+۴) به چند درگاه پیامک وصل می‌شود؟
+سه درگاه پرکاربرد ایرانی به‌صورت پیش‌فرض، به‌علاوهٔ یک درگاه عمومی REST که
+با تنظیم نشانی و پارامترها به درگاه دلخواه شما وصل می‌شود. کلید API متعلق
+به خودتان است؛ ما هیچ واسطهٔ پولی بین شما و درگاهتان نیستیم.
+
+۵) لایسنس چند دامنه است؟
+طبق قوانین مارکت، هر خرید یک دامنه. (اگر چند سایت دارید، قبل از خرید
+بپرسید — ما قیمت چنددامنه‌ای اعلام می‌کنیم.)
+
+۶) سایت کند می‌شود؟
+اندازه‌گیری‌شده: در صفحاتی که فرم نمایش داده نمی‌شود، ۰ درخواست HTTP و
+۰ کیلوبایت اضافه. ارسال اعلان‌ها در پس‌زمینه و با کنترل نرخ انجام می‌شود،
+پس حتی با ۱۰٬۰۰۰ مشترک هم صفحهٔ مدیریت قفل نمی‌کند.
+
+۷) نیاز به IonCube یا PHP خاص دارد؟
+خیر. PHP 7.4 به بالا، بدون IonCube، بدون Composer، بدون مرحلهٔ build.
+
+۸) داده‌های کاربران را نگه می‌دارید یا به جایی می‌فرستید؟
+هیچ داده‌ای از سایت شما به سرور ما نمی‌رود. افزونه هیچ تماس خروجی اجباری
+ندارد. تنها تماس خارجی، ارسال پیامک به درگاهی است که خودتان کلیدش را
+وارد کرده‌اید.</code></pre>
+<h3 id="s28-۷۷-قیمتگذاری-پیشنهادی">۷.۷ قیمت‌گذاری پیشنهادی</h3>
+<div class="tw"><table><thead><tr><th>مرحله</th><th>قیمت</th><th>مبنا</th></tr></thead><tbody><tr><td>لانچ (۳۰ روز اول)</td><td><strong>۴۴۹٬۰۰۰ تومان</strong> (از ۸۹۵٬۰۰۰ با ۵۰٪ تخفیف)</td><td>عرف محصولات تازهٔ ۱۴۰۵ در راست‌چین: دربان/دلیورس/صندوقبان/گارانتیکس همگی ۸۹۵٬۰۰۰</td></tr><tr><td>پس از ۱۰۰ فروش</td><td>۹۹۸٬۰۰۰ تومان</td><td>زیر سقف رهبر بازار (۱٬۱۹۸٬۰۰۰) تا مزیت قیمت حفظ شود</td></tr><tr><td>سقف بلندمدت</td><td>۱٬۱۹۸٬۰۰۰ تومان</td><td>هم‌ترازی با رهبر بازار پس از کسب گرید A+ پشتیبانی</td></tr></tbody></table></div>
+<hr>
+<h2 id="s29-۸-نامگذاری-فنی-برای-اجرا،-نه-فقط-برند">۸. نام‌گذاری فنی (برای اجرا، نه فقط برند)</h2>
+<p>این جدول مستقیماً به <code>research/build-prompt.md</code> وصل می‌شود — همهٔ نام‌های کد از اینجا می‌آیند.</p>
+<div class="tw"><table><thead><tr><th>عنصر</th><th>مقدار</th></tr></thead><tbody><tr><td>اسلاگ افزونه / نام پوشه</td><td><code>navidban</code></td></tr><tr><td>پروندهٔ اصلی</td><td><code>navidban.php</code></td></tr><tr><td>text domain</td><td><code>navidban</code></td></tr><tr><td>فضای نام PSR-4</td><td><code>Navidban\</code></td></tr><tr><td>پیشوند توابع جهانی</td><td><code>navidban_</code></td></tr><tr><td>پیشوند ثابت‌ها</td><td><code>NAVIDBAN_</code> (<code>NAVIDBAN_VERSION</code>, <code>NAVIDBAN_FILE</code>, <code>NAVIDBAN_DIR</code>, <code>NAVIDBAN_URL</code>)</td></tr><tr><td>پیشوند جداول</td><td><code>nvb_</code> → <code>wp_nvb_waitlists</code>, <code>wp_nvb_stock_snapshots</code>, <code>wp_nvb_notifications</code>, <code>wp_nvb_queue</code></td></tr><tr><td>پیشوند option</td><td><code>navidban_</code> → <code>navidban_settings</code>, <code>navidban_version</code>, <code>navidban_db_version</code></td></tr><tr><td>capability</td><td><code>navidban_manage</code> (admin/shop_manager)، <code>navidban_view_reports</code></td></tr><tr><td>فضای نام REST</td><td><code>navidban/v1</code></td></tr><tr><td>handle اسکریپت/استایل</td><td><code>navidban-front</code>, <code>navidban-admin</code></td></tr><tr><td>هوک‌های cron</td><td><code>navidban_reconcile_stock</code>، <code>navidban_process_queue</code>، <code>navidban_prune_records</code></td></tr><tr><td>پیشوند کلاس CSS فرانت</td><td><code>nvb-</code></td></tr><tr><td>نام کاربری در لاگ‌ها</td><td><code>navidban</code></td></tr></tbody></table></div>
+<p><strong>قاعده:</strong> هیچ‌جا در مسیرهای عمومی افزونه، نام کامل یا نسخهٔ ماژول‌های داخلی قابل حدس قرار ندهد. (درس مستقیم از گزارش کاربری رقیب که مسیر <code>/wp-content/plugins/letmeknow/src/js/date/date/</code> هدف اسکن قرار گرفته بود.) ⇒ دارایی‌ها فقط در <code>assets/</code> با نام‌های عمومی، بدون افشای ساختار <code>src/</code>.</p>
+<hr>
+<h2 id="s30-۹-الزامات-حقوقی-و-مالکیت-فکری">۹. الزامات حقوقی و مالکیت فکری</h2>
+<div class="tw"><table><thead><tr><th>مورد</th><th>حکم</th></tr></thead><tbody><tr><td>کد</td><td>۱۰۰٪ نوشتهٔ خودمان. <strong>کپی از کد رقیب ممنوع</strong> — حتی اگر GPL باشد، تحلیل رفتار مجاز است نه بازنویسی کد.</td></tr><tr><td>الگوریتم اعتبارسنجی کد ملی/موبایل</td><td>از <strong>مشخصات الگوریتم</strong> پیاده‌سازی شود، نه از کد موجود در آموزش‌های آنلاین (<code>novinmaster.com</code>، <code>mahdisweb.net</code>). کپی مستقیم آن‌ها ممنوع.</td></tr><tr><td>آیکون‌ها</td><td>مجموعهٔ بازمتن با لایسنس MIT/Apache؛ ذکر در <code>LICENSE-ICONS</code>.</td></tr><tr><td>فونت وزیرمتن</td><td>لایسنس باز (SIL OFL) — ذکر در <code>LICENSE-FONTS</code>.</td></tr><tr><td>نام «خبرم کنید» / «دیجی‌کالا» / «YITH»</td><td><strong>هرگز</strong> در نام محصول، اسلاگ، تگ، متای صفحه یا متن تبلیغاتی استفاده نشود. در متن <strong>مقایسه‌ای مستند</strong> با ارجاع factual مجاز است، ولی با احتیاط و ترجیحاً در وبلاگ نه در صفحهٔ محصول.</td></tr><tr><td>لایسنس خروجی</td><td>GPLv2+ (الزامی برای افزونهٔ وردپرس) + پروندهٔ <code>license.txt</code> در بسته</td></tr><tr><td>علامت تجاری</td><td>استعلام رسمی در <code>iripo.ssaa.ir</code> <strong>انجام نشده</strong> (دسترسی نداشتم) ⇒ پیش از صرف هزینهٔ بازاریابی انجام شود</td></tr></tbody></table></div>
+<hr>
+<h2 id="s31-۱۰-چکلیست-اجرای-برند-قبل-از-انتشار">۱۰. چک‌لیست اجرای برند (قبل از انتشار)</h2>
+<ul><li>[ ] ثبت <code>navidban.ir</code> و <code>navidban.com</code></li><li>[ ] رزرو <code>@navidban</code> در تلگرام/اینستاگرام/لینکدین</li><li>[ ] استعلام علامت تجاری در سامانهٔ مرکز مالکیت معنوی</li><li>[x] نشان تولید شد (<code>logo/navidban-logo.png</code>) + زمینهٔ بنر (<code>logo/navidban-banner.png</code>) + منبع صادرات ۱۰۵۰×۵۲۰ (<code>logo/banner-1050x520.html</code>)</li><li>[ ] صادر کردن ۵ اندازهٔ آیکون (۵۱۲/۲۵۶/۱۲۸/۶۴/۳۲) و واریانت کاشی اپ از نشان خطی</li><li>[ ] خروجی گرفتن بنر ۱۰۵۰×۵۲۰ از <code>banner-1050x520.html</code> در مرورگر</li><li>[ ] ساخت صفحهٔ <code>etehadwp.com/navidban</code> با متن بخش ۷</li><li>[ ] تهیهٔ گزارش HAR و انتشار آن به‌عنوان سند عمومی عملکرد</li><li>[ ] نوشتن <code>SECURITY.md</code> عمومی (سیاست افشای آسیب‌پذیری + مسیر گزارش)</li><li>[ ] نوشتن <code>CHANGELOG.md</code> با سیاست «هر تغییر، حتی کوچک، ثبت شود»</li><li>[ ] تهیهٔ دمؤ زنده (مارکت‌ها نشان «امکان تست قبل از خرید» دارند)</li><li>[ ] بازبینی نهایی: <strong>هیچ «به‌زودی» بدون تاریخ در صفحهٔ محصول نباشد</strong></li></ul>
+</div>
+</main>
+</div>
+<script>
+// برجسته‌سازی بخش فعال در فهرست
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.toc li a[href^="#"]'));
+  if(!links.length) return;
+  var map={};
+  links.forEach(function(a){var id=a.getAttribute('href').slice(1);
+    var el=document.getElementById(id); if(el) map[id]=a;});
+  var ids=Object.keys(map);
+  function on(){
+    var best=ids[0],by=-1e9;
+    ids.forEach(function(id){
+      var r=document.getElementById(id).getBoundingClientRect();
+      if(r.top<=140 && r.top>by){by=r.top;best=id;}
+    });
+    links.forEach(function(a){a.classList.remove('on')});
+    if(map[best]){map[best].classList.add('on');
+      map[best].scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',on,{passive:true});
+  window.addEventListener('resize',on);on();
+})();
+</script>
+</body>
+</html>
