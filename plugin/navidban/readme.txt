@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.0.6 =
+کلید روشن/خاموش برای هر فیلد فرم: می‌توانید ایمیل را خاموش کنید تا مشتری فقط
+شمارهٔ موبایل را ببیند، یا برعکس. فیلد کانالی که درگاهش پیکربندی نشده، خودش
+نمایش داده نمی‌شود.
+
 = 1.0.5 =
 رفع اشکال ظاهری پنل: ورودی‌هایی که در کد `type` نداشتند (مثل «عنوان فرم») استایل
 نمی‌گرفتند و به‌صورت باکس خام وردپرس دیده می‌شدند. هر بخش تنظیمات حالا کارت
@@ -100,6 +105,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 انتشار نخست. جزئیات کامل: `CHANGELOG.md`.
 
 == Upgrade Notice ==
+
+= 1.0.6 =
+افزودن کلید نمایش/مخفی‌کردن فیلد ایمیل و موبایل در فرم فروشگاه.
 
 = 1.0.5 =
 رفع باگ ظاهری نسخهٔ ۱.۰.۴ (باکس‌های بدون استایل در تنظیمات). فقط ظاهر تغییر کرده

@@ -238,6 +238,12 @@ NvbAdmin::ok( false !== strpos( $settings_html, 'navidban_settings[' ), 'نام 
 NvbAdmin::ok( false !== strpos( $settings_html, 'option_page' ), 'settings_fields فراخوانی شده' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'nvb-form-heading' ), 'فیلد عنوان فرم هست' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'nvb-actions' ), 'نوار ذخیرهٔ تنظیمات رندر می‌شود' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[form_email_field]"' ), 'کلید نمایش فیلد ایمیل هست' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[form_phone_field]"' ), 'کلید نمایش فیلد موبایل هست' );
+NvbAdmin::ok( 1 === substr_count( $settings_html, 'name="navidban_settings[form_email_field]"' ), 'کلید ایمیل فقط یک‌بار رندر می‌شود' );
+// Fresh defaults: SMS is not configured, so the screen must say the phone field
+// will not appear — a toggle that silently does nothing is worse than none.
+NvbAdmin::ok( false !== strpos( $settings_html, 'پیامک پیکربندی نشده' ), 'وقتی پیامک آماده نیست، کنار کلید موبایل هشدار می‌دهد' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'button button-primary' ) && false !== strpos( $settings_html, 'type="submit"' ), 'دکمهٔ ذخیره، دکمهٔ اصلی و از نوع submit است' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[sms_gateway]"' ), 'انتخاب درگاه پیامک هست' );
 

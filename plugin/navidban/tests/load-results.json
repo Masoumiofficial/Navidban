@@ -1,16 +1,16 @@
 {
     "php_version": "8.3.33",
     "storage": "SQLite (test harness) — not a MySQL benchmark",
-    "generated_at": "2026-10-26T09:44:53+00:00",
+    "generated_at": "2026-10-26T09:48:59+00:00",
     "subscribers": 10000,
     "remaining_after_batch": 950,
     "batch_sent": 50,
     "timings_ms": {
-        "insert_10000_rows": 773,
+        "insert_10000_rows": 813,
         "restock_with_10000": 11,
-        "enqueue_1000": 70,
-        "process_one_batch": 18,
-        "total": 979
+        "enqueue_1000": 53,
+        "process_one_batch": 17,
+        "total": 1002
     },
     "checks": [
         {
@@ -47,7 +47,7 @@
             "label": "زمان اجرا زیر ۳۰ ثانیه ماند",
             "passed": true,
             "expected": "< 30000 ms",
-            "actual": "18 ms"
+            "actual": "17 ms"
         },
         {
             "label": "باقی پیام‌ها در صف ماندند و گم نشدند",

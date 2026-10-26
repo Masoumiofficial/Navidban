@@ -28,7 +28,8 @@ TITLES = {
     "tools": "ابزارها",
     "help": "راهنما",
     "form": "فرم فروشگاه (هر دو کانال)",
-    "form-sms": "فرم فروشگاه (فقط پیامک)",
+    "form-sms": "فرم فروشگاه (فقط موبایل)",
+    "form-email": "فرم فروشگاه (فقط ایمیل)",
     "email": "ایمیل اعلان موجودی",
 }
 
@@ -129,7 +130,7 @@ def main() -> int:
     target.mkdir(parents=True, exist_ok=True)
 
     for key, markup in screens.items():
-        is_form = key in ("form", "form-sms")
+        is_form = key in ("form", "form-sms", "form-email")
         is_email = key == "email"
         page = PAGE.format(
             version=html.escape(str(version)),

@@ -9,16 +9,17 @@
 |---|---|---|
 | آزمون واحد روی PHP 8.3 | ✅ ۲۵۰/۲۵۰ | `tests/results.json` |
 | آزمون واحد روی PHP 7.4 | ✅ ۲۵۰/۲۵۰ | `tests/results-php74.json` |
-| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۳۴/۱۳۴ | `tests/integration-results.json` |
-| آزمون یکپارچه روی PHP 7.4 | ✅ ۱۳۴/۱۳۴ | `tests/integration-results-php74.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۷۷/۷۷ | `tests/admin-render-results.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۷۷/۷۷ | `tests/admin-render-results-php74.json` |
+| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۴۷/۱۴۷ | `tests/integration-results.json` |
+| آزمون یکپارچه روی PHP 7.4 | ✅ ۱۴۷/۱۴۷ | `tests/integration-results-php74.json` |
+| رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۸۱/۸۱ | `tests/admin-render-results.json` |
+| رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۸۱/۸۱ | `tests/admin-render-results-php74.json` |
 | آزمون بار (۱۰٬۰۰۰ مشترک) | ✅ ۷/۷ روی 8.3 | `tests/load-results.json` |
 | گرامر 7.4 + 8.3 روی همهٔ فایل‌ها | ✅ ۰ خطا | `tools/lint-php.js` |
 | ارجاع متدها | ✅ ۰ شکسته | `tools/check-methods.js` |
 | بودجهٔ حجم دارایی | ✅ ۴٬۳۹۳ / ۱۲٬۲۸۸ بایت | `docs/PERFORMANCE.md` |
 | بارگذاری صفر در صفحات غیرهدف | ✅ ۰ دارایی، ۰ کوئری | `docs/PERFORMANCE.md` |
 | پوشش استایل همهٔ کنترل‌های پنل (نوع‌به‌نوع) | ✅ ۱۲/۱۲ | `tests/admin-render.php` |
+| فیلد خاموش‌شده در فرم، در HTML وجود ندارد (نه فقط پنهان) | ✅ ۳ حالت | `tests/integration.php` |
 | بستهٔ انتشار | ✅ | `tools/verify-release.py` |
 
 ## ۱.۵) افزودهٔ ۱.۰.۱

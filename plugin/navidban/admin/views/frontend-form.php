@@ -7,7 +7,7 @@
  * @var array  $settings Form settings.
  * @var int    $product_id
  * @var array  $variations Variation list with stock state.
- * @var string $default_channel
+ * @var string $default_channel Default channel in "both" mode.
  * @var int    $user_id
  * @var string $prefill_email
  * @var string $prefill_phone
@@ -68,33 +68,38 @@ $nvb_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 		<?php endif; ?>
 
 		<div class="nvb-form__fields">
-			<p class="nvb-form__field" data-nvb="email-field">
-				<label for="nvb-email">ایمیل</label>
-				<input
-					type="email"
-					id="nvb-email"
-					name="email"
-					dir="ltr"
-					inputmode="email"
-					autocomplete="email"
-					value="<?php echo esc_attr( $prefill_email ); ?>"
-					<?php echo 'both' === $nvb_mode ? '' : 'required'; ?>
-				/>
-			</p>
+			<?php if ( 'sms' !== $nvb_mode ) : ?>
+				<p class="nvb-form__field" data-nvb="email-field">
+					<label for="nvb-email">ایمیل</label>
+					<input
+						type="email"
+						id="nvb-email"
+						name="email"
+						dir="ltr"
+						inputmode="email"
+						autocomplete="email"
+						value="<?php echo esc_attr( $prefill_email ); ?>"
+						<?php echo 'both' === $nvb_mode ? '' : 'required'; ?>
+					/>
+				</p>
+			<?php endif; ?>
 
-			<p class="nvb-form__field" data-nvb="phone-field">
-				<label for="nvb-phone">شمارهٔ موبایل</label>
-				<input
-					type="tel"
-					id="nvb-phone"
-					name="phone"
-					dir="ltr"
-					inputmode="tel"
-					autocomplete="tel"
-					placeholder="09xxxxxxxxx"
-					value="<?php echo esc_attr( $prefill_phone ); ?>"
-				/>
-			</p>
+			<?php if ( 'email' !== $nvb_mode ) : ?>
+				<p class="nvb-form__field" data-nvb="phone-field">
+					<label for="nvb-phone">شمارهٔ موبایل</label>
+					<input
+						type="tel"
+						id="nvb-phone"
+						name="phone"
+						dir="ltr"
+						inputmode="tel"
+						autocomplete="tel"
+						placeholder="09xxxxxxxxx"
+						value="<?php echo esc_attr( $prefill_phone ); ?>"
+						<?php echo 'both' === $nvb_mode ? '' : 'required'; ?>
+					/>
+				</p>
+			<?php endif; ?>
 		</div>
 
 		<div class="nvb-form__hp" aria-hidden="true">

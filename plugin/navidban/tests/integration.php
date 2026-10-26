@@ -9,6 +9,8 @@
  */
 
 require_once __DIR__ . '/stubs/wp.php';
+// The storefront view uses checked()/selected(), which live in the admin stub.
+require_once __DIR__ . '/stubs/admin.php';
 require_once __DIR__ . '/stubs/woocommerce.php';
 
 require_once NAVIDBAN_DIR . 'includes/Autoloader.php';
@@ -466,20 +468,22 @@ NvbInt::group( 'انتخاب کانال فرم' );
 
 $front = new Frontend();
 
-// Only email available (fresh install): the form must offer email, not SMS.
+// Fresh install: only email can deliver, and both field switches are on, but a
+// phone field with no gateway would collect numbers nobody can notify.
 $GLOBALS['nvb_options']['navidban_settings'] = Settings::defaults();
 Settings::flush_cache();
-NvbInt::same( 'email', $front->channel_mode(), 'ایمیل تنها، حالت فرم: email' );
 NvbInt::ok( Notifier::email_ready(), 'ایمیل آماده است' );
 NvbInt::ok( ! Notifier::sms_ready(), 'پیامک آماده نیست (پیکربندی نشده)' );
+NvbInt::same( 'email', $front->channel_mode(), 'ایمیل تنها: فقط فیلد ایمیل' );
+NvbInt::same( 'email', $front->default_channel(), 'حالت تک‌کاناله: کانال پیش‌فرض ایمیل' );
 
-// SMS switched on but no credentials: still not "ready", and the form must not
-// offer a channel that cannot deliver.
+// SMS switched on but no credentials: still not usable, and the form must not
+// offer a field for it.
 Settings::update( array( 'sms_enabled' => true ) );
 NvbInt::ok( ! Notifier::sms_ready(), 'پیامکِ بدون کلید، آماده محسوب نمی‌شود' );
-NvbInt::same( 'email', $front->channel_mode(), 'پیامک بی‌کلید، حالت فرم را تغییر نمی‌دهد' );
+NvbInt::same( 'email', $front->channel_mode(), 'پیامک بی‌کلید، فیلد موبایل را باز نمی‌کند' );
 
-// Properly configured gateway + default sms_first.
+// Properly configured gateway: both fields are on by default.
 Settings::update(
 	array(
 		'sms_gateway'      => 'melipayamak',
@@ -488,29 +492,95 @@ Settings::update(
 	)
 );
 NvbInt::ok( Notifier::sms_ready(), 'پیامک با کلید معتبر آماده است' );
-NvbInt::same( 'sms', $front->channel_mode(), 'پیش‌فرض sms_first: حالت فرم sms' );
+NvbInt::same( 'both', $front->channel_mode(), 'هر دو فیلد روشن: حالت both' );
+NvbInt::same( 'sms', $front->default_channel(), 'پیش‌فرض sms_first: پیامک از قبل انتخاب است' );
 
 Settings::update( array( 'channel_choice' => 'email_first' ) );
-NvbInt::same( 'email', $front->channel_mode(), 'email_first: حالت فرم email' );
+NvbInt::same( 'email', $front->default_channel(), 'email_first: ایمیل از قبل انتخاب است' );
+NvbInt::same( 'both', $front->channel_mode(), 'اولویت کانال، تعداد فیلدها را تغییر نمی‌دهد' );
 
-Settings::update( array( 'channel_choice' => 'both' ) );
-NvbInt::same( 'both', $front->channel_mode(), 'both: هر دو کانال نمایش داده می‌شود' );
+// The switches the store actually flips.
+Settings::update( array( 'channel_choice' => 'sms_first', 'form_email_field' => false ) );
+NvbInt::same( 'sms', $front->channel_mode(), 'فیلد ایمیل خاموش: فقط موبایل' );
 
-// Nothing usable at all: the form still renders (email shell) rather than a
-// blank block, so the store can see its own misconfiguration.
-Settings::update( array( 'channel_choice' => 'sms_first', 'email_enabled' => false, 'sms_enabled' => false ) );
+Settings::update( array( 'form_email_field' => true, 'form_phone_field' => false ) );
+NvbInt::same( 'email', $front->channel_mode(), 'فیلد موبایل خاموش: فقط ایمیل' );
+
+// A stored row with both switches off (the sanitiser refuses this, but an old
+// option row could hold it) must not produce an empty form.
+$GLOBALS['nvb_options']['navidban_settings'] = array_merge(
+	Settings::defaults(),
+	array(
+		'form_email_field' => false,
+		'form_phone_field' => false,
+		'sms_enabled'      => true,
+		'melipayamak_user' => 'demo',
+		'melipayamak_pass' => 'secret',
+	)
+);
 Settings::flush_cache();
-NvbInt::same( 'email', $front->channel_mode(), 'هیچ کانال آماده‌ای نیست: فرم پوستهٔ ایمیل را نشان می‌دهد' );
+NvbInt::same( 'sms', $front->channel_mode(), 'هر دو فیلد خاموش: به کانالِ در دسترس برمی‌گردد' );
 
-// SMS configured, email switched off: SMS only.
-Settings::update( array( 'sms_enabled' => true ) );
+// Nothing usable at all: email shell, so the page is never blank.
+$GLOBALS['nvb_options']['navidban_settings'] = array_merge(
+	Settings::defaults(),
+	array( 'email_enabled' => false, 'sms_enabled' => false, 'form_email_field' => false, 'form_phone_field' => false )
+);
 Settings::flush_cache();
-NvbInt::same( 'sms', $front->channel_mode(), 'فقط پیامکِ آماده، حالت sms' );
+NvbInt::same( 'email', $front->channel_mode(), 'هیچ کانالی آماده نیست: پوستهٔ ایمیل' );
 
-Settings::update( array( 'email_enabled' => true, 'sms_enabled' => false ) );
-Settings::flush_cache();
-NvbInt::same( 'email', $front->channel_mode(), 'بازگشت به ایمیل با پیکربندی پیش‌فرض' );
+NvbInt::group( 'رندر فرم فروشگاه' );
 
+/**
+ * Render the storefront form view for one mode and return the HTML.
+ *
+ * @param string $mode email|sms|both.
+ * @return string
+ */
+function nvb_render_form( $mode ) {
+	$settings        = array(
+		'mode'        => $mode,
+		'heading'     => 'خبرم کن',
+		'intro'       => 'موجود نیست.',
+		'notice'      => '',
+		'button'      => 'خبرم کن',
+		'consent_req' => false,
+		'consent'     => '',
+		'privacy'     => '',
+	);
+	$product_id      = 40;
+	$variations      = array();
+	$default_channel = 'sms' === $mode ? 'sms' : 'email';
+	$user_id         = 0;
+	$prefill_email   = '';
+	$prefill_phone   = '';
+
+	ob_start();
+	include NAVIDBAN_DIR . 'admin/views/frontend-form.php';
+
+	return (string) ob_get_clean();
+}
+
+$form_sms = nvb_render_form( 'sms' );
+NvbInt::ok( false !== strpos( $form_sms, 'id="nvb-phone"' ), 'حالت پیامک: کادر موبایل هست' );
+NvbInt::ok( false === strpos( $form_sms, 'id="nvb-email"' ), 'حالت پیامک: کادر ایمیل اصلاً رندر نمی‌شود' );
+NvbInt::ok( false !== strpos( $form_sms, 'name="channel" value="sms"' ), 'حالت پیامک: کانال پنهان sms است' );
+NvbInt::same( 1, substr_count( $form_sms, 'required' ), 'حالت پیامک: فقط یک فیلد اجباری است' );
+
+$form_email = nvb_render_form( 'email' );
+NvbInt::ok( false !== strpos( $form_email, 'id="nvb-email"' ), 'حالت ایمیل: کادر ایمیل هست' );
+NvbInt::ok( false === strpos( $form_email, 'id="nvb-phone"' ), 'حالت ایمیل: کادر موبایل رندر نمی‌شود' );
+NvbInt::ok( false !== strpos( $form_email, 'name="channel" value="email"' ), 'حالت ایمیل: کانال پنهان email است' );
+
+$form_both = nvb_render_form( 'both' );
+NvbInt::ok( false !== strpos( $form_both, 'id="nvb-email"' ) && false !== strpos( $form_both, 'id="nvb-phone"' ), 'حالت both: هر دو کادر هستند' );
+NvbInt::ok( false !== strpos( $form_both, 'type="radio"' ), 'حالت both: انتخاب کانال نمایش داده می‌شود' );
+
+// The one-step default applies here too: nothing about the form asks for a
+// confirmation click.
+NvbInt::ok( false === strpos( $form_both, 'confirm' ), 'فرم هیچ اشاره‌ای به مرحلهٔ تأیید ندارد' );
+
+NvbInt::group( 'موتور موجودی' );
 NvbInt::group( 'موتور موجودی' );
 
 nvb_reset_state();

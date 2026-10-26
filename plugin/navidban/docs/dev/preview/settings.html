@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نویدبان 1.0.5 — تنظیمات</title>
+<title>نویدبان 1.0.6 — تنظیمات</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1056,11 +1056,11 @@ body {
 </head>
 <body>
 <p class="nvb-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.5.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.6.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۵</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
+<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۶</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
 	
 	<form method="post" action="options.php">
 		<input type="hidden" name="option_page" value="navidban_settings_group" />
@@ -1097,12 +1097,29 @@ body {
 					<th scope="row"><label for="nvb-channel-choice">اولویت کانال در فرم</label></th>
 					<td>
 						<select id="nvb-channel-choice" name="navidban_settings[channel_choice]">
-							<option value="sms_first" selected="selected">پیامک (پیش‌فرض) — مناسب بازار ایران</option><option value="email_first">ایمیل</option><option value="both">هر دو؛ مشتری خودش انتخاب کند</option>						</select>
+							<option value="sms_first" selected="selected">پیامک (پیش‌فرض) — مناسب بازار ایران</option><option value="email_first">ایمیل</option>						</select>
 						<p class="description">
-							این گزینه فقط وقتی اثر دارد که <strong>هر دو</strong> کانال واقعاً پیکربندی شده باشند.
-							اگر پیامک را روشن کرده‌اید ولی کلید درگاه را خالی گذاشته‌اید، فرم به ایمیل برمی‌گردد تا
-							کانالی که کار نمی‌کند به مشتری پیشنهاد نشود.
+							فقط وقتی اثر دارد که هر دو فیلد پایین روشن باشند؛ تعیین می‌کند کدام گزینه از قبل
+							انتخاب شده باشد.
 						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">فیلد ایمیل در فرم</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[form_email_field]" value="1"  checked="checked" /> نمایش داده شود</label>
+						<p class="description">
+							خاموش کنید تا مشتری فقط کادر شمارهٔ موبایل را ببیند.
+													</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">فیلد موبایل در فرم</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[form_phone_field]" value="1"  checked="checked" /> نمایش داده شود</label>
+						<p class="description">
+							خاموش کنید تا مشتری فقط کادر ایمیل را ببیند.
+													</p>
 					</td>
 				</tr>
 				<tr>

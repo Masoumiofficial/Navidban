@@ -62,7 +62,6 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 							$nvb_choices = array(
 								'sms_first'   => 'پیامک (پیش‌فرض) — مناسب بازار ایران',
 								'email_first' => 'ایمیل',
-								'both'        => 'هر دو؛ مشتری خودش انتخاب کند',
 							);
 							$nvb_current = (string) $settings['channel_choice'];
 							foreach ( $nvb_choices as $nvb_value => $nvb_label ) {
@@ -76,9 +75,32 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 							?>
 						</select>
 						<p class="description">
-							این گزینه فقط وقتی اثر دارد که <strong>هر دو</strong> کانال واقعاً پیکربندی شده باشند.
-							اگر پیامک را روشن کرده‌اید ولی کلید درگاه را خالی گذاشته‌اید، فرم به ایمیل برمی‌گردد تا
-							کانالی که کار نمی‌کند به مشتری پیشنهاد نشود.
+							فقط وقتی اثر دارد که هر دو فیلد پایین روشن باشند؛ تعیین می‌کند کدام گزینه از قبل
+							انتخاب شده باشد.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">فیلد ایمیل در فرم</th>
+					<td>
+						<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[form_email_field]" value="1" <?php checked( ! empty( $settings['form_email_field'] ) ); ?> /> نمایش داده شود</label>
+						<p class="description">
+							خاموش کنید تا مشتری فقط کادر شمارهٔ موبایل را ببیند.
+							<?php if ( ! \Navidban\Notifier::email_ready() ) : ?>
+								<strong>ایمیل در حال حاضر خاموش است، پس این فیلد روی سایت دیده نمی‌شود.</strong>
+							<?php endif; ?>
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">فیلد موبایل در فرم</th>
+					<td>
+						<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[form_phone_field]" value="1" <?php checked( ! empty( $settings['form_phone_field'] ) ); ?> /> نمایش داده شود</label>
+						<p class="description">
+							خاموش کنید تا مشتری فقط کادر ایمیل را ببیند.
+							<?php if ( ! \Navidban\Notifier::sms_ready() ) : ?>
+								<strong>پیامک پیکربندی نشده (یا خاموش است)، پس فیلد موبایل روی سایت دیده نمی‌شود تا وقتی درگاه را کامل کنید.</strong>
+							<?php endif; ?>
 						</p>
 					</td>
 				</tr>

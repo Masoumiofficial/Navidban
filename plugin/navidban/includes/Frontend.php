@@ -184,33 +184,70 @@ final class Frontend {
 	/**
 	 * Which input(s) the form shows.
 	 *
+	 * Two things decide it, in this order:
+	 *
+	 *  1. the per-field switches the store set (form_email_field /
+	 *     form_phone_field) — a store that only wants phone numbers turns the
+	 *     email field off and the form asks for nothing else;
+	 *  2. whether that channel can actually deliver. A field for a channel with
+	 *     no working gateway would collect addresses nobody can ever notify, so
+	 *     it is not shown: the form falls back to the channel that works.
+	 *
+	 * Values returned: 'sms' (phone only), 'email' (email only) or 'both'
+	 * (radio pair, default taken from channel_choice).
+	 *
 	 * @return string
 	 */
 	public function channel_mode() {
-		$email = Notifier::email_ready();
-		$sms   = Notifier::sms_ready();
+		$email_ready = Notifier::email_ready();
+		$sms_ready   = Notifier::sms_ready();
 
-		if ( ! $email && ! $sms ) {
-			// Nothing usable; the form still renders so the store sees its own
-			// misconfiguration instead of a blank product page.
-			return 'email';
+		$want_email = (bool) Settings::get( 'form_email_field', true ) && $email_ready;
+		$want_phone = (bool) Settings::get( 'form_phone_field', true ) && $sms_ready;
+
+		if ( $want_email && $want_phone ) {
+			return 'both';
 		}
 
-		if ( ! $sms ) {
-			return 'email';
-		}
-
-		if ( ! $email ) {
+		if ( $want_phone ) {
 			return 'sms';
 		}
 
-		// Both work: honour the store's stated preference. "both" shows a radio
-		// pair and defaults to SMS, which is what an Iranian shopper expects.
-		$choice = (string) Settings::get( 'channel_choice', 'sms_first' );
-
-		if ( 'both' === $choice ) {
-			return 'both';
+		if ( $want_email ) {
+			return 'email';
 		}
+
+		// Neither switch produced a usable field: either both fields are off
+		// (the sanitiser refuses that, but an old option row could hold it) or
+		// the requested channel is not configured. Fall back to whatever can
+		// deliver, and to email when nothing can, so the page never renders a
+		// form with no input in it.
+		if ( $sms_ready ) {
+			return 'sms';
+		}
+
+		return 'email';
+	}
+
+	/**
+	 * Default channel in "both" mode.
+	 *
+	 * @return string sms|email
+	 */
+	public function default_channel() {
+		$mode = $this->channel_mode();
+
+		if ( 'sms' === $mode ) {
+			return 'sms';
+		}
+
+		if ( 'email' === $mode ) {
+			return 'email';
+		}
+
+		// Both fields are shown: the stored preference decides which radio is
+		// pre-selected. "sms_first" (and the legacy "both" value) mean SMS.
+		$choice = (string) Settings::get( 'channel_choice', 'sms_first' );
 
 		return ( 'email_first' === $choice ) ? 'email' : 'sms';
 	}
@@ -248,7 +285,7 @@ final class Frontend {
 		}
 
 		$nvb_mode        = $this->channel_mode();
-		$default_channel = ( 'sms' === $nvb_mode || 'both' === $nvb_mode ) ? 'sms' : 'email';
+		$default_channel = $this->default_channel();
 		$user_id         = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
 
 		$prefill_email = '';

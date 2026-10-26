@@ -54,6 +54,11 @@ final class Settings {
 			'email_enabled'         => true,
 			'sms_enabled'           => false,
 			'channel_choice'        => 'sms_first', // sms_first | email_first | both.
+			// What the storefront form actually asks for. These are field
+			// switches, not channel switches: a store can keep email enabled for
+			// messages it already queued while showing only the phone input.
+			'form_email_field'      => true,
+			'form_phone_field'      => true,
 			'notify_backorders'     => false,
 
 			// Consent / double opt-in.

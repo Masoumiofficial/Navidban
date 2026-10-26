@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.5",
+    "plugin_version": "1.0.6",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-26T09:44:50+00:00",
-    "assertions": 134,
+    "generated_at": "2026-10-26T09:48:56+00:00",
+    "assertions": 147,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -27,7 +27,11 @@
             "failures": 0
         },
         "انتخاب کانال فرم": {
-            "assertions": 12,
+            "assertions": 15,
+            "failures": 0
+        },
+        "رندر فرم فروشگاه": {
+            "assertions": 10,
             "failures": 0
         },
         "موتور موجودی": {

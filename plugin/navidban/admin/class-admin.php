@@ -191,6 +191,8 @@ final class Admin {
 			'consent_required',
 			'email_enabled',
 			'sms_enabled',
+			'form_email_field',
+			'form_phone_field',
 			'notify_backorders',
 			'double_opt_in',
 			'fair_sending',
@@ -207,6 +209,13 @@ final class Admin {
 			// Never let the site save itself into "no channel at all".
 			$out['email_enabled'] = true;
 			add_settings_error( 'navidban', 'no_channel', 'حداقل یک کانال اعلان باید فعال بماند؛ ایمیل دوباره فعال شد.', 'warning' );
+		}
+
+		if ( ! $out['form_email_field'] && ! $out['form_phone_field'] ) {
+			// A form with no input collects nothing. Keep the e-mail field so the
+			// store notices a warning instead of a silently useless form.
+			$out['form_email_field'] = true;
+			add_settings_error( 'navidban', 'no_form_field', 'فرم باید حداقل یک فیلد داشته باشد؛ فیلد ایمیل دوباره روشن شد.', 'warning' );
 		}
 
 		$int_ranges = array(
