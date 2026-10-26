@@ -665,6 +665,73 @@ NvbInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queu
 /* -------------------------------------------------------------------------
  * SMS channel + SSRF
  * ---------------------------------------------------------------------- */
+NvbInt::group( 'خطای ارسال ایمیل' );
+
+// A bare `false` from wp_mail() is useless to an administrator. WordPress
+// fires wp_mail_failed with the PHPMailer exception; the channel must surface
+// it, and must not leave a listener behind.
+$GLOBALS['nvb_mail_ok']    = false;
+$GLOBALS['nvb_mail_error'] = 'Could not instantiate mail function.';
+unset( $GLOBALS['nvb_actions']['wp_mail_failed'] );
+
+$mail_channel = new \Navidban\Channels\EmailChannel();
+$mail_failure = $mail_channel->send( 'buyer@example.com', 'موضوع', 'متن', array() );
+$mail_message = is_object( $mail_failure ) && method_exists( $mail_failure, 'get_error_message' )
+	? $mail_failure->get_error_message()
+	: (string) $mail_failure;
+
+NvbInt::ok( true !== $mail_failure, 'شکست ارسال به خطا تبدیل می‌شود' );
+NvbInt::ok( false !== strpos( $mail_message, 'Could not instantiate mail function.' ), 'دلیل واقعی wp_mail منتقل می‌شود', $mail_message );
+NvbInt::ok( false !== strpos( $mail_message, 'wp_mail' ), 'پیام به wp_mail اشاره می‌کند' );
+$listener_count = 0;
+foreach ( ( $GLOBALS['nvb_actions']['wp_mail_failed'] ?? array() ) as $bucket ) {
+	$listener_count += is_array( $bucket ) ? count( $bucket ) : 0;
+}
+NvbInt::same( 0, $listener_count, 'شنونده پس از فراخوانی برداشته شد (بدون نشت)' );
+
+$GLOBALS['nvb_mail_error'] = '';
+$no_reason                 = $mail_channel->send( 'buyer@example.com', 'موضوع', 'متن', array() );
+$no_reason_message         = is_object( $no_reason ) ? $no_reason->get_error_message() : (string) $no_reason;
+NvbInt::ok( false !== strpos( $no_reason_message, 'دلیلی گزارش نکرد' ), 'نبود دلیل هم صریح گفته می‌شود', $no_reason_message );
+
+// A very long Persian error must survive the column limit intact: a byte-wise
+// substr() would split a character and MySQL would reject the row.
+$GLOBALS['nvb_mail_ok']    = false;
+$GLOBALS['nvb_mail_error'] = str_repeat( 'خطای سرویس ایمیل هاست؛ ', 40 );
+
+$long_waitlist = WaitlistRepository::create(
+	array(
+		'product_id'   => 777,
+		'variation_id' => 0,
+		'channel'      => 'email',
+		'email'        => 'long@example.com',
+		'phone'        => '',
+		'ip_hash'      => str_repeat( 'd', 64 ),
+		'status'       => 'confirmed',
+		'consent_at'   => gmdate( 'Y-m-d H:i:s' ),
+	)
+);
+
+Queue::enqueue( (int) $long_waitlist['id'], 'email', 'restock:20261026:longerr', array(), time() );
+
+$long_id = (int) $GLOBALS['wpdb']->get_var(
+	'SELECT id FROM ' . Queue::table() . " WHERE event_key = 'restock:20261026:longerr' LIMIT 1"
+);
+
+NvbInt::ok( $long_id > 0, 'ردیف صف برای آزمون خطای طولانی ساخته شد' );
+
+if ( $long_id > 0 ) {
+	Queue::deliver( $long_id );
+	$stored = (string) $GLOBALS['wpdb']->get_var( 'SELECT last_error FROM ' . Queue::table() . ' WHERE id = ' . $long_id );
+	NvbInt::ok( '' !== $stored, 'خطای طولانی در صف ذخیره شد' );
+	NvbInt::same( 1, preg_match( '//u', $stored ), 'متن ذخیره‌شده UTF-8 معتبر است' );
+	NvbInt::ok( \Navidban\Support\Text::length( $stored ) <= 255, 'طول متن از سقف ستون عبور نمی‌کند' );
+}
+
+$GLOBALS['nvb_mail_ok']    = true;
+$GLOBALS['nvb_mail_error'] = '';
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() . " WHERE event_key = 'restock:20261026:longerr'" );
+
 NvbInt::group( 'کانال پیامک' );
 
 nvb_reset_rate_limit();

@@ -83,6 +83,22 @@ if ( $nvb_notice ) {
 			<input type="hidden" name="tool" value="test_email" />
 			<h3>ارسال ایمیل آزمایشی</h3>
 			<p>یک پیام آزمایشی به ایمیل مدیر سایت ارسال می‌شود.</p>
+			<?php
+			$nvb_mail_facts = \Navidban\Channels\EmailChannel::diagnose();
+			$nvb_mail_hint  = \Navidban\Channels\EmailChannel::hint();
+			?>
+			<p class="nvb-diagnosis">
+				<strong>وضعیت ارسال ایمیل روی این سرور:</strong>
+				تابع <code>mail()</code>: <?php echo esc_html( 'available' === $nvb_mail_facts['mail_function'] ? 'در دسترس' : 'غیرفعال' ); ?>
+				· <code>sendmail_path</code>: <?php echo esc_html( '' === (string) $nvb_mail_facts['sendmail_path'] ? 'خالی' : (string) $nvb_mail_facts['sendmail_path'] ); ?>
+				· <code>SMTP</code>: <?php echo esc_html( '' === (string) $nvb_mail_facts['smtp_host'] ? 'خالی' : (string) $nvb_mail_facts['smtp_host'] . ':' . (string) $nvb_mail_facts['smtp_port'] ); ?>
+				<?php if ( '' !== (string) $nvb_mail_facts['mailer_plugin'] ) : ?>
+					· افزونهٔ SMTP: <?php echo esc_html( (string) $nvb_mail_facts['mailer_plugin'] ); ?>
+				<?php endif; ?>
+			</p>
+			<?php if ( '' !== $nvb_mail_hint ) : ?>
+				<p class="nvb-diagnosis nvb-diagnosis--warn"><?php echo esc_html( $nvb_mail_hint ); ?></p>
+			<?php endif; ?>
 			<button class="button">ارسال آزمایشی</button>
 		</form>
 

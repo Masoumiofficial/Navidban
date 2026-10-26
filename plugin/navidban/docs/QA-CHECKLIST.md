@@ -7,10 +7,10 @@
 
 | مورد | نتیجه | شاهد |
 |---|---|---|
-| آزمون واحد روی PHP 8.3 | ✅ ۱۹۷/۱۹۷ | `tests/results.json` |
-| آزمون واحد روی PHP 7.4 | ✅ ۱۹۷/۱۹۷ | `tests/results-php74.json` |
-| آزمون یکپارچه روی PHP 8.3 | ✅ ۹۹/۹۹ | `tests/integration-results.json` |
-| آزمون یکپارچه روی PHP 7.4 | ✅ ۹۹/۹۹ | `tests/integration-results-php74.json` |
+| آزمون واحد روی PHP 8.3 | ✅ ۲۱۴/۲۱۴ | `tests/results.json` |
+| آزمون واحد روی PHP 7.4 | ✅ ۲۱۴/۲۱۴ | `tests/results-php74.json` |
+| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۰۸/۱۰۸ | `tests/integration-results.json` |
+| آزمون یکپارچه روی PHP 7.4 | ✅ ۱۰۸/۱۰۸ | `tests/integration-results-php74.json` |
 | رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۴۷/۴۷ | `tests/admin-render-results.json` |
 | رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۴۷/۴۷ | `tests/admin-render-results-php74.json` |
 | آزمون بار (۱۰٬۰۰۰ مشترک) | ✅ ۷/۷ روی 8.3 | `tests/load-results.json` |
@@ -19,6 +19,16 @@
 | بودجهٔ حجم دارایی | ✅ ۳٬۴۶۹ / ۱۲٬۲۸۸ بایت | `docs/PERFORMANCE.md` |
 | بارگذاری صفر در صفحات غیرهدف | ✅ ۰ دارایی، ۰ کوئری | `docs/PERFORMANCE.md` |
 | بستهٔ انتشار | ✅ | `tools/verify-release.py` |
+
+## ۱.۵) افزودهٔ ۱.۰.۱
+
+| مورد | نتیجه |
+|---|---|
+| پیام خطای `wp_mail` دلیل واقعی را نشان می‌دهد | ✅ آزمون یکپارچه (۹ assertion) |
+| شنوندهٔ `wp_mail_failed` بعد از فراخوانی برداشته می‌شود | ✅ |
+| برش متن فارسی در ستون خطا، UTF-8 را نمی‌شکند | ✅ ۷ assertion |
+| تشخیص وضعیت ایمیل سرور (mail/sendmail/SMTP/افزونهٔ SMTP) | ✅ رندر پنل |
+| تست واقعی ارسال ایمیل روی هاست محلی | داده در دسترس نیست (نیاز به SMTP واقعی) |
 
 ## ۲) ماتریس سازگاری (§۶.۶)
 

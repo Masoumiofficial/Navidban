@@ -15,6 +15,7 @@
 namespace Navidban;
 
 use Navidban\Logic\QueuePolicy;
+use Navidban\Support\Text;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -297,7 +298,9 @@ final class Queue {
 				'attempts'    => $attempts,
 				'status'      => $status,
 				'next_run_at' => gmdate( 'Y-m-d H:i:s', 0 === $next_run ? time() : $next_run ),
-				'last_error'  => substr( (string) $message, 0, 255 ),
+				// Character-aware: a byte-wise substr() can cut a Persian string
+				// mid-character, and MySQL rejects that as invalid utf8mb4.
+				'last_error'  => Text::substring( (string) $message, 0, 255 ),
 				'locked_at'   => null,
 			),
 			array( 'id' => (int) $queue_id ),
@@ -324,7 +327,7 @@ final class Queue {
 			self::table(),
 			array(
 				'status'     => 'skipped',
-				'last_error' => substr( (string) $reason, 0, 255 ),
+				'last_error' => Text::substring( (string) $reason, 0, 255 ),
 				'locked_at'  => null,
 			),
 			array( 'id' => (int) $queue_id ),

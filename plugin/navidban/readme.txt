@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,10 +71,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.0.1 =
+اصلاح پیام خطای ارسال ایمیل (نمایش دلیل واقعی wp_mail)، افزودن تشخیص وضعیت
+ایمیل سرور در صفحهٔ ابزارها، و رفع برش بایتی متن فارسی در ستون خطای صف.
+
 = 1.0.0 =
 انتشار نخست. جزئیات کامل: `CHANGELOG.md`.
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+اصلاح نسخهٔ ۱.۰.۰؛ به‌روزرسانی مستقیم توصیه می‌شود.
 
 = 1.0.0 =
 نسخهٔ نخست؛ نصب تازه.

@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.0",
+    "plugin_version": "1.0.1",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-25T11:20:03+00:00",
-    "assertions": 197,
+    "generated_at": "2026-10-26T08:10:53+00:00",
+    "assertions": 214,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -56,6 +56,14 @@
         },
         "Template / جای‌نگهدارها": {
             "assertions": 8,
+            "failures": 0
+        },
+        "Text / برش چندبایتی": {
+            "assertions": 7,
+            "failures": 0
+        },
+        "EmailChannel / تشخیص خطای ارسال": {
+            "assertions": 10,
             "failures": 0
         },
         "HttpGuard / SSRF": {

@@ -303,6 +303,27 @@ function add_action( $hook, $callback, $priority = 10, $args = 1 ) {
 	return true;
 }
 
+function remove_action( $hook, $callback, $priority = 10 ) {
+	if ( empty( $GLOBALS['nvb_actions'][ $hook ][ $priority ] ) ) {
+		return false;
+	}
+
+	foreach ( $GLOBALS['nvb_actions'][ $hook ][ $priority ] as $index => $existing ) {
+		if ( $existing === $callback ) {
+			unset( $GLOBALS['nvb_actions'][ $hook ][ $priority ][ $index ] );
+			$GLOBALS['nvb_actions'][ $hook ][ $priority ] = array_values( $GLOBALS['nvb_actions'][ $hook ][ $priority ] );
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function remove_all_actions( $hook ) {
+	unset( $GLOBALS['nvb_actions'][ $hook ] );
+}
+
 function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
 	return add_action( $hook, $callback, $priority, $args );
 }
@@ -607,7 +628,17 @@ function wp_mail( $to, $subject, $message, $headers = array() ) {
 		'headers' => $headers,
 	);
 
-	return (bool) ( $GLOBALS['nvb_mail_ok'] ?? true );
+	$ok = (bool) ( $GLOBALS['nvb_mail_ok'] ?? true );
+
+	if ( ! $ok ) {
+		// Real WordPress does exactly this when PHPMailer throws.
+		do_action(
+			'wp_mail_failed',
+			new WP_Error( 'wp_mail_failed', (string) ( $GLOBALS['nvb_mail_error'] ?? '' ) )
+		);
+	}
+
+	return $ok;
 }
 
 function wp_remote_post( $url, $args ) {

@@ -12,6 +12,8 @@
 
 namespace Navidban;
 
+use Navidban\Support\Text;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -54,7 +56,7 @@ final class Logger {
 			array(
 				'level'      => $level,
 				'event'      => substr( (string) $event, 0, 64 ),
-				'context'    => substr( (string) $context, 0, 255 ),
+				'context'    => Text::substring( (string) $context, 0, 255 ),
 				'ip_hash'    => substr( (string) $ip_hash, 0, 64 ),
 				'created_at' => gmdate( 'Y-m-d H:i:s' ),
 			),

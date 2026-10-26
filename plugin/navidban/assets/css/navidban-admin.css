@@ -130,3 +130,27 @@
 	direction: ltr;
 	unicode-bidi: embed;
 }
+
+/* Server diagnostics shown next to the test-email tool. */
+.nvb-diagnosis {
+	margin: 8px 0 12px;
+	padding: 8px 10px;
+	border-inline-start: 3px solid #14857B;
+	background: #f6f9f8;
+	font-size: 13px;
+	line-height: 1.9;
+	color: #24312f;
+	direction: rtl;
+	text-align: right;
+}
+
+.nvb-diagnosis code {
+	direction: ltr;
+	unicode-bidi: embed;
+	font-size: 12px;
+}
+
+.nvb-diagnosis--warn {
+	border-inline-start-color: #F2A93B;
+	background: #fff8ec;
+}

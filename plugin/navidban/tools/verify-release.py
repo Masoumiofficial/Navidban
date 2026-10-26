@@ -125,6 +125,15 @@ def audit_zip(path: str, report: Report, root: str) -> None:
     if not report.check(os.path.exists(path), "بستهٔ انتشار وجود دارد", path):
         return
 
+    # A stale archive from an older version must never be mistaken for this
+    # release: the filename carries the version, so refuse a mismatch outright.
+    expected_name = f"{PLUGIN_SLUG}-{plugin_version(root)}.zip"
+    report.check(
+        os.path.basename(path) == expected_name,
+        "نام بستهٔ انتشار با نسخهٔ افزونه می‌خواند",
+        os.path.basename(path),
+    )
+
     with zipfile.ZipFile(path) as archive:
         names = [n for n in archive.namelist() if not n.endswith("/")]
         bad = archive.testzip()

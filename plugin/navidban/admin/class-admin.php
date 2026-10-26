@@ -666,6 +666,14 @@ final class Admin {
 			? $result->get_error_message()
 			: (string) $result;
 
+		$hint = ( 'email' === $channel && class_exists( '\\Navidban\\Channels\\EmailChannel' ) )
+			? \Navidban\Channels\EmailChannel::hint()
+			: '';
+
+		if ( '' !== $hint ) {
+			$message .= ' — ' . $hint;
+		}
+
 		return 'ارسال نشد: ' . $message;
 	}
 

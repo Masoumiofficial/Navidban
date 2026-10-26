@@ -11,21 +11,21 @@ plugin/release/      بستهٔ انتشار ساخته‌شده
 
 ## بستهٔ انتشار
 
-`plugin/release/navidban-1.0.0.zip` — همین را در وردپرس نصب کنید.
+`plugin/release/navidban-1.0.1.zip` — همین را در وردپرس نصب کنید.
 
 بازسازی و بازبینی:
 
 ```bash
 cd plugin/navidban
-python3 tools/verify-release.py --build     # ۲۱ بررسی، باید ۰ خطا باشد
+python3 tools/verify-release.py --build     # ۲۲ بررسی، باید ۰ خطا باشد
 ```
 
 ## آزمون‌ها
 
 ```bash
 # با PHP نصب‌شده
-php tests/run.php            # ۱۹۷ assertion
-php tests/integration.php    # ۹۹ assertion
+php tests/run.php            # ۲۱۴ assertion
+php tests/integration.php    # ۱۰۸ assertion
 php tests/admin-render.php   # ۴۷ assertion (رندر واقعی پنل)
 php tests/load.php           # ۱۰٬۰۰۰ مشترک
 
@@ -34,7 +34,7 @@ npm install --no-save @php-wasm/node @php-wasm/universal
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php
 ```
 
-نتیجهٔ آخر: **۱۹۷/۱۹۷**، **۹۹/۹۹** و **۴۷/۴۷** روی PHP **8.3.33** و **7.4.33**.
+نتیجهٔ آخر: **۲۱۴/۲۱۴**، **۱۰۸/۱۰۸** و **۴۷/۴۷** روی PHP **8.3.33** و **7.4.33**.
 جزئیات: `plugin/navidban/docs/TEST-REPORT.md`.
 
 ## مستندات

@@ -20,7 +20,7 @@ if ( ! defined( 'NAVIDBAN_DIR' ) ) {
 	define( 'NAVIDBAN_DIR', dirname( __DIR__ ) . '/' );
 }
 if ( ! defined( 'NAVIDBAN_VERSION' ) ) {
-	define( 'NAVIDBAN_VERSION', '1.0.0' );
+	define( 'NAVIDBAN_VERSION', '1.0.1' );
 }
 
 require_once NAVIDBAN_DIR . 'includes/Autoloader.php';
@@ -31,6 +31,7 @@ use Navidban\Support\Jalali;
 use Navidban\Support\Persian;
 use Navidban\Support\Csv;
 use Navidban\Support\Masking;
+use Navidban\Support\Text;
 use Navidban\Logic\FairSending;
 use Navidban\Logic\Reconcile;
 use Navidban\Logic\QueuePolicy;
@@ -496,6 +497,42 @@ NvbTest::same( 3, Template::sms_segments( str_repeat( 'ا', 138 ) ), 'third segm
 /* -------------------------------------------------------------------------
  * HttpGuard
  * ---------------------------------------------------------------------- */
+NvbTest::group( 'Text / برش چندبایتی' );
+
+// A byte-wise substr() on Persian text cuts characters in half. MySQL then
+// rejects the row as invalid utf8mb4 - a queue error that would look like a
+// random "row did not save" bug. These assertions pin the safe behaviour.
+$long_persian = str_repeat( 'ارسال نشد: خطای درگاه پیامک. ', 40 );
+
+NvbTest::same( true, preg_match( '//u', Text::substring( $long_persian, 0, 255 ) ) === 1, 'برش ۲۵۵ کاراکتری UTF-8 معتبر می‌ماند' );
+NvbTest::same( 255, Text::length( Text::substring( $long_persian, 0, 255 ) ), 'طول برش دقیقاً ۲۵۵ کاراکتر است' );
+NvbTest::same( true, strlen( Text::substring( $long_persian, 0, 255 ) ) > 255, 'طول بایتی از ۲۵۵ بیشتر است (چندبایتی بودن اثبات می‌شود)' );
+// Not every byte offset lands mid-character; count how many do, to show the
+// hazard is real rather than theoretical.
+$nvb_split_offsets = 0;
+for ( $nvb_i = 1; $nvb_i <= 255; $nvb_i++ ) {
+	if ( 1 !== preg_match( '//u', substr( $long_persian, 0, $nvb_i ) ) ) {
+		$nvb_split_offsets++;
+	}
+}
+NvbTest::ok( $nvb_split_offsets > 0, 'substr بایتی در ' . $nvb_split_offsets . ' نقطه رشته را می‌شکند (شاهد اینکه این رفع لازم بود)' );
+NvbTest::same( 'سلام', Text::substring( 'سلام دنیا', 0, 4 ), 'برش کاراکتری فارسی درست است' );
+NvbTest::same( '', Text::substring( '', 0, 10 ), 'رشتهٔ خالی' );
+NvbTest::same( 'abc', Text::substring( 'abc', 0, 255 ), 'رشتهٔ کوتاه دست‌نخورده می‌ماند' );
+
+NvbTest::group( 'EmailChannel / تشخیص خطای ارسال' );
+
+$mail_facts = \Navidban\Channels\EmailChannel::diagnose();
+NvbTest::ok( is_array( $mail_facts ), 'diagnose آرایه برمی‌گرداند' );
+
+foreach ( array( 'mail_function', 'sendmail_path', 'sendmail_exists', 'smtp_host', 'smtp_port', 'mailer_plugin' ) as $key ) {
+	NvbTest::ok( array_key_exists( $key, $mail_facts ), 'کلید تشخیص موجود است: ' . $key );
+}
+
+NvbTest::ok( in_array( $mail_facts['mail_function'], array( 'available', 'missing' ), true ), 'وضعیت mail() یکی از دو مقدار مجاز است' );
+NvbTest::ok( is_bool( $mail_facts['sendmail_exists'] ), 'sendmail_exists بولی است' );
+NvbTest::ok( is_string( \Navidban\Channels\EmailChannel::hint() ), 'hint رشته برمی‌گرداند' );
+
 NvbTest::group( 'HttpGuard / SSRF' );
 
 NvbTest::ok( HttpGuard::is_allowed( 'https://api.sms-gateway.ir/v1/send' ), 'public https endpoint allowed' );
