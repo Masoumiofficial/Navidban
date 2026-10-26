@@ -7,21 +7,12 @@
 
 | مورد | نتیجه | شاهد |
 |---|---|---|
-<<<<<<< HEAD
-| آزمون واحد روی PHP 8.3 | ✅ ۲۲۱/۲۲۱ | `tests/results.json` |
-| آزمون واحد روی PHP 7.4 | ✅ ۲۲۱/۲۲۱ | `tests/results-php74.json` |
-| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۱۲/۱۱۲ | `tests/integration-results.json` |
-| آزمون یکپارچه روی PHP 7.4 | ✅ ۱۱۲/۱۱۲ | `tests/integration-results-php74.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۴۷/۴۷ | `tests/admin-render-results.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۴۷/۴۷ | `tests/admin-render-results-php74.json` |
-=======
 | آزمون واحد روی PHP 8.3 | ✅ ۲۳۲/۲۳۲ | `tests/results.json` |
 | آزمون واحد روی PHP 7.4 | ✅ ۲۳۲/۲۳۲ | `tests/results-php74.json` |
 | آزمون یکپارچه روی PHP 8.3 | ✅ ۱۱۲/۱۱۲ | `tests/integration-results.json` |
 | آزمون یکپارچه روی PHP 7.4 | ✅ ۱۱۲/۱۱۲ | `tests/integration-results-php74.json` |
 | رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۵۳/۵۳ | `tests/admin-render-results.json` |
 | رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۵۳/۵۳ | `tests/admin-render-results-php74.json` |
->>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 | آزمون بار (۱۰٬۰۰۰ مشترک) | ✅ ۷/۷ روی 8.3 | `tests/load-results.json` |
 | گرامر 7.4 + 8.3 روی همهٔ فایل‌ها | ✅ ۰ خطا | `tools/lint-php.js` |
 | ارجاع متدها | ✅ ۰ شکسته | `tools/check-methods.js` |
@@ -39,11 +30,8 @@
 | تشخیص وضعیت ایمیل سرور (mail/sendmail/SMTP/افزونهٔ SMTP) | ✅ رندر پنل |
 | تست واقعی ارسال ایمیل روی هاست محلی | داده در دسترس نیست (نیاز به SMTP واقعی) |
 | اولویت «نشانی فرستنده» و بازگشت به ایمیل مدیر | ✅ آزمون یکپارچه |
-<<<<<<< HEAD
-=======
 | جدا کردن فرمان sendmail از مسیر آن | ✅ ۱۱ assertion |
 | پنل «چرا برای این محصول پیامی نرفت؟» | ✅ ۶ assertion رندر |
->>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 
 ## ۲) ماتریس سازگاری (§۶.۶)
 

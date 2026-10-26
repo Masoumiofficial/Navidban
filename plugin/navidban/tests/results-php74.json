@@ -1,15 +1,8 @@
 {
-<<<<<<< HEAD
-    "plugin_version": "1.0.2",
-    "php_version": "7.4.33",
-    "generated_at": "2026-10-26T08:35:43+00:00",
-    "assertions": 221,
-=======
     "plugin_version": "1.0.3",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-26T09:10:38+00:00",
+    "generated_at": "2026-10-26T09:11:27+00:00",
     "assertions": 232,
->>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -70,11 +63,7 @@
             "failures": 0
         },
         "EmailChannel / تشخیص خطای ارسال": {
-<<<<<<< HEAD
-            "assertions": 17,
-=======
             "assertions": 28,
->>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
             "failures": 0
         },
         "HttpGuard / SSRF": {

@@ -1,11 +1,7 @@
 {
     "plugin_version": "1.0.0",
     "php_version": "8.3.33",
-<<<<<<< HEAD
-    "generated_at": "2026-10-26T08:35:42+00:00",
-=======
-    "generated_at": "2026-10-26T09:10:37+00:00",
->>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
+    "generated_at": "2026-10-26T09:11:26+00:00",
     "assertions": 112,
     "failures": 0,
     "pass_rate": 100,

@@ -225,8 +225,6 @@ NvbAdmin::ok( false !== strpos( $rendered['waitlists'], '&lt;' ), 'کاراکت�
 NvbAdmin::ok( false !== strpos( $rendered['dashboard'], 'InnoDB' ) || false !== strpos( $rendered['dashboard'], 'سالم' ), 'داشبورد وضعیت جدول‌ها را نشان می‌دهد' );
 
 /* -------------------------------------------------------------------------
-<<<<<<< HEAD
-=======
  * "Why did nothing send?" panel
  * ---------------------------------------------------------------------- */
 NvbAdmin::group( 'صفحهٔ تشخیص محصول' );
@@ -255,7 +253,6 @@ unset( $_GET['diag_product'] );
 NvbAdmin::ok( false === stripos( $bad_html, '<script' ), 'شناسهٔ نامعتبر هیچ اسکریپتی تزریق نمی‌کند' );
 
 /* -------------------------------------------------------------------------
->>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
  * No PHP notices while rendering anything above
  * ---------------------------------------------------------------------- */
 NvbAdmin::group( 'سلامت اجرا' );

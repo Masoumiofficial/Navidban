@@ -114,8 +114,6 @@ if ( $nvb_notice ) {
 		</form>
 	</div>
 
-<<<<<<< HEAD
-=======
 	<h2>چرا برای این محصول پیامی نرفت؟</h2>
 	<form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="nvb-card">
 		<input type="hidden" name="page" value="<?php echo esc_attr( \Navidban\Admin\Admin::SLUG ); ?>-tools" />
@@ -215,7 +213,6 @@ if ( $nvb_notice ) {
 		</div>
 	<?php endif; ?>
 
->>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 	<h2>وضعیت جدول‌ها</h2>
 	<table class="widefat striped nvb-table">
 		<thead><tr><th>جدول</th><th>موتور</th></tr></thead>
