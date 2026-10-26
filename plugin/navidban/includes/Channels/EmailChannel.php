@@ -7,6 +7,7 @@
 
 namespace Navidban\Channels;
 
+use Navidban\Logic\EmailSkin;
 use Navidban\Settings;
 use Navidban\Support\Text;
 use Navidban\Support\Validator;
@@ -62,7 +63,7 @@ final class EmailChannel implements ChannelInterface {
 		$from_name  = (string) Settings::get( 'from_name', (string) Settings::get( 'site_name', '' ) );
 		$from_email = self::from_address();
 
-		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 
 		if ( '' !== $from_email && Validator::is_email( $from_email ) ) {
 			$headers[] = sprintf( 'From: %s <%s>', $this->sanitize_header( $from_name ), $from_email );
@@ -71,7 +72,8 @@ final class EmailChannel implements ChannelInterface {
 
 		$subject = $this->sanitize_header( $subject );
 
-		$plain = $this->convert_links( (string) $body );
+		$plain = (string) $body;
+		$html  = EmailSkin::render( $subject, $plain, $this->skin_context( $context ) );
 
 		// wp_mail() returns a bare false, which tells an administrator nothing.
 		// WordPress fires `wp_mail_failed` with the underlying PHPMailer
@@ -86,14 +88,24 @@ final class EmailChannel implements ChannelInterface {
 			}
 		};
 
+		// A text/plain alternative is what stops spam filters from penalising an
+		// HTML-only message. PHPMailer exposes it through AltBody.
+		$alt_body = static function ( $mailer ) use ( $plain ) {
+			if ( is_object( $mailer ) && isset( $mailer->AltBody ) && '' === (string) $mailer->AltBody ) {
+				$mailer->AltBody = $plain; // phpcs:ignore WordPress.NamingConventions.ValidVariableName
+			}
+		};
+
 		if ( function_exists( 'add_action' ) ) {
 			add_action( 'wp_mail_failed', $listener );
+			add_action( 'phpmailer_init', $alt_body );
 		}
 
-		$sent = wp_mail( $to, $subject, $plain, $headers );
+		$sent = wp_mail( $to, $subject, $html, $headers );
 
 		if ( function_exists( 'remove_action' ) ) {
 			remove_action( 'wp_mail_failed', $listener );
+			remove_action( 'phpmailer_init', $alt_body );
 		}
 
 		if ( ! $sent ) {
@@ -346,18 +358,24 @@ final class EmailChannel implements ChannelInterface {
 	}
 
 	/**
-	 * Wrap bare URLs in angle brackets so long links do not break in mail clients.
+	 * Flatten the dispatch context into the small map the skin expects.
 	 *
-	 * @param string $body Body.
-	 * @return string
+	 * @param array $context Send context.
+	 * @return array
 	 */
-	private function convert_links( $body ) {
-		return preg_replace_callback(
-			'~(?<!<)(https?://[^\s<>"]+)~i',
-			function ( $matches ) {
-				return '<' . $matches[1] . '>';
-			},
-			$body
+	private function skin_context( array $context ) {
+		$row     = isset( $context['context'] ) && is_array( $context['context'] ) ? $context['context'] : array();
+		$default = array(
+			'site_name'       => '',
+			'product_name'    => '',
+			'product_url'     => '',
+			'price'           => '',
+			'unsubscribe_url' => '',
+			'store_url'       => '',
+			'confirm_url'     => '',
+			'is_confirmation' => '0',
 		);
+
+		return array_merge( $default, $row );
 	}
 }

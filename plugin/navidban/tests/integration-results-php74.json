@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.0",
+    "plugin_version": "1.0.4",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-26T09:11:28+00:00",
-    "assertions": 112,
+    "generated_at": "2026-10-26T09:25:43+00:00",
+    "assertions": 134,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -18,8 +18,16 @@
             "assertions": 20,
             "failures": 0
         },
+        "ثبت یک‌مرحله‌ای (پیش‌فرض تازه)": {
+            "assertions": 10,
+            "failures": 0
+        },
         "تأیید و لغو اشتراک": {
             "assertions": 7,
+            "failures": 0
+        },
+        "انتخاب کانال فرم": {
+            "assertions": 12,
             "failures": 0
         },
         "موتور موجودی": {

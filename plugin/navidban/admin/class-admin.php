@@ -447,6 +447,60 @@ final class Admin {
 	}
 
 	/**
+	 * Open a screen: the glass app bar, brand mark and tab strip.
+	 *
+	 * Views call this through `$this` (they are included inside a method of this
+	 * class), which keeps the markup in one place instead of five.
+	 *
+	 * @param string $active   Active tab key.
+	 * @param string $title    Screen title.
+	 * @param string $subtitle One-line description.
+	 * @return void
+	 */
+	private function open_screen( $active, $title, $subtitle ) {
+		$tabs = array(
+			'dashboard' => array( 'داشبورد', self::SLUG ),
+			'waitlists' => array( 'لیست انتظارها', self::SLUG . '-waitlists' ),
+			'settings'  => array( 'تنظیمات', self::SLUG . '-settings' ),
+			'tools'     => array( 'ابزارها', self::SLUG . '-tools' ),
+			'help'      => array( 'راهنما', self::SLUG . '-help' ),
+		);
+
+		echo '<div class="wrap nvb-wrap" dir="rtl">';
+
+		echo '<header class="nvb-hero">';
+		echo '<span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span>';
+		echo '<div class="nvb-hero__text">';
+		echo '<h1 class="nvb-hero__title">' . esc_html( (string) $title ) . '<small>' . esc_html( (string) $subtitle ) . '</small></h1>';
+		echo '</div>';
+		echo '<div class="nvb-hero__meta">';
+		// Persian::number() formats a number, so a version string has to be
+		// converted segment by segment — otherwise "1.0.4" prints as "۱".
+		$nvb_version = implode( '.', array_map( array( Persian::class, 'number' ), explode( '.', (string) NAVIDBAN_VERSION ) ) );
+		echo '<span class="nvb-chip">نسخهٔ ' . esc_html( $nvb_version ) . '</span>';
+		echo '<span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span>';
+		echo '</div>';
+		echo '</header>';
+
+		echo '<nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs">';
+		foreach ( $tabs as $key => $tab ) {
+			$current = ( $key === $active ) ? ' aria-current="page"' : '';
+			echo '<li><a href="' . esc_url_compat( admin_url( 'admin.php?page=' . $tab[1] ) ) . '"' . $current . '>' . esc_html( $tab[0] ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- attribute built above.
+		}
+		echo '</ul></nav>';
+	}
+
+	/**
+	 * Close a screen.
+	 *
+	 * @return void
+	 */
+	private function close_screen() {
+		echo '<p class="nvb-footer">نویدبان — محصولی از اتحاد وردپرس</p>';
+		echo '</div>';
+	}
+
+	/**
 	 * Capability guard for every screen and action.
 	 *
 	 * @return void

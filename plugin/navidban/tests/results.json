@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.3",
+    "plugin_version": "1.0.4",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-26T09:11:25+00:00",
-    "assertions": 232,
+    "generated_at": "2026-10-26T09:25:41+00:00",
+    "assertions": 250,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -64,6 +64,10 @@
         },
         "EmailChannel / تشخیص خطای ارسال": {
             "assertions": 28,
+            "failures": 0
+        },
+        "EmailSkin / پوستهٔ ایمیل": {
+            "assertions": 18,
             "failures": 0
         },
         "HttpGuard / SSRF": {

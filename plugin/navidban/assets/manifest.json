@@ -1,12 +1,12 @@
 {
   "generated_by": "tools/build-assets.sh",
-  "front_gzip_bytes": 3469,
-  "front_raw_bytes": 10424,
+  "front_gzip_bytes": 4392,
+  "front_raw_bytes": 13274,
   "budget_gzip_bytes": 12288,
   "files": {
-    "assets/css/navidban-front.css": {"sha256": "6a93cb9c57a20a2ff89a16bb006977b7b0a09614afffbf7da549388f5dccb46d", "bytes": 2832, "gzip_bytes": 1015},
+    "assets/css/navidban-front.css": {"sha256": "83696dea56c2a7910e347ec39911fdb6fb7bdadd959c6a43f436f3800989bec1", "bytes": 5682, "gzip_bytes": 1938},
     "assets/js/navidban-front.js": {"sha256": "6ae6bbdb2e3a78e5107e0d5c9a5f43e0dd351e5c4c0def937aa9df3b264095c6", "bytes": 7592, "gzip_bytes": 2454},
-    "assets/css/navidban-admin.css": {"sha256": "1be39895076ec2c94fad2d93677a39e89a173ee1b5f8f615f325672e6d670f97", "bytes": 1858, "gzip_bytes": 737},
+    "assets/css/navidban-admin.css": {"sha256": "97c954f7fca5ef1d3553b6c230b7574b42ea9c54304f23f6995502ea0a21caf6", "bytes": 16389, "gzip_bytes": 3848},
     "assets/js/navidban-admin.js": {"sha256": "869f897039b9a01478c04f89cb44772f538658790ccf4228ee9b88273236952b", "bytes": 1492, "gzip_bytes": 727}
   }
 }

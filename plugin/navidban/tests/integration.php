@@ -19,6 +19,7 @@ use Navidban\Capabilities;
 use Navidban\Consent;
 use Navidban\Database;
 use Navidban\Frontend;
+use Navidban\Notifier;
 use Navidban\Queue;
 use Navidban\Settings;
 use Navidban\StockWatcher;
@@ -240,6 +241,10 @@ $GLOBALS['nvb_is_admin'] = false;
  * ---------------------------------------------------------------------- */
 NvbInt::group( 'ثبت درخواست' );
 
+// This group exercises the two-step (opt-in) path, so it turns the option on
+// explicitly. The shipped default is one-step; see the next group.
+Settings::update( array( 'double_opt_in' => true ) );
+
 nvb_reset_state();
 nvb_reset_rate_limit();
 nvb_product( 40, array( 'status' => 'outofstock', 'qty' => 0 ) );
@@ -366,11 +371,57 @@ NvbInt::ok( in_array( 'rate_limited', $codes, true ), 'محدودیت نرخ ف�
 /* -------------------------------------------------------------------------
  * Consent tokens
  * ---------------------------------------------------------------------- */
+NvbInt::group( 'ثبت یک‌مرحله‌ای (پیش‌فرض تازه)' );
+
+// A fresh install must let a shopper subscribe with one click: no confirmation
+// message, no pending row. This is the behaviour the market asked for.
+$GLOBALS['nvb_options']['navidban_settings'] = Settings::defaults();
+Settings::flush_cache();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+
+NvbInt::ok( false === Settings::enabled( 'double_opt_in' ), 'پیش‌فرض: تأیید دومرحله‌ای خاموش است' );
+NvbInt::same( 'sms_first', (string) Settings::get( 'channel_choice', '' ), 'پیش‌فرض: پیامک اولویت اول است' );
+
+nvb_reset_rate_limit();
+$one_step = Subscribe::handle(
+	array(
+		'product_id' => 40,
+		'channel'    => 'email',
+		'email'      => 'onestep@example.com',
+	)
+);
+
+NvbInt::ok( $one_step['ok'], 'ثبت یک‌مرحله‌ای موفق است' );
+NvbInt::same( 'subscribed', $one_step['code'], 'پاسخ subscribed است، نه confirmation_sent' );
+NvbInt::same( false, $one_step['data']['needs_confirm'], 'نیاز به تأیید گزارش نمی‌شود' );
+
+$one_row = WaitlistRepository::get( (int) $one_step['data']['id'] );
+NvbInt::same( 'confirmed', $one_row['status'], 'ردیف مستقیماً تأییدشده است' );
+NvbInt::ok( ! empty( $one_row['confirmed_at'] ), 'زمان تأیید ثبت شده است' );
+NvbInt::ok( empty( $one_row['confirm_expires_at'] ), 'هیچ انقضای تأییدی ساخته نشد' );
+NvbInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queue::table() ), 'هیچ پیام تأییدی در صف نیست' );
+
+// Without the click, the subscriber is already eligible for a restock message.
+nvb_reset_rate_limit();
+$one_restock = Subscribe::handle(
+	array(
+		'product_id' => 40,
+		'channel'    => 'email',
+		'email'      => 'eligible@example.com',
+	)
+);
+NvbInt::same( 'confirmed', WaitlistRepository::get( (int) $one_restock['data']['id'] )['status'], 'مشترک دوم هم مستقیماً تأیید شد' );
+
 NvbInt::group( 'تأیید و لغو اشتراک' );
 
+// Back to the opt-in path for the token tests.
 $GLOBALS['nvb_options']['navidban_settings'] = array_merge(
 	Settings::defaults(),
-	array( 'consent_required' => false )
+	array(
+		'consent_required' => false,
+		'double_opt_in'    => true,
+	)
 );
 Settings::flush_cache();
 
@@ -411,6 +462,55 @@ NvbInt::same( 'already', WaitlistRepository::unsubscribe_by_token( (string) $fre
 /* -------------------------------------------------------------------------
  * Stock engine: hooks, dedupe, fair sending
  * ---------------------------------------------------------------------- */
+NvbInt::group( 'انتخاب کانال فرم' );
+
+$front = new Frontend();
+
+// Only email available (fresh install): the form must offer email, not SMS.
+$GLOBALS['nvb_options']['navidban_settings'] = Settings::defaults();
+Settings::flush_cache();
+NvbInt::same( 'email', $front->channel_mode(), 'ایمیل تنها، حالت فرم: email' );
+NvbInt::ok( Notifier::email_ready(), 'ایمیل آماده است' );
+NvbInt::ok( ! Notifier::sms_ready(), 'پیامک آماده نیست (پیکربندی نشده)' );
+
+// SMS switched on but no credentials: still not "ready", and the form must not
+// offer a channel that cannot deliver.
+Settings::update( array( 'sms_enabled' => true ) );
+NvbInt::ok( ! Notifier::sms_ready(), 'پیامکِ بدون کلید، آماده محسوب نمی‌شود' );
+NvbInt::same( 'email', $front->channel_mode(), 'پیامک بی‌کلید، حالت فرم را تغییر نمی‌دهد' );
+
+// Properly configured gateway + default sms_first.
+Settings::update(
+	array(
+		'sms_gateway'      => 'melipayamak',
+		'melipayamak_user' => 'demo',
+		'melipayamak_pass' => 'secret',
+	)
+);
+NvbInt::ok( Notifier::sms_ready(), 'پیامک با کلید معتبر آماده است' );
+NvbInt::same( 'sms', $front->channel_mode(), 'پیش‌فرض sms_first: حالت فرم sms' );
+
+Settings::update( array( 'channel_choice' => 'email_first' ) );
+NvbInt::same( 'email', $front->channel_mode(), 'email_first: حالت فرم email' );
+
+Settings::update( array( 'channel_choice' => 'both' ) );
+NvbInt::same( 'both', $front->channel_mode(), 'both: هر دو کانال نمایش داده می‌شود' );
+
+// Nothing usable at all: the form still renders (email shell) rather than a
+// blank block, so the store can see its own misconfiguration.
+Settings::update( array( 'channel_choice' => 'sms_first', 'email_enabled' => false, 'sms_enabled' => false ) );
+Settings::flush_cache();
+NvbInt::same( 'email', $front->channel_mode(), 'هیچ کانال آماده‌ای نیست: فرم پوستهٔ ایمیل را نشان می‌دهد' );
+
+// SMS configured, email switched off: SMS only.
+Settings::update( array( 'sms_enabled' => true ) );
+Settings::flush_cache();
+NvbInt::same( 'sms', $front->channel_mode(), 'فقط پیامکِ آماده، حالت sms' );
+
+Settings::update( array( 'email_enabled' => true, 'sms_enabled' => false ) );
+Settings::flush_cache();
+NvbInt::same( 'email', $front->channel_mode(), 'بازگشت به ایمیل با پیکربندی پیش‌فرض' );
+
 NvbInt::group( 'موتور موجودی' );
 
 nvb_reset_state();
@@ -647,6 +747,7 @@ NvbInt::same( 'skipped', $skipped['status'] ?? '', 'وضعیت ردیف لغوش
 NvbInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queue::table() . " WHERE status = 'sent'" ), 'هیچ پیامی برای مشترک لغوشده ارسال نشد' );
 
 // Pending subscriber never receives a restock message.
+Settings::update( array( 'double_opt_in' => true ) );
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
 $pending = WaitlistRepository::create(
 	array(
@@ -661,6 +762,7 @@ Queue::process( 5 );
 $pending_row = $GLOBALS['wpdb']->get_row( 'SELECT * FROM ' . Queue::table() . " WHERE last_error = 'not_confirmed' LIMIT 1" );
 NvbInt::ok( is_array( $pending_row ), 'ردیف تأییدنشده رده شد' );
 NvbInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queue::table() . " WHERE status = 'sent'" ), 'به مشترک تأییدنشده پیامی نرفت' );
+Settings::update( array( 'double_opt_in' => false ) );
 
 /* -------------------------------------------------------------------------
  * SMS channel + SSRF

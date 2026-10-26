@@ -48,8 +48,7 @@ $nvb_statuses = array(
 	'unsubscribed' => 'لغو شده',
 );
 ?>
-<div class="wrap nvb-wrap" dir="rtl">
-	<h1>لیست انتظارها</h1>
+<?php $this->open_screen( 'waitlists', 'لیست انتظارها', 'همهٔ درخواست‌ها، با فیلتر و خروجی CSV' ); ?>
 
 	<?php
 	$notice = get_transient( 'navidban_tool_notice' );
@@ -186,4 +185,4 @@ $nvb_statuses = array(
 			?>
 		</div></div>
 	<?php endif; ?>
-</div>
+	<?php $this->close_screen(); ?>

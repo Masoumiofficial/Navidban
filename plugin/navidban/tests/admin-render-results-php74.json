@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.0",
+    "plugin_version": "1.0.4",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-26T09:11:29+00:00",
-    "assertions": 53,
+    "generated_at": "2026-10-26T09:25:44+00:00",
+    "assertions": 63,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -12,6 +12,10 @@
         },
         "رندر صفحات": {
             "assertions": 20,
+            "failures": 0
+        },
+        "پوستهٔ شیشه‌ای": {
+            "assertions": 10,
             "failures": 0
         },
         "قراردادهای خروجی": {

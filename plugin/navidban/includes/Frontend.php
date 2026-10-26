@@ -187,14 +187,32 @@ final class Frontend {
 	 * @return string
 	 */
 	public function channel_mode() {
-		$email = Settings::enabled( 'email_enabled' );
-		$sms   = Settings::enabled( 'sms_enabled' );
+		$email = Notifier::email_ready();
+		$sms   = Notifier::sms_ready();
 
-		if ( $email && $sms ) {
+		if ( ! $email && ! $sms ) {
+			// Nothing usable; the form still renders so the store sees its own
+			// misconfiguration instead of a blank product page.
+			return 'email';
+		}
+
+		if ( ! $sms ) {
+			return 'email';
+		}
+
+		if ( ! $email ) {
+			return 'sms';
+		}
+
+		// Both work: honour the store's stated preference. "both" shows a radio
+		// pair and defaults to SMS, which is what an Iranian shopper expects.
+		$choice = (string) Settings::get( 'channel_choice', 'sms_first' );
+
+		if ( 'both' === $choice ) {
 			return 'both';
 		}
 
-		return $sms ? 'sms' : 'email';
+		return ( 'email_first' === $choice ) ? 'email' : 'sms';
 	}
 
 	/**
@@ -229,7 +247,8 @@ final class Frontend {
 			}
 		}
 
-		$default_channel = ( 'sms' === $this->channel_mode() ) ? 'sms' : 'email';
+		$nvb_mode        = $this->channel_mode();
+		$default_channel = ( 'sms' === $nvb_mode || 'both' === $nvb_mode ) ? 'sms' : 'email';
 		$user_id         = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
 
 		$prefill_email = '';

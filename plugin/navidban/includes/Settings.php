@@ -48,14 +48,19 @@ final class Settings {
 			'consent_required'      => false,
 			'privacy_url'           => '',
 
-			// Channels.
+			// Channels. Iran-first: SMS is the preferred channel, but it can only
+			// be used once a gateway is configured, so the effective mode falls
+			// back to email until then (see Frontend::channel_mode()).
 			'email_enabled'         => true,
 			'sms_enabled'           => false,
-			'channel_choice'        => 'email_first', // email_first | sms_first | both.
+			'channel_choice'        => 'sms_first', // sms_first | email_first | both.
 			'notify_backorders'     => false,
 
 			// Consent / double opt-in.
-			'double_opt_in'         => true,
+			// Off by default: one step, no confirmation click. The trade-off is
+			// documented in docs/SECURITY.md - with opt-in off, a stranger can
+			// register somebody else's address, and for SMS that costs money.
+			'double_opt_in'         => false,
 			'confirm_ttl_hours'     => 48,
 
 			// Messaging.

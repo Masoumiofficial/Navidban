@@ -7,16 +7,16 @@
 
 | مورد | نتیجه | شاهد |
 |---|---|---|
-| آزمون واحد روی PHP 8.3 | ✅ ۲۳۲/۲۳۲ | `tests/results.json` |
-| آزمون واحد روی PHP 7.4 | ✅ ۲۳۲/۲۳۲ | `tests/results-php74.json` |
-| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۱۲/۱۱۲ | `tests/integration-results.json` |
-| آزمون یکپارچه روی PHP 7.4 | ✅ ۱۱۲/۱۱۲ | `tests/integration-results-php74.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۵۳/۵۳ | `tests/admin-render-results.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۵۳/۵۳ | `tests/admin-render-results-php74.json` |
+| آزمون واحد روی PHP 8.3 | ✅ ۲۵۰/۲۵۰ | `tests/results.json` |
+| آزمون واحد روی PHP 7.4 | ✅ ۲۵۰/۲۵۰ | `tests/results-php74.json` |
+| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۳۴/۱۳۴ | `tests/integration-results.json` |
+| آزمون یکپارچه روی PHP 7.4 | ✅ ۱۳۴/۱۳۴ | `tests/integration-results-php74.json` |
+| رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۶۳/۶۳ | `tests/admin-render-results.json` |
+| رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۶۳/۶۳ | `tests/admin-render-results-php74.json` |
 | آزمون بار (۱۰٬۰۰۰ مشترک) | ✅ ۷/۷ روی 8.3 | `tests/load-results.json` |
 | گرامر 7.4 + 8.3 روی همهٔ فایل‌ها | ✅ ۰ خطا | `tools/lint-php.js` |
 | ارجاع متدها | ✅ ۰ شکسته | `tools/check-methods.js` |
-| بودجهٔ حجم دارایی | ✅ ۳٬۴۶۹ / ۱۲٬۲۸۸ بایت | `docs/PERFORMANCE.md` |
+| بودجهٔ حجم دارایی | ✅ ۴٬۳۹۳ / ۱۲٬۲۸۸ بایت | `docs/PERFORMANCE.md` |
 | بارگذاری صفر در صفحات غیرهدف | ✅ ۰ دارایی، ۰ کوئری | `docs/PERFORMANCE.md` |
 | بستهٔ انتشار | ✅ | `tools/verify-release.py` |
 

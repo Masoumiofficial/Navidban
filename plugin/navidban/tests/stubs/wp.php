@@ -18,7 +18,14 @@ define( 'NAVIDBAN_FILE', __DIR__ . '/../../navidban.php' );
 define( 'NAVIDBAN_DIR', dirname( __DIR__, 2 ) . '/' );
 define( 'NAVIDBAN_URL', 'https://shop.test/wp-content/plugins/navidban/' );
 define( 'NAVIDBAN_BASENAME', 'navidban/navidban.php' );
-define( 'NAVIDBAN_VERSION', '1.0.0' );
+// Version comes from the plugin header, so a test report can never claim a
+// version that the shipped file does not declare.
+$nvb_header_source = (string) @file_get_contents( NAVIDBAN_FILE );
+$nvb_header_match  = array();
+define(
+	'NAVIDBAN_VERSION',
+	preg_match( '~^[ \t/*#@]*Version:\s*([0-9][0-9.\-a-zA-Z]*)~mi', $nvb_header_source, $nvb_header_match ) ? trim( $nvb_header_match[1] ) : '0.0.0'
+);
 define( 'NAVIDBAN_DB_VERSION', '1' );
 define( 'AUTH_SALT', 'test-salt' );
 define( 'ARRAY_A', 'ARRAY_A' );

@@ -83,9 +83,10 @@ final class Subscribe {
 			return self::fail( 'invalid_email', 422, 'ایمیل معتبر نیست.', $ip_hash );
 		}
 
-		// Channel resolution honours what the store has enabled.
-		$email_on = Settings::enabled( 'email_enabled' );
-		$sms_on   = Settings::enabled( 'sms_enabled' );
+		// Channel resolution honours what the store can actually deliver: an
+		// enabled-but-unconfigured SMS gateway must never be chosen.
+		$email_on = Notifier::email_ready();
+		$sms_on   = Notifier::sms_ready();
 
 		if ( ! $email_on && ! $sms_on ) {
 			return self::fail( 'no_channel', 503, 'هیچ کانال اعلانی فعال نیست.', $ip_hash );

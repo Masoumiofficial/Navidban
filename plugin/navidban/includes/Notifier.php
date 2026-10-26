@@ -23,6 +23,34 @@ defined( 'ABSPATH' ) || exit;
 final class Notifier {
 
 	/**
+	 * Is SMS actually usable right now?
+	 *
+	 * "Enabled" in the settings is not enough: a gateway must also be
+	 * configured, otherwise the form would promise an SMS the store cannot
+	 * send. This is the single source of truth for that question.
+	 *
+	 * @return bool
+	 */
+	public static function sms_ready() {
+		if ( ! Settings::enabled( 'sms_enabled' ) ) {
+			return false;
+		}
+
+		$channel = self::channel( 'sms' );
+
+		return null !== $channel && $channel->is_configured();
+	}
+
+	/**
+	 * Is email usable right now?
+	 *
+	 * @return bool
+	 */
+	public static function email_ready() {
+		return Settings::enabled( 'email_enabled' );
+	}
+
+	/**
 	 * Instantiate a channel by name.
 	 *
 	 * @param string $channel email|sms.

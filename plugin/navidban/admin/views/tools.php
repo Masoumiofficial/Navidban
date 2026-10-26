@@ -19,8 +19,7 @@ if ( $nvb_notice ) {
 	delete_transient( 'navidban_tool_notice' );
 }
 ?>
-<div class="wrap nvb-wrap" dir="rtl">
-	<h1>ابزارهای نویدبان</h1>
+<?php $this->open_screen( 'tools', 'ابزارهای نویدبان', 'تشخیص، بازسازی و نگهداری' ); ?>
 
 	<?php if ( $nvb_notice ) : ?>
 		<div class="notice notice-success is-dismissible"><p><?php echo esc_html( (string) $nvb_notice ); ?></p></div>
@@ -226,5 +225,4 @@ if ( $nvb_notice ) {
 		</tbody>
 	</table>
 
-	<p class="nvb-footer">نویدبان — محصولی از اتحاد وردپرس</p>
-</div>
+	<?php $this->close_screen(); ?>

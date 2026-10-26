@@ -7,8 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div class="wrap nvb-wrap" dir="rtl">
-	<h1>راهنمای نویدبان</h1>
+<?php $this->open_screen( 'help', 'راهنمای نویدبان', 'از نصب تا رفع اشکال، بدون تیکت' ); ?>
 
 	<h2>در ۳ قدم راه بیندازید</h2>
 	<ol>
@@ -62,5 +61,4 @@ defined( 'ABSPATH' ) || exit;
 		<li>حذف داده هنگام حذف افزونه پیش‌فرض خاموش است.</li>
 	</ul>
 
-	<p class="nvb-footer">نویدبان — محصولی از اتحاد وردپرس</p>
-</div>
+	<?php $this->close_screen(); ?>

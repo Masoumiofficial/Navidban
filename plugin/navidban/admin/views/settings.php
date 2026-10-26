@@ -18,11 +18,7 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 	return '' === $value ? '' : 'saved';
 };
 ?>
-<div class="wrap nvb-wrap" dir="rtl">
-	<h1>تنظیمات نویدبان</h1>
-	<p class="nvb-sub">
-		پیش‌فرض‌ها آمادهٔ کار کردن‌اند: با فعال‌سازی افزونه، فرم با ایمیل کار می‌کند. برای پیامک، فقط یکی از درگاه‌ها را پر کنید.
-	</p>
+<?php $this->open_screen( 'settings', 'تنظیمات نویدبان', 'پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید' ); ?>
 
 	<?php settings_errors( 'navidban' ); ?>
 
@@ -55,6 +51,34 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 
 		<h2>کانال‌ها</h2>
 		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row"><label for="nvb-channel-choice">اولویت کانال در فرم</label></th>
+				<td>
+					<select id="nvb-channel-choice" name="<?php echo esc_attr( Settings::OPTION ); ?>[channel_choice]">
+						<?php
+						$nvb_choices = array(
+							'sms_first'   => 'پیامک (پیش‌فرض) — مناسب بازار ایران',
+							'email_first' => 'ایمیل',
+							'both'        => 'هر دو؛ مشتری خودش انتخاب کند',
+						);
+						$nvb_current = (string) $settings['channel_choice'];
+						foreach ( $nvb_choices as $nvb_value => $nvb_label ) {
+							printf(
+								'<option value="%s"%s>%s</option>',
+								esc_attr( $nvb_value ),
+								selected( $nvb_current, $nvb_value, false ),
+								esc_html( $nvb_label )
+							);
+						}
+						?>
+					</select>
+					<p class="description">
+						این گزینه فقط وقتی اثر دارد که <strong>هر دو</strong> کانال واقعاً پیکربندی شده باشند.
+						اگر پیامک را روشن کرده‌اید ولی کلید درگاه را خالی گذاشته‌اید، فرم به ایمیل برمی‌گردد تا
+						کانالی که کار نمی‌کند به مشتری پیشنهاد نشود.
+					</p>
+				</td>
+			</tr>
 			<tr>
 				<th scope="row">ایمیل</th>
 				<td>
@@ -130,6 +154,11 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 		</table>
 
 		<h2>رضایت و تأیید دومرحله‌ای</h2>
+		<p class="description" style="max-width:640px;">
+			پیش‌فرض تازه: تأیید دومرحله‌ای <strong>خاموش</strong> است؛ مشتری یک‌بار ثبت می‌کند و اعلان موجودی مستقیم می‌رسد.
+			اگر روی این سایت ثبت‌نام الکی زیاد شده، روشنش کنید. هزینه‌اش این است که تا وقتی مشتری پیوند تأیید را باز نکند،
+			اعلانی برایش نمی‌رود؛ بعضی مشتری‌ها این را «پیام نیامد» برداشت می‌کنند.
+		</p>
 		<table class="form-table" role="presentation">
 			<tr>
 				<th scope="row">چک‌باکس رضایت</th>
@@ -152,7 +181,10 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 				<th scope="row">تأیید دومرحله‌ای</th>
 				<td>
 					<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[double_opt_in]" value="1" <?php checked( ! empty( $settings['double_opt_in'] ) ); ?> /> فعال</label>
-					<p class="description">تا وقتی مشتری پیوند تأیید را باز نکند، هیچ اعلانی برای او ارسال نمی‌شود.</p>
+					<p class="description">
+						خاموش (پیش‌فرض): ثبت یک‌مرحله‌ای است و اعلان موجودی مستقیم ارسال می‌شود — کم‌ترین اصطکاک برای مشتری.
+						روشن: تا وقتی مشتری پیوند تأیید را باز نکند، هیچ اعلانی برایش نمی‌رود؛ جلوی ثبت‌نام الکی را می‌گیرد.
+					</p>
 				</td>
 			</tr>
 			<tr>
@@ -260,5 +292,4 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 		<?php submit_button( 'ذخیرهٔ تنظیمات' ); ?>
 	</form>
 
-	<p class="nvb-footer">نویدبان — محصولی از اتحاد وردپرس</p>
-</div>
+	<?php $this->close_screen(); ?>

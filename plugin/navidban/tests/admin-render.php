@@ -199,6 +199,34 @@ foreach ( $screens as $key => $config ) {
 }
 
 /* -------------------------------------------------------------------------
+ * Shell: app bar + tab strip
+ * ---------------------------------------------------------------------- */
+NvbAdmin::group( 'پوستهٔ شیشه‌ای' );
+
+NvbAdmin::ok( false !== strpos( $rendered['dashboard'], 'nvb-hero' ), 'نوار بالای صفحه رندر می‌شود' );
+NvbAdmin::ok( false !== strpos( $rendered['dashboard'], 'nvb-hero__title' ), 'عنوان در نوار بالا هست' );
+NvbAdmin::ok( false !== strpos( $rendered['dashboard'], '<svg' ), 'نشان برند به‌صورت SVG درون‌خطی است (بدون درخواست بیرونی)' );
+NvbAdmin::ok( 1 === substr_count( $rendered['settings'], 'aria-current="page"' ), 'فقط یک زبانهٔ فعال علامت می‌خورد' );
+NvbAdmin::ok( false !== strpos( $rendered['settings'], 'page=navidban-settings"' ) && false !== strpos( $rendered['settings'], 'aria-current="page"' ), 'زبانهٔ فعال همان صفحهٔ جاری است' );
+NvbAdmin::ok( false !== strpos( $rendered['help'], 'page=navidban-help"' ), 'زبانهٔ راهنما به صفحهٔ درست وصل است' );
+NvbAdmin::ok( substr_count( $rendered['dashboard'], 'nvb-footer' ) === 1, 'پاورقی یک‌بار چاپ می‌شود' );
+NvbAdmin::ok( false === strpos( $rendered['dashboard'], 'fonts.googleapis' ) && false === strpos( $rendered['dashboard'], 'http://' ) || false === strpos( $rendered['dashboard'], 'fonts.googleapis' ), 'هیچ فونت بیرونی بارگذاری نمی‌شود' );
+NvbAdmin::ok( false === strpos( $rendered['help'], 'undefined' ), 'هیچ مقدار تعریف‌نشده در خروجی نیست' );
+
+// Regression: Persian::number() formats a number, so a version string must be
+// converted segment by segment or "1.0.4" prints as "۱".
+$nvb_dots = implode(
+	'.',
+	array_map(
+		static function ( $part ) {
+			return \Navidban\Support\Persian::number( $part );
+		},
+		explode( '.', (string) NAVIDBAN_VERSION )
+	)
+);
+NvbAdmin::ok( false !== strpos( $rendered['dashboard'], $nvb_dots ), 'شمارهٔ نسخه کامل و با ارقام فارسی نمایش داده می‌شود', $nvb_dots );
+
+/* -------------------------------------------------------------------------
  * Contracts inside the output
  * ---------------------------------------------------------------------- */
 NvbAdmin::group( 'قراردادهای خروجی' );

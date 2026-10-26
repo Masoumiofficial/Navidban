@@ -18,9 +18,7 @@ use Navidban\Support\Persian;
 
 $nvb_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $tables, true );
 ?>
-<div class="wrap nvb-wrap" dir="rtl">
-	<h1>نویدبان — داشبورد</h1>
-	<p class="nvb-sub">نگهبانِ خبرهای خوب فروشگاه شما</p>
+<?php $this->open_screen( 'dashboard', 'نویدبان — داشبورد', 'نگهبانِ خبرهای خوب فروشگاه شما' ); ?>
 
 	<?php if ( ! $nvb_healthy ) : ?>
 		<div class="notice notice-error inline">
@@ -106,5 +104,4 @@ $nvb_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $
 		</tbody>
 	</table>
 
-	<p class="nvb-footer">نویدبان — محصولی از اتحاد وردپرس</p>
-</div>
+	<?php $this->close_screen(); ?>

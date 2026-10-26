@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.0.4 =
+یک‌مرحله‌ای شدن ثبت‌نام (تأیید دومرحله‌ای پیش‌فرض خاموش شد)، اولویت پیامک برای
+ایران، قالب ایمیل شیشه‌ای RTL با نسخهٔ متنی جایگزین، و بازطراحی کامل پنل مدیریت
+با ظاهر شیشه‌ای. گزینهٔ «اولویت کانال» به تنظیمات اضافه شد.
+
 = 1.0.3 =
 اصلاح هشدار کاذب دربارهٔ مسیر sendmail (php.ini معمولاً «sendmail -t -i» دارد)،
 نادیده‌گرفتن SMTP در php.ini روی لینوکس، و افزودن پنل «چرا برای این محصول
@@ -89,6 +94,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 انتشار نخست. جزئیات کامل: `CHANGELOG.md`.
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+به‌روزرسانی توصیه می‌شود. توجه: تأیید دومرحله‌ای حالا پیش‌فرض خاموش است؛ اگر
+می‌خواهید مثل قبل بماند، در تنظیمات روشنش کنید.
 
 = 1.0.3 =
 به‌روزرسانی توصیه می‌شود؛ هشدار کاذب sendmail رفع شده است.

@@ -20,7 +20,14 @@ if ( ! defined( 'NAVIDBAN_DIR' ) ) {
 	define( 'NAVIDBAN_DIR', dirname( __DIR__ ) . '/' );
 }
 if ( ! defined( 'NAVIDBAN_VERSION' ) ) {
-	define( 'NAVIDBAN_VERSION', '1.0.3' );
+	// Read the version from the plugin header: a test report must never claim a
+	// version the shipped file does not declare.
+	$nvb_header       = (string) @file_get_contents( dirname( __DIR__ ) . '/navidban.php' );
+	$nvb_header_match = array();
+	define(
+		'NAVIDBAN_VERSION',
+		preg_match( '~^[ \t/*#@]*Version:\s*([0-9][0-9.\-a-zA-Z]*)~mi', $nvb_header, $nvb_header_match ) ? trim( $nvb_header_match[1] ) : '0.0.0'
+	);
 }
 
 require_once NAVIDBAN_DIR . 'includes/Autoloader.php';
@@ -37,6 +44,7 @@ use Navidban\Logic\Reconcile;
 use Navidban\Logic\QueuePolicy;
 use Navidban\Logic\Template;
 use Navidban\Logic\HttpGuard;
+use Navidban\Logic\EmailSkin;
 
 /**
  * Extremely small assertion harness.
@@ -571,6 +579,67 @@ $nvb_sendmail_cases = array(
 foreach ( $nvb_sendmail_cases as $input => $expected ) {
 	NvbTest::same( $expected, $nvb_reflect->invoke( null, $input ), 'مسیر اجرایی از فرمان sendmail جدا می‌شود: ' . $input );
 }
+
+NvbTest::group( 'EmailSkin / پوستهٔ ایمیل' );
+
+$skin = EmailSkin::render(
+	'کفش دویدن نایک',
+	"سلام مریم،\n\nخبر خوب: کفش دویدن نایک دوباره موجود شد.\nhttps://shop.example/product/42\n\nلغو: https://shop.example/?navidban_unsubscribe=abc",
+	array(
+		'site_name'       => 'فروشگاه نمونه',
+		'product_name'    => 'کفش دویدن نایک',
+		'product_url'     => 'https://shop.example/product/42',
+		'price'           => '۲٬۴۵۰٬۰۰۰ تومان',
+		'unsubscribe_url' => 'https://shop.example/?navidban_unsubscribe=abc',
+		'store_url'       => 'https://shop.example/',
+		'is_confirmation' => '0',
+	)
+);
+
+NvbTest::ok( false !== strpos( $skin, '<!DOCTYPE html>' ), 'سند HTML کامل است' );
+NvbTest::ok( false !== strpos( $skin, 'dir="rtl"' ), 'جهت راست‌چین صریح است' );
+NvbTest::ok( false !== strpos( $skin, EmailSkin::TEAL ), 'رنگ برند در پوسته هست' );
+NvbTest::ok( false !== strpos( $skin, 'کفش دویدن نایک' ), 'نام محصول نمایش داده می‌شود' );
+NvbTest::ok( false !== strpos( $skin, '۲٬۴۵۰٬۰۰۰ تومان' ), 'قیمت نمایش داده می‌شود' );
+NvbTest::ok( false !== strpos( $skin, 'https://shop.example/product/42' ), 'پیوند محصول در دکمهٔ اقدام هست' );
+NvbTest::ok( false !== strpos( $skin, 'navidban_unsubscribe' ), 'پیوند لغو اشتراک در هر پیام هست' );
+NvbTest::ok( false === strpos( $skin, '<script' ), 'هیچ اسکریپتی در ایمیل نیست' );
+NvbTest::ok( false === strpos( $skin, 'display:flex' ) && false === strpos( $skin, 'display:grid' ), 'فقط چیدمان جدولی (سازگار با کلاینت‌های ایمیل)' );
+
+// The bare URL paragraph is dropped because the button already carries it.
+NvbTest::same( 2, count( EmailSkin::paragraphs( "خط اول\n\nhttps://shop.example/x\n\nخط سوم" ) ), 'پاراگرافِ تنها-URL حذف می‌شود' );
+
+// Injection attempts.
+$evil = EmailSkin::render(
+	'<script>alert(1)</script>',
+	'متن',
+	array(
+		'product_name'    => '"><img src=x onerror=alert(1)>',
+		'product_url'     => 'javascript:alert(1)',
+		'unsubscribe_url' => 'data:text/html,<script>alert(1)</script>',
+	)
+);
+
+NvbTest::ok( false === strpos( $evil, '<script' ), 'تزریق اسکریپت در عنوان خنثی می‌شود' );
+NvbTest::ok( false === strpos( $evil, '<img src=x' ), 'تزریق در نام محصول escape می‌شود' );
+NvbTest::ok( false === strpos( $evil, 'javascript:' ), 'پیوند javascript: صادر نمی‌شود' );
+NvbTest::ok( false === strpos( $evil, 'data:text/html' ), 'پیوند data: صادر نمی‌شود' );
+NvbTest::ok( false !== strpos( $evil, '&lt;' ), 'متن خطرناک به موجودیت &lt; تبدیل شده' );
+NvbTest::ok( false === strpos( $evil, '<img' ), 'هیچ تگ img ساخته نمی‌شود' );
+
+// Confirmation variant swaps the call to action.
+$confirm_skin = EmailSkin::render(
+	'تأیید اشتراک',
+	'برای تکمیل ثبت روی پیوند زیر بزنید.',
+	array(
+		'is_confirmation' => '1',
+		'confirm_url'     => 'https://shop.example/?navidban_confirm=tok',
+		'product_url'     => 'https://shop.example/product/42',
+	)
+);
+
+NvbTest::ok( false !== strpos( $confirm_skin, 'navidban_confirm' ), 'پیام تأیید، دکمه را به پیوند تأیید وصل می‌کند' );
+NvbTest::ok( false !== strpos( $confirm_skin, 'تأیید اشتراک' ), 'متن دکمهٔ تأیید درست است' );
 
 NvbTest::group( 'HttpGuard / SSRF' );
 

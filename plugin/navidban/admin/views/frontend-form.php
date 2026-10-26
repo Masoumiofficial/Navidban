@@ -67,33 +67,35 @@ $nvb_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 			<input type="hidden" name="channel" value="<?php echo esc_attr( 'sms' === $nvb_mode ? 'sms' : 'email' ); ?>" />
 		<?php endif; ?>
 
-		<p class="nvb-form__field" data-nvb="email-field">
-			<label for="nvb-email">ایمیل</label>
-			<input
-				type="email"
-				id="nvb-email"
-				name="email"
-				dir="ltr"
-				inputmode="email"
-				autocomplete="email"
-				value="<?php echo esc_attr( $prefill_email ); ?>"
-				<?php echo 'both' === $nvb_mode ? '' : 'required'; ?>
-			/>
-		</p>
+		<div class="nvb-form__fields">
+			<p class="nvb-form__field" data-nvb="email-field">
+				<label for="nvb-email">ایمیل</label>
+				<input
+					type="email"
+					id="nvb-email"
+					name="email"
+					dir="ltr"
+					inputmode="email"
+					autocomplete="email"
+					value="<?php echo esc_attr( $prefill_email ); ?>"
+					<?php echo 'both' === $nvb_mode ? '' : 'required'; ?>
+				/>
+			</p>
 
-		<p class="nvb-form__field" data-nvb="phone-field">
-			<label for="nvb-phone">شمارهٔ موبایل</label>
-			<input
-				type="tel"
-				id="nvb-phone"
-				name="phone"
-				dir="ltr"
-				inputmode="tel"
-				autocomplete="tel"
-				placeholder="09xxxxxxxxx"
-				value="<?php echo esc_attr( $prefill_phone ); ?>"
-			/>
-		</p>
+			<p class="nvb-form__field" data-nvb="phone-field">
+				<label for="nvb-phone">شمارهٔ موبایل</label>
+				<input
+					type="tel"
+					id="nvb-phone"
+					name="phone"
+					dir="ltr"
+					inputmode="tel"
+					autocomplete="tel"
+					placeholder="09xxxxxxxxx"
+					value="<?php echo esc_attr( $prefill_phone ); ?>"
+				/>
+			</p>
+		</div>
 
 		<div class="nvb-form__hp" aria-hidden="true">
 			<label for="nvb-website">این فیلد را خالی بگذارید</label>
