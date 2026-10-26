@@ -273,7 +273,115 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 				<tr><th scope="row">نام کاربری</th><td><input class="regular-text" dir="ltr" name="<?php echo esc_attr( Settings::OPTION ); ?>[melipayamak_user]" value="<?php echo esc_attr( (string) $settings['melipayamak_user'] ); ?>" /></td></tr>
 				<tr><th scope="row">رمز</th><td><input class="regular-text" dir="ltr" type="password" name="<?php echo esc_attr( Settings::OPTION ); ?>[melipayamak_pass]" value="" placeholder="<?php echo '' === $nvb_secret( 'melipayamak_pass' ) ? '' : 'ذخیره شده — برای تغییر، مقدار جدید بگذارید'; ?>" autocomplete="new-password" /></td></tr>
 				<tr><th scope="row">شمارهٔ خط</th><td><input class="regular-text" dir="ltr" name="<?php echo esc_attr( Settings::OPTION ); ?>[melipayamak_from]" value="<?php echo esc_attr( (string) $settings['melipayamak_from'] ); ?>" /></td></tr>
-				<tr><th scope="row">شناسهٔ الگو (bodyId)</th><td><input class="regular-text" dir="ltr" name="<?php echo esc_attr( Settings::OPTION ); ?>[melipayamak_body_id]" value="<?php echo esc_attr( (string) $settings['melipayamak_body_id'] ); ?>" /> <span class="description">اختیاری؛ برای ارسال خدماتی/الگویی.</span></td></tr>
+				<tr>
+					<th scope="row">شناسهٔ الگو (bodyId)</th>
+					<td>
+						<input class="regular-text" dir="ltr" inputmode="numeric" name="<?php echo esc_attr( Settings::OPTION ); ?>[melipayamak_body_id]" value="<?php echo esc_attr( (string) $settings['melipayamak_body_id'] ); ?>" placeholder="مثلاً 123456" />
+						<p class="description">
+							اختیاری. برای خطوط خدماتی، ارسال فقط با «الگو» انجام می‌شود. با پر کردن این فیلد،
+							افزونه به‌جای متن کامل، <strong>فقط مقدارها</strong> را با جداکنندهٔ <code>;</code> می‌فرستد.
+						</p>
+					</td>
+				</tr>
+			</table>
+
+			<?php
+			$nvb_pattern_stored = (string) $settings['sms_pattern_template'];
+			$nvb_pattern_text   = \Navidban\Logic\SmsPattern::resolve( $nvb_pattern_stored, (string) $settings['site_name'] );
+			$nvb_findings       = \Navidban\Logic\SmsPattern::validate( $nvb_pattern_text, (string) $settings['site_name'] );
+			$nvb_sample_context = array(
+				'customer_name' => 'مریم',
+				'product_name'  => 'کفش دویدن نایک',
+				'product_url'   => 'https://example.com/p/12',
+				'price'         => '۲٬۴۵۰٬۰۰۰ تومان',
+				'site_name'     => (string) $settings['site_name'],
+			);
+			?>
+
+			<h3>متن الگو (برای خطوط خدماتی)</h3>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">متن تأییدشدهٔ الگو</th>
+					<td>
+						<textarea id="nvb-sms-pattern" class="large-text" rows="3" dir="rtl" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_pattern_template]" placeholder="<?php echo esc_attr( \Navidban\Logic\SmsPattern::default_template( (string) $settings['site_name'] ) ); ?>"><?php echo esc_textarea( $nvb_pattern_stored ); ?></textarea>
+						<p class="description">
+							همان متنی را بگذارید که در پنل ملی‌پیامک تأیید شده است. اگر خالی بماند، متن پیشنهادی پایین
+							استفاده می‌شود. جای هر مقدار متغیر، <code>{0}</code>، <code>{1}</code> … بگذارید —
+							نه نام متغیر.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">متغیرهای این افزونه</th>
+					<td>
+						<ul class="nvb-pattern-vars">
+							<?php foreach ( \Navidban\Logic\SmsPattern::labels() as $nvb_index => $nvb_label ) : ?>
+								<li><code><?php echo esc_html( '{' . $nvb_index . '}' ); ?></code> <?php echo esc_html( $nvb_label ); ?></li>
+							<?php endforeach; ?>
+						</ul>
+						<p class="description">
+							ترتیب ارسال همان ترتیب شماره است: مقدار <code>{0}</code> اول، بعد <code>{1}</code> و…
+							اگر شماره‌گذاری پرش داشته باشد یا با متغیر تمام شود، درگاه پیام را رد می‌کند.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">روش جای‌گذاری</th>
+					<td>
+						<div class="nvb-pattern-help">
+							<p>
+								<strong>۱.</strong> در پنل ملی‌پیامک → «ارسال الگو» → «متن‌های من» یک متن بسازید و همان را
+								تأیید بگیرید. متن نهایی همان چیزی است که مشتری می‌بیند؛ کد افزونه فقط مقدارها را پر می‌کند.
+							</p>
+							<p>
+								<strong>۲.</strong> برای هر مقداری که می‌خواهید در پیام بیاید، یک متغیر بگذارید: <code>{0}</code>، <code>{1}</code>، <code>{2}</code> …
+								شماره‌گذاری از صفر و بدون پرش.
+							</p>
+							<p>
+								<strong>۳.</strong> متن را با <strong>نام فروشگاه</strong> تمام کنید (متن ثابت، نه متغیر).
+								متغیر در انتها = رد شدن الگو.
+							</p>
+							<p>
+								<strong>۴.</strong> الگوهایی مثل «<code>{0} باتشکر</code>» یا «<code>{0} گوگل</code>»
+								تأیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
+							</p>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">متن پیشنهادی</th>
+					<td>
+						<code class="nvb-pattern-sample" dir="rtl"><?php echo esc_html( \Navidban\Logic\SmsPattern::default_template( (string) $settings['site_name'] ) ); ?></code>
+						<p class="description">
+							این متن را عیناً در پنل درگاه ثبت کنید (نام فروشگاه خودتان در انتهایش هست)، تأیید بگیرید و
+							شناسهٔ آن را در فیلد <code>bodyId</code> بالا بگذارید.
+						</p>
+						<p class="description">
+							نمونهٔ مقداری که افزونه برای همین متن می‌فرستد:
+							<code dir="ltr"><?php echo esc_html( \Navidban\Logic\SmsPattern::payload( $nvb_pattern_text, $nvb_sample_context ) ); ?></code>
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">بررسی متن</th>
+					<td>
+						<?php if ( empty( $nvb_findings ) ) : ?>
+							<p class="nvb-pattern-ok">هیچ ایرادی پیدا نشد: شماره‌گذاری درست است، متن با متغیر تمام نمی‌شود و نام فروشگاه در انتها هست.</p>
+						<?php else : ?>
+							<ul class="nvb-pattern-findings">
+								<?php foreach ( $nvb_findings as $nvb_finding ) : ?>
+									<li class="is-<?php echo esc_attr( $nvb_finding['level'] ); ?>">
+										<strong><?php echo 'error' === $nvb_finding['level'] ? 'خطا' : 'هشدار'; ?>:</strong>
+										<?php echo esc_html( $nvb_finding['message'] ); ?>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+							<p class="description">
+								این بررسی بر اساس قواعد منتشرشدهٔ درگاه‌هاست؛ تصمیم نهایی با بازبین پنل شماست.
+							</p>
+						<?php endif; ?>
+					</td>
+				</tr>
 			</table>
 
 			<h3>آی‌پی‌پنل</h3>

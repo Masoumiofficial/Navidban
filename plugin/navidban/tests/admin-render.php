@@ -247,6 +247,16 @@ NvbAdmin::ok( false !== strpos( $settings_html, 'پیامک پیکربندی ن�
 NvbAdmin::ok( false !== strpos( $settings_html, 'button button-primary' ) && false !== strpos( $settings_html, 'type="submit"' ), 'دکمهٔ ذخیره، دکمهٔ اصلی و از نوع submit است' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[sms_gateway]"' ), 'انتخاب درگاه پیامک هست' );
 
+// Pattern (bodyId) block: the text the gateway will actually deliver lives in
+// the panel, so the screen has to show the rules and the exact values we send.
+NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[sms_pattern_template]"' ), 'فیلد متن الگوی پیامک هست' );
+NvbAdmin::ok( false !== strpos( $settings_html, '<textarea' ), 'متن الگو در textarea ویرایش می‌شود' );
+NvbAdmin::ok( false !== strpos( $settings_html, '{0}' ) && false !== strpos( $settings_html, '{1}' ), 'فهرست متغیرها با شمارهٔ صفر شروع می‌شود' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'متغیر در انتها' ), 'قاعدهٔ «متغیر در انتها» در راهنما آمده' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'مریم;کفش دویدن نایک;https://example.com/p/12' ), 'نمونهٔ مقدارهای ارسالی نشان داده می‌شود' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'nvb-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تأیید می‌گیرد' );
+NvbAdmin::ok( false === strpos( $settings_html, 'nvb-pattern-findings' ), 'برای الگوی پیش‌فرض هیچ ایرادی رندر نمی‌شود' );
+
 foreach ( array( 'rebuild_snapshots', 'run_reconcile', 'flush_queue', 'empty_queue', 'prune', 'test_email', 'test_sms' ) as $tool ) {
 	NvbAdmin::ok( false !== strpos( $rendered['tools'], 'value="' . $tool . '"' ), 'ابزار موجود است: ' . $tool );
 }

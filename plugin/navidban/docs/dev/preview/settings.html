@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نویدبان 1.0.6 — تنظیمات</title>
+<title>نویدبان 1.0.7 — تنظیمات</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -988,6 +988,110 @@ body {
  * Motion and small screens
  * ---------------------------------------------------------------------- */
 
+/* SMS pattern (bodyId) helper block -------------------------------------- */
+
+.nvb-pattern-vars {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	margin: 0 0 6px;
+	padding: 0;
+	list-style: none;
+}
+
+.nvb-pattern-vars li {
+	background: var(--nvb-glass);
+	border: 1px solid var(--nvb-line);
+	border-radius: 999px;
+	padding: 4px 12px;
+	font-size: 12px;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
+.nvb-pattern-vars code,
+.nvb-pattern-sample {
+	direction: ltr;
+	unicode-bidi: embed;
+}
+
+.nvb-pattern-help {
+	background: var(--nvb-glass);
+	border: 1px solid var(--nvb-line);
+	border-radius: var(--nvb-radius);
+	padding: 14px 16px;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
+.nvb-pattern-help p {
+	margin: 0 0 8px;
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+.nvb-pattern-help p:last-child {
+	margin-bottom: 0;
+}
+
+.nvb-pattern-sample {
+	display: inline-block;
+	max-width: 100%;
+	padding: 10px 14px;
+	border-radius: 14px;
+	background: var(--nvb-glass-strong);
+	border: 1px solid var(--nvb-line);
+	font-size: 13px;
+	line-height: 1.8;
+	white-space: normal;
+}
+
+.nvb-pattern-ok {
+	margin: 0;
+	padding: 10px 14px;
+	border-radius: 14px;
+	background: rgba(31, 143, 96, 0.1);
+	border: 1px solid rgba(31, 143, 96, 0.3);
+	color: var(--nvb-ok);
+	font-size: 13px;
+}
+
+.nvb-pattern-findings {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.nvb-pattern-findings li {
+	margin: 0 0 8px;
+	padding: 10px 14px;
+	border-radius: 14px;
+	font-size: 13px;
+	line-height: 1.8;
+	background: var(--nvb-glass);
+	border: 1px solid var(--nvb-line);
+}
+
+.nvb-pattern-findings li.is-error {
+	background: rgba(198, 72, 60, 0.09);
+	border-color: rgba(198, 72, 60, 0.32);
+}
+
+.nvb-pattern-findings li.is-warning {
+	background: rgba(242, 169, 59, 0.14);
+	border-color: rgba(242, 169, 59, 0.38);
+}
+
+#nvb-sms-pattern {
+	width: 100%;
+	max-width: 640px;
+	border-radius: 14px;
+	border: 1px solid var(--nvb-line);
+	background: var(--nvb-glass-strong);
+	padding: 10px 12px;
+	font-size: 13px;
+	line-height: 1.9;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.nvb-wrap *,
 	.nvb-wrap *::before,
@@ -1056,11 +1160,11 @@ body {
 </head>
 <body>
 <p class="nvb-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.6.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.7.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۶</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
+<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۷</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
 	
 	<form method="post" action="options.php">
 		<input type="hidden" name="option_page" value="navidban_settings_group" />
@@ -1298,7 +1402,90 @@ body {
 				<tr><th scope="row">نام کاربری</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_user]" value="demo" /></td></tr>
 				<tr><th scope="row">رمز</th><td><input class="regular-text" dir="ltr" type="password" name="navidban_settings[melipayamak_pass]" value="" placeholder="ذخیره شده — برای تغییر، مقدار جدید بگذارید" autocomplete="new-password" /></td></tr>
 				<tr><th scope="row">شمارهٔ خط</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_from]" value="" /></td></tr>
-				<tr><th scope="row">شناسهٔ الگو (bodyId)</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_body_id]" value="" /> <span class="description">اختیاری؛ برای ارسال خدماتی/الگویی.</span></td></tr>
+				<tr>
+					<th scope="row">شناسهٔ الگو (bodyId)</th>
+					<td>
+						<input class="regular-text" dir="ltr" inputmode="numeric" name="navidban_settings[melipayamak_body_id]" value="" placeholder="مثلاً 123456" />
+						<p class="description">
+							اختیاری. برای خطوط خدماتی، ارسال فقط با «الگو» انجام می‌شود. با پر کردن این فیلد،
+							افزونه به‌جای متن کامل، <strong>فقط مقدارها</strong> را با جداکنندهٔ <code>;</code> می‌فرستد.
+						</p>
+					</td>
+				</tr>
+			</table>
+
+			
+			<h3>متن الگو (برای خطوط خدماتی)</h3>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">متن تأییدشدهٔ الگو</th>
+					<td>
+						<textarea id="nvb-sms-pattern" class="large-text" rows="3" dir="rtl" name="navidban_settings[sms_pattern_template]" placeholder="{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} — فروشگاه تست"></textarea>
+						<p class="description">
+							همان متنی را بگذارید که در پنل ملی‌پیامک تأیید شده است. اگر خالی بماند، متن پیشنهادی پایین
+							استفاده می‌شود. جای هر مقدار متغیر، <code>{0}</code>، <code>{1}</code> … بگذارید —
+							نه نام متغیر.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">متغیرهای این افزونه</th>
+					<td>
+						<ul class="nvb-pattern-vars">
+															<li><code>{0}</code> نام مشتری (اگر ناشناس باشد: «مشتری»)</li>
+															<li><code>{1}</code> نام محصول</li>
+															<li><code>{2}</code> نشانی صفحهٔ محصول</li>
+															<li><code>{3}</code> قیمت محصول</li>
+													</ul>
+						<p class="description">
+							ترتیب ارسال همان ترتیب شماره است: مقدار <code>{0}</code> اول، بعد <code>{1}</code> و…
+							اگر شماره‌گذاری پرش داشته باشد یا با متغیر تمام شود، درگاه پیام را رد می‌کند.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">روش جای‌گذاری</th>
+					<td>
+						<div class="nvb-pattern-help">
+							<p>
+								<strong>۱.</strong> در پنل ملی‌پیامک → «ارسال الگو» → «متن‌های من» یک متن بسازید و همان را
+								تأیید بگیرید. متن نهایی همان چیزی است که مشتری می‌بیند؛ کد افزونه فقط مقدارها را پر می‌کند.
+							</p>
+							<p>
+								<strong>۲.</strong> برای هر مقداری که می‌خواهید در پیام بیاید، یک متغیر بگذارید: <code>{0}</code>، <code>{1}</code>، <code>{2}</code> …
+								شماره‌گذاری از صفر و بدون پرش.
+							</p>
+							<p>
+								<strong>۳.</strong> متن را با <strong>نام فروشگاه</strong> تمام کنید (متن ثابت، نه متغیر).
+								متغیر در انتها = رد شدن الگو.
+							</p>
+							<p>
+								<strong>۴.</strong> الگوهایی مثل «<code>{0} باتشکر</code>» یا «<code>{0} گوگل</code>»
+								تأیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
+							</p>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">متن پیشنهادی</th>
+					<td>
+						<code class="nvb-pattern-sample" dir="rtl">{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} — فروشگاه تست</code>
+						<p class="description">
+							این متن را عیناً در پنل درگاه ثبت کنید (نام فروشگاه خودتان در انتهایش هست)، تأیید بگیرید و
+							شناسهٔ آن را در فیلد <code>bodyId</code> بالا بگذارید.
+						</p>
+						<p class="description">
+							نمونهٔ مقداری که افزونه برای همین متن می‌فرستد:
+							<code dir="ltr">مریم;کفش دویدن نایک;https://example.com/p/12</code>
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">بررسی متن</th>
+					<td>
+													<p class="nvb-pattern-ok">هیچ ایرادی پیدا نشد: شماره‌گذاری درست است، متن با متغیر تمام نمی‌شود و نام فروشگاه در انتها هست.</p>
+											</td>
+				</tr>
 			</table>
 
 			<h3>آی‌پی‌پنل</h3>

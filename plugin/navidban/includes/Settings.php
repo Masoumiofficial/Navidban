@@ -100,6 +100,9 @@ final class Settings {
 			'melipayamak_pass'      => '',
 			'melipayamak_from'      => '',
 			'melipayamak_body_id'   => '',
+			// Positional pattern text, as approved on the gateway panel. Empty
+			// means "use the suggested template" (SmsPattern::default_template).
+			'sms_pattern_template'  => '',
 			'ippanel_token'         => '',
 			'ippanel_from'          => '',
 			'ippanel_pattern'       => '',

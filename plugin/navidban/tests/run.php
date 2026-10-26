@@ -45,6 +45,7 @@ use Navidban\Logic\QueuePolicy;
 use Navidban\Logic\Template;
 use Navidban\Logic\HttpGuard;
 use Navidban\Logic\EmailSkin;
+use Navidban\Logic\SmsPattern;
 
 /**
  * Extremely small assertion harness.
@@ -669,6 +670,80 @@ foreach ( $blocked as $url ) {
 NvbTest::same( 'scheme', HttpGuard::check( 'http://api.example.com/send' )['reason'], 'reason: scheme' );
 NvbTest::same( 'private_ip', HttpGuard::check( 'https://10.1.2.3/x' )['reason'], 'reason: private ip' );
 NvbTest::same( 'credentials', HttpGuard::check( 'https://a:b@api.example.com/x' )['reason'], 'reason: credentials' );
+
+/* -------------------------------------------------------------------------
+ * SmsPattern / الگوی positional پیامک
+ * ---------------------------------------------------------------------- */
+NvbTest::group( 'SmsPattern / الگوی پیامک' );
+
+$pattern_ctx = array(
+	'customer_name' => 'مریم',
+	'product_name'  => 'کفش دویدن',
+	'product_url'   => 'https://shop.test/p/10',
+	'price'         => '۲٬۴۵۰٬۰۰۰ تومان',
+	'site_name'     => 'فروشگاه نمونه',
+);
+
+NvbTest::same( array( 0, 1, 2 ), SmsPattern::indexes( '{0} عزیز، {1} آمد. {2} — فروشگاه' ), 'indexes() ascending' );
+NvbTest::same( array( 0, 1 ), SmsPattern::indexes( '{1} {0} {1}' ), 'indexes() dedupes' );
+NvbTest::same( array(), SmsPattern::indexes( 'بدون متغیر' ), 'indexes() empty' );
+
+NvbTest::same( 'مریم', SmsPattern::value( 0, $pattern_ctx ), 'value {0} = customer name' );
+NvbTest::same( 'کفش دویدن', SmsPattern::value( 1, $pattern_ctx ), 'value {1} = product name' );
+NvbTest::same( '', SmsPattern::value( 9, $pattern_ctx ), 'unknown index yields empty' );
+
+// A semicolon inside a value would shift every later value by one.
+NvbTest::same( 'الف, ب', SmsPattern::value( 1, array( 'product_name' => "الف;\nب" ) ), 'semicolon and newline are neutralised' );
+
+NvbTest::same(
+	'مریم;کفش دویدن;https://shop.test/p/10',
+	SmsPattern::payload( '{0} عزیز، {1} آمد: {2} — فروشگاه نمونه', $pattern_ctx ),
+	'payload joins values in index order'
+);
+// The gateway fills {n} with the n-th value of the list, so the list is built
+// by index: a template that mentions {1} before {0} still gets {0} first.
+NvbTest::same(
+	'مریم;کفش دویدن',
+	SmsPattern::payload( 'مشتری {1} برای {0} — فروشگاه', $pattern_ctx ),
+	'payload is ordered by index, not by position in the text'
+);
+
+$default_pattern = SmsPattern::default_template( 'فروشگاه نمونه' );
+NvbTest::ok( false !== strpos( $default_pattern, 'فروشگاه نمونه' ), 'default template carries the store name' );
+NvbTest::ok( ! preg_match( '/\{\d+\}\s*$/u', $default_pattern ), 'default template does not end with a variable' );
+NvbTest::same( array(), SmsPattern::validate( $default_pattern, 'فروشگاه نمونه' ), 'default template has no findings' );
+NvbTest::ok( false !== strpos( SmsPattern::default_template( '' ), 'فروشگاه شما' ), 'default template falls back to a generic name' );
+NvbTest::same( $default_pattern, SmsPattern::resolve( '', 'فروشگاه نمونه' ), 'resolve() uses the default when empty' );
+NvbTest::same( '{0} — فروشگاه', SmsPattern::resolve( '{0} — فروشگاه', 'فروشگاه نمونه' ), 'resolve() keeps a stored template' );
+
+/**
+ * Codes of the findings for a template.
+ */
+function nvb_pattern_codes( $template, $site = 'فروشگاه نمونه' ) {
+	$codes = array();
+	foreach ( SmsPattern::validate( $template, $site ) as $finding ) {
+		$codes[] = $finding['level'] . ':' . $finding['code'];
+	}
+
+	return $codes;
+}
+
+NvbTest::same( array( 'error:empty' ), nvb_pattern_codes( '   ' ), 'empty template is an error' );
+NvbTest::same( array( 'error:no_variables' ), nvb_pattern_codes( 'سلام، موجود شد — فروشگاه نمونه' ), 'template without variables is an error' );
+NvbTest::ok( in_array( 'error:numbering', nvb_pattern_codes( 'کاربر {1} عزیز، {2} موجود شد — فروشگاه نمونه' ), true ), 'numbering that starts at 1 is rejected' );
+NvbTest::ok( in_array( 'error:numbering', nvb_pattern_codes( '{0} و {2} موجود شد — فروشگاه نمونه' ), true ), 'a gap in numbering is rejected' );
+NvbTest::ok( in_array( 'error:ends_with_variable', nvb_pattern_codes( '{0} عزیز، کالای شما موجود شد {1}' ), true ), 'trailing variable is rejected' );
+NvbTest::ok( in_array( 'error:too_many', nvb_pattern_codes( '{0} {1} {2} {3} {4} موجود شد — فروشگاه نمونه' ), true ), 'index above 3 is rejected' );
+NvbTest::ok( in_array( 'warning:too_short', nvb_pattern_codes( '{0} باتشکر', 'فروشگاه نمونه' ), true ), 'variable-only text warns (the «{0} باتشکر» case)' );
+NvbTest::ok( in_array( 'warning:no_brand', nvb_pattern_codes( '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2}', 'فروشگاه نمونه' ), true ), 'missing store name warns' );
+NvbTest::ok( in_array( 'warning:too_long', nvb_pattern_codes( str_repeat( 'ا', 185 ) . ' {0} — فروشگاه نمونه' ), true ), 'over-long template warns' );
+
+NvbTest::ok( SmsPattern::has_errors( SmsPattern::validate( '{0}', 'x' ) ), 'has_errors() sees a hard error' );
+NvbTest::ok( ! SmsPattern::has_errors( SmsPattern::validate( '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} — فروشگاه نمونه', 'فروشگاه نمونه' ) ), 'a clean template has no hard errors' );
+
+// The four variables this plugin actually documents must all exist.
+NvbTest::same( 4, count( SmsPattern::labels() ), 'four documented variables' );
+NvbTest::same( 4, count( SmsPattern::VARIABLES ), 'four mapped variables' );
 
 /* -------------------------------------------------------------------------
  * Report

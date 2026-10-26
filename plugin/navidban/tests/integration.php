@@ -956,6 +956,93 @@ $GLOBALS['nvb_http_response'] = null;
 $transport_error = $ok_post->send( '09121234567', '', 'سلام', array() );
 NvbInt::ok( true !== $transport_error, 'خطای انتقال، شکست ارسال محسوب می‌شود' );
 
+NvbInt::group( 'الگوی ملی‌پیامک (bodyId)' );
+
+$GLOBALS['nvb_transients'] = array();
+Settings::update(
+	array(
+		'sms_enabled'           => true,
+		'sms_gateway'           => 'melipayamak',
+		'melipayamak_user'      => '09120000000',
+		'melipayamak_pass'      => 'secret',
+		'melipayamak_from'      => '1000',
+		'melipayamak_body_id'   => '',
+		'sms_pattern_template'  => '',
+		'site_name'             => 'فروشگاه نمونه',
+	)
+);
+
+$restock_context = array(
+	'context' => array(
+		'customer_name' => 'مریم',
+		'product_name'  => 'کفش دویدن',
+		'product_url'   => 'https://shop.test/p/10',
+		'price'         => '۲٬۴۵۰٬۰۰۰ تومان',
+		'site_name'     => 'فروشگاه نمونه',
+	),
+);
+
+$GLOBALS['nvb_http_calls']    = array();
+$GLOBALS['nvb_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"1234","RetStatus":1,"StrRetStatus":"Ok"}' );
+$plain_sms = new \Navidban\Channels\SmsMelipayamak();
+NvbInt::same( true, $plain_sms->send( '09121234567', '', 'متن ساده', $restock_context ), 'بدون bodyId ارسال متنی انجام می‌شود' );
+NvbInt::same( 'https://rest.payamak-panel.com/api/SendSMS/SendSMS', $GLOBALS['nvb_http_calls'][0][0], 'نشانی درست در حالت متنی' );
+NvbInt::same( 'متن ساده', $GLOBALS['nvb_http_calls'][0][1]['body']['text'], 'متن خام در حالت متنی فرستاده می‌شود' );
+
+// Pattern mode: the gateway holds the approved text, we send only the values.
+Settings::update( array( 'melipayamak_body_id' => ' 98765 ' ) );
+$GLOBALS['nvb_http_calls'] = array();
+NvbInt::same( true, $plain_sms->send( '09121234567', '', 'متن ساده', $restock_context ), 'ارسال الگویی موفق' );
+NvbInt::same( 'https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumber', $GLOBALS['nvb_http_calls'][0][0], 'نشانی درست در حالت الگو' );
+
+$pattern_call = $GLOBALS['nvb_http_calls'][0][1]['body'];
+NvbInt::same( 98765, $pattern_call['bodyId'], 'شناسهٔ الگو به عدد تبدیل شد' );
+NvbInt::same( '09121234567', $pattern_call['to'], 'شماره در حالت الگو' );
+NvbInt::ok( ! isset( $pattern_call['isflash'] ), 'پارامترهای حالت متنی در حالت الگو فرستاده نمی‌شوند' );
+NvbInt::same(
+	'مریم;کفش دویدن;https://shop.test/p/10',
+	$pattern_call['text'],
+	'مقدارها به ترتیب شماره با جداکنندهٔ نقطه‌ویرگول'
+);
+NvbInt::ok( false === strpos( $pattern_call['text'], 'متن ساده' ), 'متن کاملِ رندرشده جای مقدارها فرستاده نمی‌شود' );
+
+// A stored template that reorders or drops variables changes the payload.
+Settings::update( array( 'sms_pattern_template' => 'کالای {1} برای {0} موجود شد. {2} — فروشگاه نمونه' ) );
+$GLOBALS['nvb_http_calls'] = array();
+$plain_sms->send( '09121234567', '', 'x', $restock_context );
+NvbInt::same( 'مریم;کفش دویدن;https://shop.test/p/10', $GLOBALS['nvb_http_calls'][0][1]['body']['text'], 'ترتیب مقدارها از روی شمارهٔ متغیر است' );
+
+Settings::update( array( 'sms_pattern_template' => '{0} عزیز، موجود شد — فروشگاه نمونه' ) );
+$GLOBALS['nvb_http_calls'] = array();
+$plain_sms->send( '09121234567', '', 'x', $restock_context );
+NvbInt::same( 'مریم', $GLOBALS['nvb_http_calls'][0][1]['body']['text'], 'الگوی تک‌متغیره یک مقدار می‌فرستد' );
+
+// {1} alone is a numbering error: the gateway numbers from zero without gaps.
+Settings::update( array( 'sms_pattern_template' => '{1} موجود شد — فروشگاه نمونه' ) );
+$GLOBALS['nvb_http_calls'] = array();
+NvbInt::ok( true !== $plain_sms->send( '09121234567', '', 'x', $restock_context ), 'الگوی تک‌متغیره با شمارهٔ ۱ رد می‌شود' );
+NvbInt::ok( 0 === count( $GLOBALS['nvb_http_calls'] ), 'برای شماره‌گذاری نادرست تماسی انجام نشد' );
+
+// A broken template is refused locally, so no money is spent on a send that
+// the gateway would reject anyway.
+Settings::update( array( 'sms_pattern_template' => '{0} عزیز، کالای شما موجود شد {1}' ) );
+$GLOBALS['nvb_http_calls'] = array();
+$broken = $plain_sms->send( '09121234567', '', 'x', $restock_context );
+NvbInt::ok( true !== $broken, 'الگوی نامعتبر پیش از تماس با درگاه رد می‌شود' );
+NvbInt::ok( 0 === count( $GLOBALS['nvb_http_calls'] ), 'برای الگوی نامعتبر هیچ تماسی با درگاه انجام نشد' );
+NvbInt::ok( false !== strpos( (string) ( is_object( $broken ) ? $broken->get_error_message() : $broken ), 'متغیر' ), 'پیام خطا به متغیر اشاره می‌کند' );
+
+// Missing values must not collapse the list.
+Settings::update( array( 'sms_pattern_template' => '{0} عزیز، {1} موجود شد — فروشگاه نمونه' ) );
+$GLOBALS['nvb_http_calls'] = array();
+$plain_sms->send( '09121234567', '', 'x', array( 'context' => array( 'product_name' => 'کفش دویدن' ) ) );
+$thin = explode( ';', (string) $GLOBALS['nvb_http_calls'][0][1]['body']['text'] );
+NvbInt::same( 2, count( $thin ), 'تعداد مقدارها با تعداد متغیرها برابر می‌ماند' );
+NvbInt::same( 'کفش دویدن', $thin[1], 'مقدار موجود در جای خودش می‌نشیند' );
+
+Settings::update( array( 'melipayamak_body_id' => '', 'sms_pattern_template' => '' ) );
+$GLOBALS['nvb_http_response'] = null;
+
 /**
  * Configure the SMS channel for a generic gateway test.
  *

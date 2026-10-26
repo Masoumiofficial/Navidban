@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.6",
+    "plugin_version": "1.0.7",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-26T09:48:54+00:00",
-    "assertions": 250,
+    "generated_at": "2026-10-26T10:16:57+00:00",
+    "assertions": 278,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -72,6 +72,10 @@
         },
         "HttpGuard / SSRF": {
             "assertions": 18,
+            "failures": 0
+        },
+        "SmsPattern / الگوی پیامک": {
+            "assertions": 28,
             "failures": 0
         }
     },

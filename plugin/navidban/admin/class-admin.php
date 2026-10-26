@@ -151,6 +151,8 @@ final class Admin {
 			'sms_template',
 			'melipayamak_user',
 			'melipayamak_from',
+			'melipayamak_body_id',
+			'sms_pattern_template',
 			'ippanel_from',
 			'kavenegar_sender',
 			'generic_payload',
@@ -282,6 +284,26 @@ final class Admin {
 
 		if ( isset( $input['site_name'] ) ) {
 			$out['site_name'] = Validator::plain_text( $input['site_name'], 190 );
+		}
+
+		// Pattern text is advice-checked on save: the gateway rejects a badly
+		// numbered template at send time, and a store that only learns about it
+		// from a failed send wastes real money and real subscribers.
+		if ( isset( $input['sms_pattern_template'] ) ) {
+			$pattern = trim( (string) $out['sms_pattern_template'] );
+
+			if ( '' !== $pattern ) {
+				$findings = \Navidban\Logic\SmsPattern::validate( $pattern, (string) $out['site_name'] );
+
+				foreach ( $findings as $finding ) {
+					add_settings_error(
+						'navidban',
+						'sms_pattern_' . $finding['code'],
+						( 'error' === $finding['level'] ? 'متن الگوی پیامک: ' : 'متن الگوی پیامک (هشدار): ' ) . $finding['message'],
+						'error' === $finding['level'] ? 'error' : 'warning'
+					);
+				}
+			}
 		}
 
 		Settings::flush_cache();

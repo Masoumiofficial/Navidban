@@ -956,6 +956,110 @@
  * Motion and small screens
  * ---------------------------------------------------------------------- */
 
+/* SMS pattern (bodyId) helper block -------------------------------------- */
+
+.nvb-pattern-vars {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	margin: 0 0 6px;
+	padding: 0;
+	list-style: none;
+}
+
+.nvb-pattern-vars li {
+	background: var(--nvb-glass);
+	border: 1px solid var(--nvb-line);
+	border-radius: 999px;
+	padding: 4px 12px;
+	font-size: 12px;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
+.nvb-pattern-vars code,
+.nvb-pattern-sample {
+	direction: ltr;
+	unicode-bidi: embed;
+}
+
+.nvb-pattern-help {
+	background: var(--nvb-glass);
+	border: 1px solid var(--nvb-line);
+	border-radius: var(--nvb-radius);
+	padding: 14px 16px;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
+.nvb-pattern-help p {
+	margin: 0 0 8px;
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+.nvb-pattern-help p:last-child {
+	margin-bottom: 0;
+}
+
+.nvb-pattern-sample {
+	display: inline-block;
+	max-width: 100%;
+	padding: 10px 14px;
+	border-radius: 14px;
+	background: var(--nvb-glass-strong);
+	border: 1px solid var(--nvb-line);
+	font-size: 13px;
+	line-height: 1.8;
+	white-space: normal;
+}
+
+.nvb-pattern-ok {
+	margin: 0;
+	padding: 10px 14px;
+	border-radius: 14px;
+	background: rgba(31, 143, 96, 0.1);
+	border: 1px solid rgba(31, 143, 96, 0.3);
+	color: var(--nvb-ok);
+	font-size: 13px;
+}
+
+.nvb-pattern-findings {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.nvb-pattern-findings li {
+	margin: 0 0 8px;
+	padding: 10px 14px;
+	border-radius: 14px;
+	font-size: 13px;
+	line-height: 1.8;
+	background: var(--nvb-glass);
+	border: 1px solid var(--nvb-line);
+}
+
+.nvb-pattern-findings li.is-error {
+	background: rgba(198, 72, 60, 0.09);
+	border-color: rgba(198, 72, 60, 0.32);
+}
+
+.nvb-pattern-findings li.is-warning {
+	background: rgba(242, 169, 59, 0.14);
+	border-color: rgba(242, 169, 59, 0.38);
+}
+
+#nvb-sms-pattern {
+	width: 100%;
+	max-width: 640px;
+	border-radius: 14px;
+	border: 1px solid var(--nvb-line);
+	background: var(--nvb-glass-strong);
+	padding: 10px 12px;
+	font-size: 13px;
+	line-height: 1.9;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.nvb-wrap *,
 	.nvb-wrap *::before,

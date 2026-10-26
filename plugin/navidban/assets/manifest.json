@@ -6,7 +6,7 @@
   "files": {
     "assets/css/navidban-front.css": {"sha256": "83696dea56c2a7910e347ec39911fdb6fb7bdadd959c6a43f436f3800989bec1", "bytes": 5682, "gzip_bytes": 1938},
     "assets/js/navidban-front.js": {"sha256": "6ae6bbdb2e3a78e5107e0d5c9a5f43e0dd351e5c4c0def937aa9df3b264095c6", "bytes": 7592, "gzip_bytes": 2454},
-    "assets/css/navidban-admin.css": {"sha256": "be91e1b3753019fbd8c8dad1e89c41bb070049be7be7710dcc7a19fe3befea81", "bytes": 21852, "gzip_bytes": 5303},
+    "assets/css/navidban-admin.css": {"sha256": "8dc3bbb6ba7ceb995d075c5930be1a591cde0ba123fb7bed0ac8c979e7853163", "bytes": 23842, "gzip_bytes": 5581},
     "assets/js/navidban-admin.js": {"sha256": "869f897039b9a01478c04f89cb44772f538658790ccf4228ee9b88273236952b", "bytes": 1492, "gzip_bytes": 727}
   }
 }

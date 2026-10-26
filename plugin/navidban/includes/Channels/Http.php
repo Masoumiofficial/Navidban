@@ -36,7 +36,7 @@ final class Http {
 			'sslverify'   => true,
 			'headers'     => $headers,
 			'body'        => $body,
-			'user-agent'  => 'Navidban/' . ( defined( 'NAVIDBAN_VERSION' ) ? NAVIDBAN_VERSION : '1.0.6' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
+			'user-agent'  => 'Navidban/' . ( defined( 'NAVIDBAN_VERSION' ) ? NAVIDBAN_VERSION : '1.0.7' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
 		);
 
 		if ( 'json' === $format && ! isset( $args['headers']['Content-Type'] ) ) {
@@ -111,6 +111,21 @@ final class Http {
 		$decoded = json_decode( $body, true );
 
 		if ( is_array( $decoded ) ) {
+			// ملی‌پیامک answers with {"Value":…,"RetStatus":1,"StrRetStatus":"Ok"}:
+			// a numeric code plus a *text* status that says "Ok" on success. Any
+			// generic scan for a non-empty string would read that as a failure.
+			if ( isset( $decoded['RetStatus'] ) && is_numeric( $decoded['RetStatus'] ) ) {
+				if ( 1 === (int) $decoded['RetStatus'] ) {
+					return '';
+				}
+
+				if ( isset( $decoded['StrRetStatus'] ) && is_string( $decoded['StrRetStatus'] ) && '' !== $decoded['StrRetStatus'] ) {
+					return $decoded['StrRetStatus'];
+				}
+
+				return 'کد خطای درگاه: ' . $decoded['RetStatus'];
+			}
+
 			foreach ( array( 'error', 'message', 'StrRetStatus', 'msg' ) as $key ) {
 				if ( isset( $decoded[ $key ] ) && is_string( $decoded[ $key ] ) && '' !== $decoded[ $key ] ) {
 					// "message" is also used for success in some gateways.
