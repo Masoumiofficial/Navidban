@@ -20,7 +20,7 @@ if ( ! defined( 'NAVIDBAN_DIR' ) ) {
 	define( 'NAVIDBAN_DIR', dirname( __DIR__ ) . '/' );
 }
 if ( ! defined( 'NAVIDBAN_VERSION' ) ) {
-	define( 'NAVIDBAN_VERSION', '1.0.2' );
+	define( 'NAVIDBAN_VERSION', '1.0.3' );
 }
 
 require_once NAVIDBAN_DIR . 'includes/Autoloader.php';
@@ -541,6 +541,36 @@ foreach ( array( 'admin_email', 'from_email', 'from_domain', 'site_host', 'from_
 
 NvbTest::ok( in_array( $mail_facts['from_matches_site'], array( true, false, null ), true ), 'تطابق دامنهٔ فرستنده سه‌حالتی است (نمی‌دانیم ≠ نادرست)' );
 NvbTest::ok( is_string( \Navidban\Channels\EmailChannel::from_address() ), 'from_address رشته برمی‌گرداند' );
+
+// Regression (reported on a real host): php.ini holds
+// "sendmail_path = /usr/sbin/sendmail -t -i". The arguments are not part of
+// the path; treating them as one made a working server look broken.
+NvbTest::ok( array_key_exists( 'sendmail_binary', $mail_facts ), 'کلید sendmail_binary موجود است' );
+NvbTest::ok( array_key_exists( 'transport', $mail_facts ), 'کلید transport موجود است' );
+NvbTest::ok( in_array( $mail_facts['transport'], array( 'sendmail', 'smtp', 'mail' ), true ), 'حالت انتقال یکی از سه مقدار مجاز است' );
+NvbTest::ok( in_array( $mail_facts['sendmail_exists'], array( true, false, null ), true ), 'وجود sendmail سه‌حالتی است (نمی‌دانیم ≠ ناموجود)' );
+
+if ( 'Windows' !== PHP_OS_FAMILY ) {
+	NvbTest::same( '', (string) $mail_facts['smtp_host'], 'SMTP در php.ini روی لینوکس نادیده گرفته می‌شود (هشدار کاذب نمی‌دهیم)' );
+}
+
+// The parser is private; exercise it through a reflection so the exact string
+// from the bug report is covered.
+$nvb_reflect = new ReflectionMethod( '\\Navidban\\Channels\\EmailChannel', 'sendmail_binary' );
+$nvb_reflect->setAccessible( true );
+
+$nvb_sendmail_cases = array(
+	'/usr/sbin/sendmail -t -i'          => '/usr/sbin/sendmail',
+	'/usr/sbin/sendmail'                => '/usr/sbin/sendmail',
+	'"C:\\Program Files\\sendmail.exe" -t' => 'C:\\Program Files\\sendmail.exe',
+	'/usr/sbin/exim4 -t -i -f x@y.z'    => '/usr/sbin/exim4',
+	''                                  => '',
+	'   '                               => '',
+);
+
+foreach ( $nvb_sendmail_cases as $input => $expected ) {
+	NvbTest::same( $expected, $nvb_reflect->invoke( null, $input ), 'مسیر اجرایی از فرمان sendmail جدا می‌شود: ' . $input );
+}
 
 NvbTest::group( 'HttpGuard / SSRF' );
 

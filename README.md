@@ -11,7 +11,11 @@ plugin/release/      بستهٔ انتشار ساخته‌شده
 
 ## بستهٔ انتشار
 
+<<<<<<< HEAD
 `plugin/release/navidban-1.0.2.zip` — همین را در وردپرس نصب کنید.
+=======
+`plugin/release/navidban-1.0.3.zip` — همین را در وردپرس نصب کنید.
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 
 بازسازی و بازبینی:
 
@@ -24,9 +28,15 @@ python3 tools/verify-release.py --build     # ۲۲ بررسی، باید ۰ خط
 
 ```bash
 # با PHP نصب‌شده
+<<<<<<< HEAD
 php tests/run.php            # ۲۲۱ assertion
 php tests/integration.php    # ۱۱۲ assertion
 php tests/admin-render.php   # ۴۷ assertion (رندر واقعی پنل)
+=======
+php tests/run.php            # ۲۳۲ assertion
+php tests/integration.php    # ۱۱۲ assertion
+php tests/admin-render.php   # ۵۳ assertion (رندر واقعی پنل)
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 php tests/load.php           # ۱۰٬۰۰۰ مشترک
 
 # بدون PHP (wasm)
@@ -34,7 +44,11 @@ npm install --no-save @php-wasm/node @php-wasm/universal
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php
 ```
 
+<<<<<<< HEAD
 نتیجهٔ آخر: **۲۲۱/۲۲۱**، **۱۱۲/۱۱۲** و **۴۷/۴۷** روی PHP **8.3.33** و **7.4.33**.
+=======
+نتیجهٔ آخر: **۲۳۲/۲۳۲**، **۱۱۲/۱۱۲** و **۵۳/۵۳** روی PHP **8.3.33** و **7.4.33**.
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 جزئیات: `plugin/navidban/docs/TEST-REPORT.md`.
 
 ## مستندات

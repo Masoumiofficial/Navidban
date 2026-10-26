@@ -1,16 +1,28 @@
 {
     "php_version": "8.3.33",
     "storage": "SQLite (test harness) — not a MySQL benchmark",
+<<<<<<< HEAD
     "generated_at": "2026-10-26T08:35:46+00:00",
+=======
+    "generated_at": "2026-10-26T09:10:41+00:00",
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
     "subscribers": 10000,
     "remaining_after_batch": 950,
     "batch_sent": 50,
     "timings_ms": {
+<<<<<<< HEAD
         "insert_10000_rows": 920,
         "restock_with_10000": 13,
         "enqueue_1000": 72,
         "process_one_batch": 22,
         "total": 1184
+=======
+        "insert_10000_rows": 892,
+        "restock_with_10000": 13,
+        "enqueue_1000": 76,
+        "process_one_batch": 21,
+        "total": 1112
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
     },
     "checks": [
         {
@@ -47,7 +59,11 @@
             "label": "زمان اجرا زیر ۳۰ ثانیه ماند",
             "passed": true,
             "expected": "< 30000 ms",
+<<<<<<< HEAD
             "actual": "22 ms"
+=======
+            "actual": "21 ms"
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
         },
         {
             "label": "باقی پیام‌ها در صف ماندند و گم نشدند",

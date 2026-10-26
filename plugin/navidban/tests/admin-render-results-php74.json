@@ -1,8 +1,13 @@
 {
     "plugin_version": "1.0.0",
     "php_version": "7.4.33",
+<<<<<<< HEAD
     "generated_at": "2026-10-26T08:35:44+00:00",
     "assertions": 47,
+=======
+    "generated_at": "2026-10-26T09:10:39+00:00",
+    "assertions": 53,
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -18,6 +23,13 @@
             "assertions": 18,
             "failures": 0
         },
+<<<<<<< HEAD
+=======
+        "صفحهٔ تشخیص محصول": {
+            "assertions": 6,
+            "failures": 0
+        },
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
         "سلامت اجرا": {
             "assertions": 3,
             "failures": 0

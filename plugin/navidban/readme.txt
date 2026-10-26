@@ -4,7 +4,11 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
+<<<<<<< HEAD
 Stable tag: 1.0.2
+=======
+Stable tag: 1.0.3
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +75,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+<<<<<<< HEAD
+=======
+= 1.0.3 =
+اصلاح هشدار کاذب دربارهٔ مسیر sendmail (php.ini معمولاً «sendmail -t -i» دارد)،
+نادیده‌گرفتن SMTP در php.ini روی لینوکس، و افزودن پنل «چرا برای این محصول
+پیامی نرفت؟» در ابزارها.
+
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 = 1.0.2 =
 افزودن تنظیم «نشانی فرستنده» و «نام فرستنده»، نمایش فرستنده در ابزارها، و
 اصلاح متن پیام آزمایشی: حالا دقیقاً می‌گوید wp_mail پیام را پذیرفت، نه
@@ -85,6 +97,12 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Upgrade Notice ==
 
+<<<<<<< HEAD
+=======
+= 1.0.3 =
+به‌روزرسانی توصیه می‌شود؛ هشدار کاذب sendmail رفع شده است.
+
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 = 1.0.2 =
 به‌روزرسانی توصیه می‌شود؛ برای کسانی که «ارسال شد ولی ایمیل نیامد» را دیده‌اند.
 

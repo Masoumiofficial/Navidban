@@ -36,7 +36,11 @@ final class Http {
 			'sslverify'   => true,
 			'headers'     => $headers,
 			'body'        => $body,
+<<<<<<< HEAD
 			'user-agent'  => 'Navidban/' . ( defined( 'NAVIDBAN_VERSION' ) ? NAVIDBAN_VERSION : '1.0.2' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
+=======
+			'user-agent'  => 'Navidban/' . ( defined( 'NAVIDBAN_VERSION' ) ? NAVIDBAN_VERSION : '1.0.3' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 		);
 
 		if ( 'json' === $format && ! isset( $args['headers']['Content-Type'] ) ) {

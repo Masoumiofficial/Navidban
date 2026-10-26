@@ -225,6 +225,37 @@ NvbAdmin::ok( false !== strpos( $rendered['waitlists'], '&lt;' ), 'کاراکت�
 NvbAdmin::ok( false !== strpos( $rendered['dashboard'], 'InnoDB' ) || false !== strpos( $rendered['dashboard'], 'سالم' ), 'داشبورد وضعیت جدول‌ها را نشان می‌دهد' );
 
 /* -------------------------------------------------------------------------
+<<<<<<< HEAD
+=======
+ * "Why did nothing send?" panel
+ * ---------------------------------------------------------------------- */
+NvbAdmin::group( 'صفحهٔ تشخیص محصول' );
+
+$_GET['diag_product'] = 501;
+$diag_html            = nvb_render( array( $admin, 'render_tools' ) );
+unset( $_GET['diag_product'] );
+
+NvbAdmin::ok( false !== strpos( $diag_html, 'نتیجه برای محصول' ), 'پنل تشخیص برای شناسهٔ داده‌شده رندر می‌شود' );
+NvbAdmin::ok( false !== strpos( $diag_html, 'تأییدشده' ), 'تعداد تأییدشده نمایش داده می‌شود' );
+NvbAdmin::ok( false !== strpos( $diag_html, 'snapshot' ) || false !== strpos( $diag_html, 'تصویر موجودی' ), 'وضعیت تصویر موجودی نمایش داده می‌شود' );
+NvbAdmin::ok( false !== strpos( $diag_html, 'صف ارسال' ), 'وضعیت صف نمایش داده می‌شود' );
+
+// A product nobody subscribed to must say so, not render an empty shell.
+$_GET['diag_product'] = 424242;
+$empty_html           = nvb_render( array( $admin, 'render_tools' ) );
+unset( $_GET['diag_product'] );
+
+NvbAdmin::ok( false !== strpos( $empty_html, 'علت اصلی همین است' ), 'محصول بدون مشترک تأییدشده، علت را صریح می‌گوید' );
+
+// Hostile input: a non-numeric id must not reach a query or the output.
+$_GET['diag_product'] = '<script>alert(1)</script>';
+$bad_html             = nvb_render( array( $admin, 'render_tools' ) );
+unset( $_GET['diag_product'] );
+
+NvbAdmin::ok( false === stripos( $bad_html, '<script' ), 'شناسهٔ نامعتبر هیچ اسکریپتی تزریق نمی‌کند' );
+
+/* -------------------------------------------------------------------------
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
  * No PHP notices while rendering anything above
  * ---------------------------------------------------------------------- */
 NvbAdmin::group( 'سلامت اجرا' );

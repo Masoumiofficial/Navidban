@@ -147,7 +147,16 @@ final class EmailChannel implements ChannelInterface {
 	 */
 	public static function diagnose() {
 		$sendmail = (string) ini_get( 'sendmail_path' );
+<<<<<<< HEAD
 		$smtp     = (string) ini_get( 'SMTP' );
+=======
+		$binary   = self::sendmail_binary( $sendmail );
+		$smtp     = (string) ini_get( 'SMTP' );
+		// PHP only consults the SMTP/smtp_port ini values on Windows. On Linux
+		// they are inherited from php.ini-development and ignored, so warning
+		// about them there would be a false alarm.
+		$is_windows = ( 'Windows' === PHP_OS_FAMILY );
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 		$plugin   = self::mailer_plugin();
 		$from     = self::from_address();
 		$admin    = function_exists( 'get_option' ) ? strtolower( trim( (string) get_option( 'admin_email', '' ) ) ) : '';
@@ -158,9 +167,20 @@ final class EmailChannel implements ChannelInterface {
 		return array(
 			'mail_function'   => function_exists( 'mail' ) ? 'available' : 'missing',
 			'sendmail_path'   => $sendmail,
+<<<<<<< HEAD
 			'sendmail_exists' => '' !== $sendmail && self::path_exists( $sendmail ),
 			'smtp_host'       => $smtp,
 			'smtp_port'       => (string) ini_get( 'smtp_port' ),
+=======
+			'sendmail_binary' => $binary,
+			// Only true/false when there is something to check; null otherwise.
+			'sendmail_exists' => '' === $binary ? null : self::path_exists( $binary ),
+			'os_family'       => PHP_OS_FAMILY,
+			// Which transport PHP will actually use.
+			'transport'       => ( '' !== $binary ) ? 'sendmail' : ( $is_windows && '' !== $smtp ? 'smtp' : 'mail' ),
+			'smtp_host'       => $is_windows ? $smtp : '',
+			'smtp_port'       => $is_windows ? (string) ini_get( 'smtp_port' ) : '',
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 			'mailer_plugin'   => $plugin,
 			'admin_email'     => $admin,
 			'from_email'      => $from,
@@ -209,25 +229,45 @@ final class EmailChannel implements ChannelInterface {
 			return 'نشانی فرستنده (' . $facts['from_email'] . ') با دامنهٔ سایت (' . $facts['site_host'] . ') یکی نیست؛ بسیاری از هاست‌ها چنین پیامی را بی‌صدا دور می‌ریزند یا به اسپم می‌فرستند. یک فرستنده با دامنهٔ خودِ سایت تنظیم کنید یا از افزونهٔ SMTP با SMTP واقعی استفاده کنید.';
 		}
 
+<<<<<<< HEAD
 		if ( '' !== (string) $facts['sendmail_path'] && ! $facts['sendmail_exists'] ) {
 			return 'مسیر sendmail در php.ini به فایلی اشاره می‌کند که وجود ندارد: ' . $facts['sendmail_path'];
+=======
+		if ( true === $facts['sendmail_exists'] ) {
+			// The transport exists and the From domain matches. What is left is
+			// delivery, which no PHP-side check can settle: say so instead of
+			// inventing a cause.
+			return 'مسیر sendmail روی سرور وجود دارد و از نظر PHP مانعی نیست. پیام تحویل میل سرور شده است؛ رسیدن آن به صندوق، SPF/DKIM دامنه، فیلتر ضداسپم هاست و اعتبار درگاه SMTP را درگیر می‌کند — این‌ها از داخل وردپرس قابل بررسی نیستند. برای دیدن سرنوشت پیام، یک افزونهٔ لاگ ایمیل (مثل WP Mail Logging) نصب کنید.';
+		}
+
+		if ( false === $facts['sendmail_exists'] ) {
+			return 'مسیر sendmail در php.ini به فایلی اشاره می‌کند که وجود ندارد: ' . $facts['sendmail_binary'];
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 		}
 
 		if ( '' !== (string) $facts['smtp_host'] ) {
 			$target = $facts['smtp_host'] . ( '' !== (string) $facts['smtp_port'] ? ':' . $facts['smtp_port'] : '' );
 
+<<<<<<< HEAD
 			if ( self::is_local($facts['smtp_host']) ) {
+=======
+			if ( self::is_local( $facts['smtp_host'] ) ) {
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 				return 'PHP پیکربندی شده که از SMTP محلی (' . $target . ') استفاده کند؛ حالت پیش‌فرض XAMPP. اگر سرور SMTP روی آن اجرا نشود، هر ارسال شکست می‌خورد.';
 			}
 
 			return 'PHP پیکربندی شده که از SMTP ' . $target . ' استفاده کند؛ دسترس‌پذیری و اعتبارنامهٔ آن را بررسی کنید.';
 		}
 
+<<<<<<< HEAD
 		if ( '' === (string) $facts['sendmail_path'] ) {
 			return 'نه مسیر sendmail و نه سرور SMTP برای PHP تنظیم نشده است؛ روی هاست محلی برای تست، Mailpit یا افزونهٔ SMTP نصب کنید.';
 		}
 
 		return '';
+=======
+		return 'نه مسیر sendmail و نه سرور SMTP برای PHP تنظیم نشده است؛ روی هاست محلی برای تست، Mailpit یا افزونهٔ SMTP نصب کنید.';
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 	}
 
 	/**
@@ -243,6 +283,41 @@ final class EmailChannel implements ChannelInterface {
 	}
 
 	/**
+<<<<<<< HEAD
+=======
+	 * The executable part of a sendmail_path value.
+	 *
+	 * php.ini commonly holds "sendmail_path = /usr/sbin/sendmail -t -i"; the
+	 * arguments belong to the command, not the path, and must not be fed to
+	 * file_exists().
+	 *
+	 * @param string $command Raw ini value.
+	 * @return string
+	 */
+	private static function sendmail_binary( $command ) {
+		$command = trim( (string) $command );
+
+		if ( '' === $command ) {
+			return '';
+		}
+
+		// Quoted path first: "/path with space/sendmail" -t -i
+		if ( '"' === $command[0] || "'" === $command[0] ) {
+			$quote   = $command[0];
+			$closing = strpos( $command, $quote, 1 );
+
+			if ( false !== $closing ) {
+				return substr( $command, 1, $closing - 1 );
+			}
+		}
+
+		$parts = preg_split( '/\s+/', $command );
+
+		return is_array( $parts ) && isset( $parts[0] ) ? (string) $parts[0] : '';
+	}
+
+	/**
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 	 * Does a php.ini path point at something real? Windows paths are checked
 	 * only when they look absolute, so a shell command never becomes a path.
 	 *
@@ -253,6 +328,11 @@ final class EmailChannel implements ChannelInterface {
 		$path = trim( (string) $path );
 
 		if ( '' === $path || false !== strpos( $path, ' ' ) ) {
+<<<<<<< HEAD
+=======
+			// A command line with arguments is not a path; callers must pass the
+			// binary only (see sendmail_binary()).
+>>>>>>> 4ed7736 (۱.۰.۳: رفع هشدار کاذب sendmail + پنل «چرا پیامی نرفت؟»)
 			return false;
 		}
 
