@@ -1,7 +1,7 @@
 {
-    "plugin_version": "1.0.7",
+    "plugin_version": "1.0.8",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-26T10:16:58+00:00",
+    "generated_at": "2026-10-26T10:30:36+00:00",
     "assertions": 166,
     "failures": 0,
     "pass_rate": 100,

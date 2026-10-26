@@ -11,12 +11,12 @@
 | آزمون واحد روی PHP 7.4 | ✅ ۲۷۸/۲۷۸ | `tests/results-php74.json` |
 | آزمون یکپارچه روی PHP 8.3 | ✅ ۱۶۶/۱۶۶ | `tests/integration-results.json` |
 | آزمون یکپارچه روی PHP 7.4 | ✅ ۱۶۶/۱۶۶ | `tests/integration-results-php74.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۸۸/۸۸ | `tests/admin-render-results.json` |
-| رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۸۸/۸۸ | `tests/admin-render-results-php74.json` |
+| رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۹۱/۹۱ | `tests/admin-render-results.json` |
+| رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۹۱/۹۱ | `tests/admin-render-results-php74.json` |
 | آزمون بار (۱۰٬۰۰۰ مشترک) | ✅ ۷/۷ روی 8.3 | `tests/load-results.json` |
 | گرامر 7.4 + 8.3 روی همهٔ فایل‌ها | ✅ ۰ خطا | `tools/lint-php.js` |
 | ارجاع متدها | ✅ ۰ شکسته | `tools/check-methods.js` |
-| بودجهٔ حجم دارایی | ✅ ۴٬۳۹۳ / ۱۲٬۲۸۸ بایت | `docs/PERFORMANCE.md` |
+| بودجهٔ حجم دارایی | ✅ ۴٬۳۹۲ / ۱۲٬۲۸۸ بایت | `docs/PERFORMANCE.md` |
 | بارگذاری صفر در صفحات غیرهدف | ✅ ۰ دارایی، ۰ کوئری | `docs/PERFORMANCE.md` |
 | پوشش استایل همهٔ کنترل‌های پنل (نوع‌به‌نوع) | ✅ ۱۲/۱۲ | `tests/admin-render.php` |
 | فیلد خاموش‌شده در فرم، در HTML وجود ندارد (نه فقط پنهان) | ✅ ۳ حالت | `tests/integration.php` |

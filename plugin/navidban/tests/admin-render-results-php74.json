@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.7",
+    "plugin_version": "1.0.8",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-26T10:17:00+00:00",
-    "assertions": 88,
+    "generated_at": "2026-10-26T10:30:31+00:00",
+    "assertions": 91,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -23,7 +23,7 @@
             "failures": 0
         },
         "پوشش استایل": {
-            "assertions": 12,
+            "assertions": 15,
             "failures": 0
         },
         "صفحهٔ تشخیص محصول": {

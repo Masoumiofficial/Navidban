@@ -372,64 +372,121 @@
  * ---------------------------------------------------------------------- */
 
 /*
- * Any input that is not a button-like control gets the field look.
+ * FIELD LOOK
  *
- * `input:not([type])` matters more than it looks: an <input> with no type
- * attribute is a text box in every browser, but `input[type="text"]` does NOT
- * match it. WordPress views written without an explicit type (title fields,
- * gateway credentials, the test-phone box) stayed as raw WP boxes until this
- * selector existed.
+ * Two hard-won details live here:
+ *
+ * 1. `input:not([type])` — an <input> with no type attribute is a text box in
+ *    every browser, but `input[type="text"]` does NOT match it. WordPress views
+ *    written without an explicit type (the form title, the button label, the
+ *    gateway credentials, the test-phone box) rendered as raw WP boxes until
+ *    this selector existed.
+ * 2. `.nvb-wrap.nvb-wrap` — the class is doubled on purpose. wp-admin's
+ *    forms.css styles bare inputs with selectors around specificity (0,1,1); a
+ *    single `.nvb-wrap input[...]` is (0,2,1) and normally wins, but a theme or
+ *    a page builder that ships `.form-table input` and loads after us can still
+ *    pull one field back to the default look. Doubling the class makes the
+ *    field style independent of load order.
  */
-.nvb-wrap input:not([type]),
-.nvb-wrap input[type="text"],
-.nvb-wrap input[type="email"],
-.nvb-wrap input[type="url"],
-.nvb-wrap input[type="password"],
-.nvb-wrap input[type="number"],
-.nvb-wrap input[type="search"],
-.nvb-wrap input[type="tel"],
-.nvb-wrap input[type="date"],
-.nvb-wrap input[type="datetime-local"],
-.nvb-wrap input[type="time"],
-.nvb-wrap input[type="month"],
-.nvb-wrap input[type="week"],
-.nvb-wrap select,
-.nvb-wrap textarea {
-	min-height: 36px;
-	padding: 6px 12px;
-	border: 1px solid rgba(14, 92, 85, 0.18);
-	border-radius: 11px;
-	background: rgba(255, 255, 255, 0.9);
+.nvb-wrap.nvb-wrap input:not([type]),
+.nvb-wrap.nvb-wrap input[type="text"],
+.nvb-wrap.nvb-wrap input[type="email"],
+.nvb-wrap.nvb-wrap input[type="url"],
+.nvb-wrap.nvb-wrap input[type="password"],
+.nvb-wrap.nvb-wrap input[type="number"],
+.nvb-wrap.nvb-wrap input[type="search"],
+.nvb-wrap.nvb-wrap input[type="tel"],
+.nvb-wrap.nvb-wrap input[type="date"],
+.nvb-wrap.nvb-wrap input[type="datetime-local"],
+.nvb-wrap.nvb-wrap input[type="time"],
+.nvb-wrap.nvb-wrap input[type="month"],
+.nvb-wrap.nvb-wrap input[type="week"],
+.nvb-wrap.nvb-wrap select,
+.nvb-wrap.nvb-wrap textarea {
+	min-height: 40px;
+	padding: 8px 14px;
+	border: 1px solid rgba(14, 92, 85, 0.22);
+	border-radius: 12px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.84));
 	color: var(--nvb-ink);
-	box-shadow: inset 0 1px 2px rgba(14, 92, 85, 0.06);
-	transition: border-color 0.16s ease, box-shadow 0.16s ease;
+	font-size: 13.5px;
+	line-height: 1.65;
+	box-shadow:
+		inset 0 1px 0 #fff,
+		0 1px 2px rgba(14, 92, 85, 0.07);
+	transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
-.nvb-wrap select {
-	padding-inline-end: 26px;
+.nvb-wrap.nvb-wrap input:not([type])::placeholder,
+.nvb-wrap.nvb-wrap input[type="text"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="email"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="url"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="password"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="number"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="search"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="tel"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="date"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="datetime-local"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="time"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="month"]::placeholder,
+.nvb-wrap.nvb-wrap input[type="week"]::placeholder,
+.nvb-wrap.nvb-wrap select::placeholder,
+.nvb-wrap.nvb-wrap textarea::placeholder {
+	color: rgba(91, 107, 102, 0.75);
+	opacity: 1;
 }
 
-.nvb-wrap textarea {
-	min-height: 90px;
-	line-height: 1.9;
+.nvb-wrap.nvb-wrap input:not([type]):hover,
+.nvb-wrap.nvb-wrap input[type="text"]:hover,
+.nvb-wrap.nvb-wrap input[type="email"]:hover,
+.nvb-wrap.nvb-wrap input[type="url"]:hover,
+.nvb-wrap.nvb-wrap input[type="password"]:hover,
+.nvb-wrap.nvb-wrap input[type="number"]:hover,
+.nvb-wrap.nvb-wrap input[type="search"]:hover,
+.nvb-wrap.nvb-wrap input[type="tel"]:hover,
+.nvb-wrap.nvb-wrap input[type="date"]:hover,
+.nvb-wrap.nvb-wrap input[type="datetime-local"]:hover,
+.nvb-wrap.nvb-wrap input[type="time"]:hover,
+.nvb-wrap.nvb-wrap input[type="month"]:hover,
+.nvb-wrap.nvb-wrap input[type="week"]:hover,
+.nvb-wrap.nvb-wrap select:hover,
+.nvb-wrap.nvb-wrap textarea:hover {
+	border-color: rgba(14, 92, 85, 0.36);
+	background: #fff;
 }
 
-.nvb-wrap input:not([type]):focus,
-.nvb-wrap input[type="text"]:focus,
-.nvb-wrap input[type="email"]:focus,
-.nvb-wrap input[type="url"]:focus,
-.nvb-wrap input[type="password"]:focus,
-.nvb-wrap input[type="number"]:focus,
-.nvb-wrap input[type="search"]:focus,
-.nvb-wrap input[type="tel"]:focus,
-.nvb-wrap input[type="date"]:focus,
-.nvb-wrap input[type="datetime-local"]:focus,
-.nvb-wrap input[type="time"]:focus,
-.nvb-wrap select:focus,
-.nvb-wrap textarea:focus {
+.nvb-wrap.nvb-wrap input:not([type]):focus,
+.nvb-wrap.nvb-wrap input[type="text"]:focus,
+.nvb-wrap.nvb-wrap input[type="email"]:focus,
+.nvb-wrap.nvb-wrap input[type="url"]:focus,
+.nvb-wrap.nvb-wrap input[type="password"]:focus,
+.nvb-wrap.nvb-wrap input[type="number"]:focus,
+.nvb-wrap.nvb-wrap input[type="search"]:focus,
+.nvb-wrap.nvb-wrap input[type="tel"]:focus,
+.nvb-wrap.nvb-wrap input[type="date"]:focus,
+.nvb-wrap.nvb-wrap input[type="datetime-local"]:focus,
+.nvb-wrap.nvb-wrap input[type="time"]:focus,
+.nvb-wrap.nvb-wrap input[type="month"]:focus,
+.nvb-wrap.nvb-wrap input[type="week"]:focus,
+.nvb-wrap.nvb-wrap select:focus,
+.nvb-wrap.nvb-wrap textarea:focus {
 	border-color: var(--nvb-primary-hover);
-	box-shadow: 0 0 0 3px rgba(20, 133, 123, 0.16);
+	background: #fff;
+	box-shadow:
+		0 0 0 3px rgba(20, 133, 123, 0.16),
+		inset 0 1px 0 #fff;
 	outline: 0;
+}
+
+.nvb-wrap.nvb-wrap select {
+	min-height: 40px;
+	padding-inline-end: 28px;
+}
+
+.nvb-wrap.nvb-wrap textarea {
+	min-height: 96px;
+	line-height: 1.95;
+	resize: vertical;
 }
 
 .nvb-wrap .form-table {
@@ -479,6 +536,29 @@
 	padding: 12px 0;
 	font-size: 13px;
 	line-height: 1.95;
+}
+
+/* Hairline between rows: inside one glass panel, five unseparated rows read as
+   a text dump. The line is drawn with border-top on both cells so it lines up
+   in both LTR and RTL layouts. */
+.nvb-wrap .form-table tr + tr > th,
+.nvb-wrap .form-table tr + tr > td {
+	border-top: 1px solid rgba(14, 92, 85, 0.08);
+}
+
+.nvb-wrap .form-table th > label {
+	display: inline-block;
+	padding-top: 9px;
+	cursor: pointer;
+}
+
+/* A control and its inline description share one line without the description
+   wrapping under the field. */
+.nvb-wrap .form-table td > input + .description,
+.nvb-wrap .form-table td > select + .description {
+	display: inline-block;
+	margin: 0 10px 0 0;
+	vertical-align: middle;
 }
 
 .nvb-wrap .description {
@@ -1058,6 +1138,79 @@
 	font-size: 13px;
 	line-height: 1.9;
 	box-shadow: var(--nvb-shadow-soft);
+}
+
+/* Notices and pagination: WordPress styles both, but the defaults sit oddly on
+   the glass background, so they get the same radius and palette as the rest. */
+
+.nvb-wrap .notice {
+	margin: 0 0 16px;
+	padding: 10px 14px;
+	border: 1px solid var(--nvb-line);
+	border-radius: 14px;
+	background: var(--nvb-glass-strong);
+	box-shadow: var(--nvb-shadow-soft);
+}
+
+.nvb-wrap .notice p {
+	margin: 4px 0;
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+.nvb-wrap .notice-success {
+	border-color: rgba(31, 143, 96, 0.35);
+}
+
+.nvb-wrap .notice-error {
+	border-color: rgba(198, 72, 60, 0.35);
+}
+
+.nvb-wrap .tablenav {
+	height: auto;
+	margin: 14px 0 0;
+}
+
+.nvb-wrap .tablenav-pages {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	float: none;
+	text-align: start;
+}
+
+.nvb-wrap .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 32px;
+	height: 32px;
+	padding: 0 10px;
+	border-radius: 10px;
+	border: 1px solid var(--nvb-line);
+	background: var(--nvb-glass);
+	color: var(--nvb-primary);
+	font-size: 12.5px;
+	text-decoration: none;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
+.nvb-wrap .page-numbers.current {
+	background: linear-gradient(135deg, var(--nvb-primary), var(--nvb-primary-hover));
+	border-color: transparent;
+	color: #fff;
+	font-weight: 700;
+}
+
+.nvb-wrap .page-numbers:hover,
+.nvb-wrap .page-numbers:focus {
+	border-color: var(--nvb-primary-hover);
+	color: var(--nvb-primary);
+}
+
+.nvb-wrap .page-numbers.current:hover {
+	color: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {

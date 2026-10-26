@@ -326,8 +326,36 @@ foreach ( array_keys( $nvb_types ) as $nvb_type ) {
 	}
 
 	$nvb_needle = '(none)' === $nvb_type ? 'input:not([type])' : 'input[type="' . $nvb_type . '"]';
-	NvbAdmin::ok( $nvb_has_rule( $nvb_css, '.' . 'nvb-wrap ' . $nvb_needle ), 'استایل برای ورودی نوع ' . $nvb_type . ' هست' );
+	// The rule head may repeat the wrapper class on purpose (see the comment in
+	// the stylesheet): `.nvb-wrap.nvb-wrap input[…]` beats a late-loading
+	// `.form-table input` from a theme. Both spellings have to count as covered.
+	$nvb_covered = $nvb_has_rule( $nvb_css, '.nvb-wrap ' . $nvb_needle )
+		|| $nvb_has_rule( $nvb_css, '.nvb-wrap.nvb-wrap ' . $nvb_needle );
+	NvbAdmin::ok( $nvb_covered, 'استایل برای ورودی نوع ' . $nvb_type . ' هست' );
 }
+
+// Every input type that actually appears in the rendered screens must have a
+// rule. This is the regression guard for the 1.0.8 report: textareas looked
+// right while single-line boxes stayed plain, because those markup sites emit
+// <input> with no type attribute at all.
+$nvb_missing = array();
+foreach ( array_keys( $nvb_types ) as $nvb_type ) {
+	if ( in_array( $nvb_type, $nvb_exempt, true ) ) {
+		continue;
+	}
+
+	$nvb_needle  = '(none)' === $nvb_type ? 'input:not([type])' : 'input[type="' . $nvb_type . '"]';
+	$nvb_present = $nvb_has_rule( $nvb_css, '.nvb-wrap ' . $nvb_needle )
+		|| $nvb_has_rule( $nvb_css, '.nvb-wrap.nvb-wrap ' . $nvb_needle );
+
+	if ( ! $nvb_present ) {
+		$nvb_missing[] = $nvb_type;
+	}
+}
+
+NvbAdmin::ok( empty( $nvb_missing ), 'همهٔ انواع ورودیِ موجود در صفحه‌ها استایل دارند', implode( ',', $nvb_missing ) );
+NvbAdmin::ok( false !== strpos( $nvb_css, '.nvb-wrap.nvb-wrap' ), 'انتخابگر فیلد در برابر استایل دیرتر‌بار‌شده مقاوم است' );
+NvbAdmin::ok( false === strpos( $nvb_css, '!important' ), 'پنل بدون !important استایل می‌شود' );
 
 // Checkbox and radio must at least be themed, not restyled from scratch.
 NvbAdmin::ok( false !== strpos( $nvb_css, 'input[type="checkbox"]' ) && false !== strpos( $nvb_css, 'accent-color' ), 'چک‌باکس‌ها با accent-color رنگ می‌گیرند' );
