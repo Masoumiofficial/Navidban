@@ -93,6 +93,13 @@ ob_start();
 include NAVIDBAN_DIR . 'admin/views/frontend-form.php';
 $out['form'] = (string) ob_get_clean();
 
+// The SMS-only layout: phone field first, e-mail hidden by the script.
+$settings['mode'] = 'sms';
+ob_start();
+include NAVIDBAN_DIR . 'admin/views/frontend-form.php';
+$out['form-sms'] = (string) ob_get_clean();
+$settings['mode'] = 'both';
+
 // The email skin, with representative content.
 $out['email'] = \Navidban\Logic\EmailSkin::render(
 	'کفش دویدن نایک ایر زوم پگاسوس',

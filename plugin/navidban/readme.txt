@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,12 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.0.5 =
+رفع اشکال ظاهری پنل: ورودی‌هایی که در کد `type` نداشتند (مثل «عنوان فرم») استایل
+نمی‌گرفتند و به‌صورت باکس خام وردپرس دیده می‌شدند. هر بخش تنظیمات حالا کارت
+شیشه‌ای جدا دارد، نوار ذخیره به پایین چسبیده، و پوشش استایل با آزمون خودکار
+بررسی می‌شود.
+
 = 1.0.4 =
 یک‌مرحله‌ای شدن ثبت‌نام (تأیید دومرحله‌ای پیش‌فرض خاموش شد)، اولویت پیامک برای
 ایران، قالب ایمیل شیشه‌ای RTL با نسخهٔ متنی جایگزین، و بازطراحی کامل پنل مدیریت
@@ -94,6 +100,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 انتشار نخست. جزئیات کامل: `CHANGELOG.md`.
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+رفع باگ ظاهری نسخهٔ ۱.۰.۴ (باکس‌های بدون استایل در تنظیمات). فقط ظاهر تغییر کرده
+است.
 
 = 1.0.4 =
 به‌روزرسانی توصیه می‌شود. توجه: تأیید دومرحله‌ای حالا پیش‌فرض خاموش است؛ اگر

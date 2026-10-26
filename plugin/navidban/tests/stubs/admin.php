@@ -48,7 +48,26 @@ function register_setting( $group, $name, $args = array() ) {
  * @param bool   $wrap Wrap.
  */
 function submit_button( $text = 'Save Changes', $type = 'primary', $name = 'submit', $wrap = true ) {
-	echo '<button type="submit" class="button">' . htmlspecialchars( (string) $text, ENT_QUOTES ) . '</button>';
+	// Mirrors core: the class comes from $type, and $wrap controls the
+	// <p class="submit"> wrapper. The views rely on wrap=false so the button can
+	// live inside their own action bar.
+	$class = 'button';
+	if ( 'primary' === $type ) {
+		$class .= ' button-primary';
+	}
+	if ( 'delete' === $type ) {
+		$class .= ' button-secondary button-link-delete';
+	}
+
+	$button = sprintf(
+		'<input type="submit" name="%s" id="%s" class="%s" value="%s" />',
+		htmlspecialchars( (string) $name, ENT_QUOTES ),
+		htmlspecialchars( (string) $name, ENT_QUOTES ),
+		esc_attr( $class ),
+		htmlspecialchars( (string) $text, ENT_QUOTES )
+	);
+
+	echo $wrap ? '<p class="submit">' . $button . '</p>' : $button;
 }
 
 /**

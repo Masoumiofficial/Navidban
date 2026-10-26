@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نویدبان 1.0.4 — تنظیمات</title>
+<title>نویدبان 1.0.5 — تنظیمات</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -241,7 +241,7 @@ body {
 
 .nvb-tabs a[aria-current="page"] {
 	color: #fff;
-	background: linear-gradient(135deg, var(--nvb-primary), var(--nvb-primary-hover));
+	background: linear-gradient(135deg, #0a4741, #0f6f66);
 	box-shadow: 0 8px 18px -10px rgba(14, 92, 85, 0.9);
 }
 
@@ -321,6 +321,61 @@ body {
 	margin-bottom: 18px;
 }
 
+/* Section heading: a small gradient tick + the title, so every block has an
+   obvious start without a decorative icon font. */
+.nvb-panel > h2,
+.nvb-panel > h3 {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--nvb-primary);
+}
+
+.nvb-panel > h2::before,
+.nvb-panel > h3::before {
+	content: "";
+	flex: 0 0 4px;
+	width: 4px;
+	height: 1.05em;
+	border-radius: 2px;
+	background: linear-gradient(180deg, var(--nvb-primary), var(--nvb-accent));
+}
+
+.nvb-panel > h3 {
+	margin-top: 22px;
+	font-size: 14px;
+	color: var(--nvb-ink);
+}
+
+.nvb-panel > h3::before {
+	height: 0.95em;
+	background: linear-gradient(180deg, var(--nvb-primary-hover), rgba(20, 133, 123, 0.35));
+}
+
+.nvb-panel > p:first-of-type {
+	margin-top: 2px;
+}
+
+/* A card placed inside a panel is a sub-block, not a second sheet of glass:
+   two frosted layers on top of each other look muddy. */
+.nvb-panel .nvb-card {
+	background: rgba(255, 255, 255, 0.5);
+	box-shadow: none;
+}
+
+.nvb-panel .nvb-card::after {
+	display: none;
+}
+
+/* Inside a panel the first field should not push the heading away. */
+.nvb-panel .form-table tr:first-child th,
+.nvb-panel .form-table tr:first-child td {
+	padding-top: 4px;
+}
+
 .nvb-panel > h2:first-child,
 .nvb-panel > h3:first-child {
 	margin-top: 0;
@@ -348,13 +403,28 @@ body {
  * Forms
  * ---------------------------------------------------------------------- */
 
+/*
+ * Any input that is not a button-like control gets the field look.
+ *
+ * `input:not([type])` matters more than it looks: an <input> with no type
+ * attribute is a text box in every browser, but `input[type="text"]` does NOT
+ * match it. WordPress views written without an explicit type (title fields,
+ * gateway credentials, the test-phone box) stayed as raw WP boxes until this
+ * selector existed.
+ */
+.nvb-wrap input:not([type]),
 .nvb-wrap input[type="text"],
 .nvb-wrap input[type="email"],
 .nvb-wrap input[type="url"],
 .nvb-wrap input[type="password"],
 .nvb-wrap input[type="number"],
 .nvb-wrap input[type="search"],
+.nvb-wrap input[type="tel"],
 .nvb-wrap input[type="date"],
+.nvb-wrap input[type="datetime-local"],
+.nvb-wrap input[type="time"],
+.nvb-wrap input[type="month"],
+.nvb-wrap input[type="week"],
 .nvb-wrap select,
 .nvb-wrap textarea {
 	min-height: 36px;
@@ -376,13 +446,17 @@ body {
 	line-height: 1.9;
 }
 
+.nvb-wrap input:not([type]):focus,
 .nvb-wrap input[type="text"]:focus,
 .nvb-wrap input[type="email"]:focus,
 .nvb-wrap input[type="url"]:focus,
 .nvb-wrap input[type="password"]:focus,
 .nvb-wrap input[type="number"]:focus,
 .nvb-wrap input[type="search"]:focus,
+.nvb-wrap input[type="tel"]:focus,
 .nvb-wrap input[type="date"]:focus,
+.nvb-wrap input[type="datetime-local"]:focus,
+.nvb-wrap input[type="time"]:focus,
 .nvb-wrap select:focus,
 .nvb-wrap textarea:focus {
 	border-color: var(--nvb-primary-hover);
@@ -392,6 +466,36 @@ body {
 
 .nvb-wrap .form-table {
 	margin: 0;
+}
+
+/* Widths are declared here rather than inherited from wp-admin's stylesheet:
+   the panel must look the same even if a security plugin strips core CSS, and
+   the static preview (no wp-admin CSS) has to be representative. */
+.nvb-wrap .regular-text {
+	width: 25em;
+	max-width: 100%;
+}
+
+.nvb-wrap .large-text {
+	width: 100%;
+	max-width: 42em;
+}
+
+.nvb-wrap textarea.code {
+	direction: ltr;
+	text-align: left;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12.5px;
+	line-height: 1.8;
+}
+
+.nvb-wrap .check-column {
+	width: 2.4em;
+	text-align: center;
+}
+
+.nvb-wrap .widefat {
+	border: 0;
 }
 
 .nvb-wrap .form-table th {
@@ -410,9 +514,41 @@ body {
 }
 
 .nvb-wrap .description {
+	display: block;
+	margin: 5px 0 0;
 	color: var(--nvb-ink-soft);
 	font-size: 12px;
 	line-height: 1.9;
+	max-width: 60ch;
+}
+
+/* A description that has to sit next to a control (not under it). */
+.nvb-wrap .description--inline {
+	display: inline-block;
+	margin: 0 8px 0 0;
+}
+
+.nvb-wrap .description code,
+.nvb-wrap .description strong {
+	font-size: inherit;
+}
+
+/* Native checkboxes and radios, themed with accent-color (no custom sprite,
+   so keyboard and screen-reader behaviour stays untouched). */
+.nvb-wrap input[type="checkbox"],
+.nvb-wrap input[type="radio"] {
+	width: 18px;
+	height: 18px;
+	margin: 0 0 0 2px;
+	vertical-align: -3px;
+	accent-color: var(--nvb-primary);
+	cursor: pointer;
+}
+
+.nvb-wrap label {
+	font-size: 13px;
+	line-height: 1.95;
+	color: var(--nvb-ink);
 }
 
 /* Switch-style checkbox rows: keeps long Persian labels from jumping. */
@@ -479,10 +615,51 @@ body {
 	border-color: rgba(198, 72, 60, 0.35);
 }
 
+.nvb-wrap .button:focus,
+.nvb-wrap .button-secondary:focus,
+.nvb-wrap .button-primary:focus,
+.nvb-wrap button.button:focus {
+	box-shadow: 0 0 0 3px rgba(20, 133, 123, 0.28);
+	outline: 0;
+}
+
 .nvb-wrap .button:disabled,
 .nvb-wrap .button[disabled] {
 	opacity: 0.55;
 	transform: none;
+}
+
+/* Save/submit bar: sits at the end of a long settings form and stays reachable
+   while scrolling a tall panel list. */
+.nvb-actions {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin: 18px 0 0;
+	padding: 12px 16px;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: rgba(255, 255, 255, 0.88);
+	-webkit-backdrop-filter: blur(18px) saturate(1.4);
+	backdrop-filter: blur(18px) saturate(1.4);
+	box-shadow: 0 -8px 24px -18px rgba(14, 92, 85, 0.8);
+}
+
+.nvb-actions .button-primary,
+.nvb-actions input[type="submit"] {
+	padding: 8px 26px;
+	min-height: 40px;
+	font-size: 14px;
+}
+
+.nvb-actions p {
+	margin: 0;
+	font-size: 12px;
+	color: var(--nvb-ink-soft);
 }
 
 /* -------------------------------------------------------------------------
@@ -633,6 +810,47 @@ body {
 	line-height: 2;
 }
 
+/* Pagination (WordPress core classes, restyled to match the cards). */
+.nvb-wrap .tablenav {
+	display: flex;
+	justify-content: flex-start;
+	margin: 14px 0 0;
+	height: auto;
+}
+
+.nvb-wrap .tablenav-pages {
+	float: none;
+	margin: 0;
+}
+
+.nvb-wrap .tablenav-pages a,
+.nvb-wrap .tablenav-pages span {
+	display: inline-block;
+	min-width: 30px;
+	padding: 4px 10px;
+	margin-inline-end: 4px;
+	border: 1px solid var(--nvb-line);
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.75);
+	font-size: 12.5px;
+	line-height: 1.9;
+	color: var(--nvb-primary);
+	text-align: center;
+	text-decoration: none;
+}
+
+.nvb-wrap .tablenav-pages a:hover {
+	background: #fff;
+	border-color: var(--nvb-primary-hover);
+}
+
+.nvb-wrap .tablenav-pages .current {
+	border-color: transparent;
+	background: linear-gradient(135deg, var(--nvb-primary), var(--nvb-primary-hover));
+	color: #fff;
+	font-weight: 700;
+}
+
 /* -------------------------------------------------------------------------
  * Notices and diagnostics
  * ---------------------------------------------------------------------- */
@@ -667,10 +885,13 @@ body {
 	direction: ltr;
 	unicode-bidi: embed;
 	display: inline-block;
+	max-width: 100%;
 	padding: 1px 6px;
 	border-radius: 6px;
 	background: rgba(14, 92, 85, 0.08);
 	font-size: 12px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .nvb-diagnosis--warn {
@@ -787,6 +1008,16 @@ body {
 		padding: 14px 16px;
 	}
 
+	.nvb-tabs {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.nvb-tabs a {
+		white-space: nowrap;
+	}
+
 	.nvb-hero__title {
 		font-size: 18px;
 	}
@@ -802,11 +1033,22 @@ body {
 		padding-top: 0;
 	}
 
+	.nvb-table {
+		display: block;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
 	.nvb-table thead th,
 	.nvb-table tbody td,
 	.nvb-table tbody th {
 		font-size: 12px;
 		padding: 9px 8px;
+		white-space: nowrap;
+	}
+
+	.nvb-actions {
+		position: static;
 	}
 }
 
@@ -814,116 +1056,121 @@ body {
 </head>
 <body>
 <p class="nvb-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.4.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.5.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۴</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
+<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۵</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
 	
 	<form method="post" action="options.php">
 		<input type="hidden" name="option_page" value="navidban_settings_group" />
-		<h2>عمومی</h2>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row"><label for="nvb-form-heading">عنوان فرم</label></th>
-				<td><input id="nvb-form-heading" class="regular-text" name="navidban_settings[form_heading]" value="خبرم کن" /></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-form-intro">توضیح زیر عنوان</label></th>
-				<td><textarea id="nvb-form-intro" class="large-text" rows="2" name="navidban_settings[form_intro]">این کالا فعلاً موجود نیست. شمارهٔ خود را بگذارید تا به‌محض بازگشت موجودی خبرتان کنیم.</textarea></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-button">متن دکمه</label></th>
-				<td><input id="nvb-button" class="regular-text" name="navidban_settings[button_label]" value="خبرم کن" /></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-success">پیام موفقیت</label></th>
-				<td><input id="nvb-success" class="large-text" name="navidban_settings[success_message]" value="ثبت شد. به‌محض بازگشت موجودی خبرتان می‌کنیم." /></td>
-			</tr>
-			<tr>
-				<th scope="row">نام فروشگاه در پیام‌ها</th>
-				<td><input class="regular-text" name="navidban_settings[site_name]" value="فروشگاه تست" /></td>
-			</tr>
-		</table>
+		<div class="nvb-panel">
+			<h2>عمومی</h2>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="nvb-form-heading">عنوان فرم</label></th>
+					<td><input id="nvb-form-heading" class="regular-text" name="navidban_settings[form_heading]" value="خبرم کن" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-form-intro">توضیح زیر عنوان</label></th>
+					<td><textarea id="nvb-form-intro" class="large-text" rows="2" name="navidban_settings[form_intro]">این کالا فعلاً موجود نیست. شمارهٔ خود را بگذارید تا به‌محض بازگشت موجودی خبرتان کنیم.</textarea></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-button">متن دکمه</label></th>
+					<td><input id="nvb-button" class="regular-text" name="navidban_settings[button_label]" value="خبرم کن" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-success">پیام موفقیت</label></th>
+					<td><input id="nvb-success" class="large-text" name="navidban_settings[success_message]" value="ثبت شد. به‌محض بازگشت موجودی خبرتان می‌کنیم." /></td>
+				</tr>
+				<tr>
+					<th scope="row">نام فروشگاه در پیام‌ها</th>
+					<td><input class="regular-text" name="navidban_settings[site_name]" value="فروشگاه تست" /></td>
+				</tr>
+			</table>
 
-		<h2>کانال‌ها</h2>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row"><label for="nvb-channel-choice">اولویت کانال در فرم</label></th>
-				<td>
-					<select id="nvb-channel-choice" name="navidban_settings[channel_choice]">
-						<option value="sms_first" selected="selected">پیامک (پیش‌فرض) — مناسب بازار ایران</option><option value="email_first">ایمیل</option><option value="both">هر دو؛ مشتری خودش انتخاب کند</option>					</select>
-					<p class="description">
-						این گزینه فقط وقتی اثر دارد که <strong>هر دو</strong> کانال واقعاً پیکربندی شده باشند.
-						اگر پیامک را روشن کرده‌اید ولی کلید درگاه را خالی گذاشته‌اید، فرم به ایمیل برمی‌گردد تا
-						کانالی که کار نمی‌کند به مشتری پیشنهاد نشود.
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row">ایمیل</th>
-				<td>
-					<label><input type="checkbox" name="navidban_settings[email_enabled]" value="1"  checked="checked" /> فعال</label>
-					<p class="description">از تابع ایمیل وردپرس (wp_mail) استفاده می‌شود؛ هیچ سرویس بیرونی در میان نیست.</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-from-email">نشانی فرستنده</label></th>
-				<td>
-					<input id="nvb-from-email" class="regular-text" dir="ltr" name="navidban_settings[from_email]" value="" placeholder="noreply@example.com" />
-					<p class="description">
-						بهتر است دامنهٔ همین نشانی با دامنهٔ سایت یکی باشد؛ فرستندهٔ ناهم‌خوان، رایج‌ترین
-						دلیل «ارسال شد ولی ایمیل نیامد» است. خالی بگذارید تا ایمیل مدیر سایت
-						(<code dir="ltr"></code>) استفاده شود.
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-from-name">نام فرستنده</label></th>
-				<td><input id="nvb-from-name" class="regular-text" name="navidban_settings[from_name]" value="فروشگاه تست" /></td>
-			</tr>
-			<tr>
-				<th scope="row">پیامک</th>
-				<td>
-					<label><input type="checkbox" name="navidban_settings[sms_enabled]" value="1"  checked="checked" /> فعال</label>
-					<p class="description">تا وقتی درگاه پیامک پیکربندی نشود، پیامک ارسال نمی‌شود.</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-gateway">درگاه پیامک</label></th>
-				<td>
-					<select id="nvb-gateway" name="navidban_settings[sms_gateway]">
-													<option value="melipayamak"  selected="selected">ملی‌پیامک</option>
-													<option value="ippanel" >آی‌پی‌پنل</option>
-													<option value="kavenegar" >کاوه‌نگار</option>
-													<option value="generic" >درگاه عمومی REST</option>
-											</select>
-				</td>
-			</tr>
-		</table>
+		</div>
+		<div class="nvb-panel">
+			<h2>کانال‌ها</h2>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="nvb-channel-choice">اولویت کانال در فرم</label></th>
+					<td>
+						<select id="nvb-channel-choice" name="navidban_settings[channel_choice]">
+							<option value="sms_first" selected="selected">پیامک (پیش‌فرض) — مناسب بازار ایران</option><option value="email_first">ایمیل</option><option value="both">هر دو؛ مشتری خودش انتخاب کند</option>						</select>
+						<p class="description">
+							این گزینه فقط وقتی اثر دارد که <strong>هر دو</strong> کانال واقعاً پیکربندی شده باشند.
+							اگر پیامک را روشن کرده‌اید ولی کلید درگاه را خالی گذاشته‌اید، فرم به ایمیل برمی‌گردد تا
+							کانالی که کار نمی‌کند به مشتری پیشنهاد نشود.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">ایمیل</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[email_enabled]" value="1"  checked="checked" /> فعال</label>
+						<p class="description">از تابع ایمیل وردپرس (wp_mail) استفاده می‌شود؛ هیچ سرویس بیرونی در میان نیست.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-from-email">نشانی فرستنده</label></th>
+					<td>
+						<input id="nvb-from-email" class="regular-text" dir="ltr" name="navidban_settings[from_email]" value="" placeholder="noreply@example.com" />
+						<p class="description">
+							بهتر است دامنهٔ همین نشانی با دامنهٔ سایت یکی باشد؛ فرستندهٔ ناهم‌خوان، رایج‌ترین
+							دلیل «ارسال شد ولی ایمیل نیامد» است. خالی بگذارید تا ایمیل مدیر سایت
+							(<code dir="ltr"></code>) استفاده شود.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-from-name">نام فرستنده</label></th>
+					<td><input id="nvb-from-name" class="regular-text" name="navidban_settings[from_name]" value="فروشگاه تست" /></td>
+				</tr>
+				<tr>
+					<th scope="row">پیامک</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[sms_enabled]" value="1"  checked="checked" /> فعال</label>
+						<p class="description">تا وقتی درگاه پیامک پیکربندی نشود، پیامک ارسال نمی‌شود.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-gateway">درگاه پیامک</label></th>
+					<td>
+						<select id="nvb-gateway" name="navidban_settings[sms_gateway]">
+															<option value="melipayamak"  selected="selected">ملی‌پیامک</option>
+															<option value="ippanel" >آی‌پی‌پنل</option>
+															<option value="kavenegar" >کاوه‌نگار</option>
+															<option value="generic" >درگاه عمومی REST</option>
+													</select>
+					</td>
+				</tr>
+			</table>
 
-		<h2>متن پیام‌ها</h2>
-		<p class="nvb-muted">
-			جای‌نگهدارهای مجاز:
-							<code>{site_name}</code>
-							<code>{product_name}</code>
-							<code>{variation_name}</code>
-							<code>{product_url}</code>
-							<code>{price}</code>
-							<code>{customer_name}</code>
-							<code>{unsubscribe_url}</code>
-							<code>{confirm_url}</code>
-							<code>{waitlist_id}</code>
-							<code>{store_url}</code>
-					</p>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row"><label for="nvb-subject">موضوع ایمیل</label></th>
-				<td><input id="nvb-subject" class="large-text" name="navidban_settings[email_subject]" value="بازگشت موجودی: {product_name}" /></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-email-body">متن ایمیل</label></th>
-				<td><textarea id="nvb-email-body" class="large-text code" rows="7" name="navidban_settings[email_body]">سلام {customer_name}،
+		</div>
+		<div class="nvb-panel">
+			<h2>متن پیام‌ها</h2>
+			<p class="nvb-muted">
+				جای‌نگهدارهای مجاز:
+									<code>{site_name}</code>
+									<code>{product_name}</code>
+									<code>{variation_name}</code>
+									<code>{product_url}</code>
+									<code>{price}</code>
+									<code>{customer_name}</code>
+									<code>{unsubscribe_url}</code>
+									<code>{confirm_url}</code>
+									<code>{waitlist_id}</code>
+									<code>{store_url}</code>
+							</p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="nvb-subject">موضوع ایمیل</label></th>
+					<td><input id="nvb-subject" class="large-text" name="navidban_settings[email_subject]" value="بازگشت موجودی: {product_name}" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-email-body">متن ایمیل</label></th>
+					<td><textarea id="nvb-email-body" class="large-text code" rows="7" name="navidban_settings[email_body]">سلام {customer_name}،
 
 خبر خوب: {product_name} دوباره موجود شد.
 {product_url}
@@ -931,153 +1178,165 @@ body {
 اگر دیگر نمی‌خواهید اعلان بگیرید: {unsubscribe_url}
 
 {site_name}</textarea></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-sms-body">متن پیامک</label></th>
-				<td>
-					<textarea id="nvb-sms-body" class="large-text" rows="3" name="navidban_settings[sms_template]">{product_name} موجود شد: {product_url} | لغو: {unsubscribe_url}</textarea>
-					<p class="description">پیوند لغو اشتراک در هر پیام اجباری است؛ آن را حذف نکنید. هر ۷۰ کاراکتر یک پیامک حساب می‌شود.</p>
-				</td>
-			</tr>
-		</table>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-sms-body">متن پیامک</label></th>
+					<td>
+						<textarea id="nvb-sms-body" class="large-text" rows="3" name="navidban_settings[sms_template]">{product_name} موجود شد: {product_url} | لغو: {unsubscribe_url}</textarea>
+						<p class="description">پیوند لغو اشتراک در هر پیام اجباری است؛ آن را حذف نکنید. هر ۷۰ کاراکتر یک پیامک حساب می‌شود.</p>
+					</td>
+				</tr>
+			</table>
 
-		<h2>رضایت و تأیید دومرحله‌ای</h2>
-		<p class="description" style="max-width:640px;">
-			پیش‌فرض تازه: تأیید دومرحله‌ای <strong>خاموش</strong> است؛ مشتری یک‌بار ثبت می‌کند و اعلان موجودی مستقیم می‌رسد.
-			اگر روی این سایت ثبت‌نام الکی زیاد شده، روشنش کنید. هزینه‌اش این است که تا وقتی مشتری پیوند تأیید را باز نکند،
-			اعلانی برایش نمی‌رود؛ بعضی مشتری‌ها این را «پیام نیامد» برداشت می‌کنند.
-		</p>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row">چک‌باکس رضایت</th>
-				<td>
-					<label><input type="checkbox" name="navidban_settings[consent_required]" value="1"  /> اجباری باشد</label>
-					<p class="description">پیش‌فرض: خاموش (چک‌باکس نمایش داده نمی‌شود). اگر روشن کنید، ثبت بدون تیک انجام نمی‌شود.</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-consent-label">متن رضایت</label></th>
-				<td><input id="nvb-consent-label" class="large-text" name="navidban_settings[consent_label]" value="با دریافت اعلان از طریق پیامک/ایمیل موافقم و سیاست حریم خصوصی را خوانده‌ام." /></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-privacy">نشانی سیاست حریم خصوصی</label></th>
-				<td>
-					<input id="nvb-privacy" class="large-text" type="url" name="navidban_settings[privacy_url]" value="" placeholder="خالی = صفحهٔ رسمی حریم خصوصی وردپرس" />
-				</td>
-			</tr>
-			<tr>
-				<th scope="row">تأیید دومرحله‌ای</th>
-				<td>
-					<label><input type="checkbox" name="navidban_settings[double_opt_in]" value="1"  /> فعال</label>
-					<p class="description">
-						خاموش (پیش‌فرض): ثبت یک‌مرحله‌ای است و اعلان موجودی مستقیم ارسال می‌شود — کم‌ترین اصطکاک برای مشتری.
-						روشن: تا وقتی مشتری پیوند تأیید را باز نکند، هیچ اعلانی برایش نمی‌رود؛ جلوی ثبت‌نام الکی را می‌گیرد.
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-ttl">اعتبار پیوند تأیید (ساعت)</label></th>
-				<td><input id="nvb-ttl" type="number" min="1" max="168" name="navidban_settings[confirm_ttl_hours]" value="48" /></td>
-			</tr>
-		</table>
+		</div>
+		<div class="nvb-panel">
+			<h2>رضایت و تأیید دومرحله‌ای</h2>
+			<p class="description" style="max-width:640px;">
+				پیش‌فرض تازه: تأیید دومرحله‌ای <strong>خاموش</strong> است؛ مشتری یک‌بار ثبت می‌کند و اعلان موجودی مستقیم می‌رسد.
+				اگر روی این سایت ثبت‌نام الکی زیاد شده، روشنش کنید. هزینه‌اش این است که تا وقتی مشتری پیوند تأیید را باز نکند،
+				اعلانی برایش نمی‌رود؛ بعضی مشتری‌ها این را «پیام نیامد» برداشت می‌کنند.
+			</p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">چک‌باکس رضایت</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[consent_required]" value="1"  /> اجباری باشد</label>
+						<p class="description">پیش‌فرض: خاموش (چک‌باکس نمایش داده نمی‌شود). اگر روشن کنید، ثبت بدون تیک انجام نمی‌شود.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-consent-label">متن رضایت</label></th>
+					<td><input id="nvb-consent-label" class="large-text" name="navidban_settings[consent_label]" value="با دریافت اعلان از طریق پیامک/ایمیل موافقم و سیاست حریم خصوصی را خوانده‌ام." /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-privacy">نشانی سیاست حریم خصوصی</label></th>
+					<td>
+						<input id="nvb-privacy" class="large-text" type="url" name="navidban_settings[privacy_url]" value="" placeholder="خالی = صفحهٔ رسمی حریم خصوصی وردپرس" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">تأیید دومرحله‌ای</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[double_opt_in]" value="1"  /> فعال</label>
+						<p class="description">
+							خاموش (پیش‌فرض): ثبت یک‌مرحله‌ای است و اعلان موجودی مستقیم ارسال می‌شود — کم‌ترین اصطکاک برای مشتری.
+							روشن: تا وقتی مشتری پیوند تأیید را باز نکند، هیچ اعلانی برایش نمی‌رود؛ جلوی ثبت‌نام الکی را می‌گیرد.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-ttl">اعتبار پیوند تأیید (ساعت)</label></th>
+					<td><input id="nvb-ttl" type="number" min="1" max="168" name="navidban_settings[confirm_ttl_hours]" value="48" /></td>
+				</tr>
+			</table>
 
-		<h2>زمان‌بندی و صف</h2>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row">اعلام به تعداد موجودی</th>
-				<td>
-					<label><input type="checkbox" name="navidban_settings[fair_sending]" value="1"  checked="checked" /> فعال</label>
-					<p class="description">اگر ۵ عدد موجود شد و ۲۰۰ نفر در انتظار باشند، فقط به ۵ نفر اول خبر می‌دهد. بقیه برای بازگشت بعدی می‌مانند.</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row">اعلام برای پیش‌سفارش (backorder)</th>
-				<td><label><input type="checkbox" name="navidban_settings[notify_backorders]" value="1"  /> پیش‌سفارش هم «موجود» شمرده شود</label></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-batch">اندازهٔ دسته</label></th>
-				<td><input id="nvb-batch" type="number" min="1" max="500" name="navidban_settings[queue_batch_size]" value="50" /> <span class="description">پیش‌فرض ۵۰، سقف ۵۰۰.</span></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-rate">حداکثر ارسال در دقیقه</label></th>
-				<td><input id="nvb-rate" type="number" min="1" max="600" name="navidban_settings[queue_per_minute]" value="60" /></td>
-			</tr>
-			<tr>
-				<th scope="row">بازهٔ مجاز ارسال</th>
-				<td>
-					<label><input type="checkbox" name="navidban_settings[send_window_enabled]" value="1"  /> فعال</label>
-					از <input type="number" min="0" max="23" name="navidban_settings[send_window_start]" value="8" />
-					تا <input type="number" min="0" max="23" name="navidban_settings[send_window_end]" value="22" />
-					<p class="description">بیرون از این بازه، پیام‌ها در صف می‌مانند و در اولین ساعت مجاز ارسال می‌شوند.</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-reconcile">فاصلهٔ پایش تطبیقی (دقیقه)</label></th>
-				<td><input id="nvb-reconcile" type="number" min="5" max="1440" name="navidban_settings[reconcile_interval]" value="15" /></td>
-			</tr>
-			<tr>
-				<th scope="row"><label for="nvb-retention">نگهداریٔ رکورد (روز)</label></th>
-				<td><input id="nvb-retention" type="number" min="0" max="3650" name="navidban_settings[retention_days]" value="180" /> <span class="description">۰ = هرگز پاک نشود.</span></td>
-			</tr>
-		</table>
+		</div>
+		<div class="nvb-panel">
+			<h2>زمان‌بندی و صف</h2>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">اعلام به تعداد موجودی</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[fair_sending]" value="1"  checked="checked" /> فعال</label>
+						<p class="description">اگر ۵ عدد موجود شد و ۲۰۰ نفر در انتظار باشند، فقط به ۵ نفر اول خبر می‌دهد. بقیه برای بازگشت بعدی می‌مانند.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">اعلام برای پیش‌سفارش (backorder)</th>
+					<td><label><input type="checkbox" name="navidban_settings[notify_backorders]" value="1"  /> پیش‌سفارش هم «موجود» شمرده شود</label></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-batch">اندازهٔ دسته</label></th>
+					<td><input id="nvb-batch" type="number" min="1" max="500" name="navidban_settings[queue_batch_size]" value="50" /> <span class="description">پیش‌فرض ۵۰، سقف ۵۰۰.</span></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-rate">حداکثر ارسال در دقیقه</label></th>
+					<td><input id="nvb-rate" type="number" min="1" max="600" name="navidban_settings[queue_per_minute]" value="60" /></td>
+				</tr>
+				<tr>
+					<th scope="row">بازهٔ مجاز ارسال</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[send_window_enabled]" value="1"  /> فعال</label>
+						از <input type="number" min="0" max="23" name="navidban_settings[send_window_start]" value="8" />
+						تا <input type="number" min="0" max="23" name="navidban_settings[send_window_end]" value="22" />
+						<p class="description">بیرون از این بازه، پیام‌ها در صف می‌مانند و در اولین ساعت مجاز ارسال می‌شوند.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-reconcile">فاصلهٔ پایش تطبیقی (دقیقه)</label></th>
+					<td><input id="nvb-reconcile" type="number" min="5" max="1440" name="navidban_settings[reconcile_interval]" value="15" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="nvb-retention">نگهداریٔ رکورد (روز)</label></th>
+					<td><input id="nvb-retention" type="number" min="0" max="3650" name="navidban_settings[retention_days]" value="180" /> <span class="description">۰ = هرگز پاک نشود.</span></td>
+				</tr>
+			</table>
 
-		<h2>درگاه‌های پیامک</h2>
+		</div>
+		<div class="nvb-panel">
+			<h2>درگاه‌های پیامک</h2>
 
-		<h3>ملی‌پیامک</h3>
-		<table class="form-table" role="presentation">
-			<tr><th scope="row">نام کاربری</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_user]" value="demo" /></td></tr>
-			<tr><th scope="row">رمز</th><td><input class="regular-text" dir="ltr" type="password" name="navidban_settings[melipayamak_pass]" value="" placeholder="ذخیره شده — برای تغییر، مقدار جدید بگذارید" autocomplete="new-password" /></td></tr>
-			<tr><th scope="row">شمارهٔ خط</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_from]" value="" /></td></tr>
-			<tr><th scope="row">شناسهٔ الگو (bodyId)</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_body_id]" value="" /> <span class="description">اختیاری؛ برای ارسال خدماتی/الگویی.</span></td></tr>
-		</table>
+			<h3>ملی‌پیامک</h3>
+			<table class="form-table" role="presentation">
+				<tr><th scope="row">نام کاربری</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_user]" value="demo" /></td></tr>
+				<tr><th scope="row">رمز</th><td><input class="regular-text" dir="ltr" type="password" name="navidban_settings[melipayamak_pass]" value="" placeholder="ذخیره شده — برای تغییر، مقدار جدید بگذارید" autocomplete="new-password" /></td></tr>
+				<tr><th scope="row">شمارهٔ خط</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_from]" value="" /></td></tr>
+				<tr><th scope="row">شناسهٔ الگو (bodyId)</th><td><input class="regular-text" dir="ltr" name="navidban_settings[melipayamak_body_id]" value="" /> <span class="description">اختیاری؛ برای ارسال خدماتی/الگویی.</span></td></tr>
+			</table>
 
-		<h3>آی‌پی‌پنل</h3>
-		<table class="form-table" role="presentation">
-			<tr><th scope="row">کلید API</th><td><input class="regular-text" dir="ltr" type="password" name="navidban_settings[ippanel_token]" value="" placeholder="" autocomplete="new-password" /></td></tr>
-			<tr><th scope="row">شمارهٔ فرستنده</th><td><input class="regular-text" dir="ltr" name="navidban_settings[ippanel_from]" value="" /></td></tr>
-		</table>
+			<h3>آی‌پی‌پنل</h3>
+			<table class="form-table" role="presentation">
+				<tr><th scope="row">کلید API</th><td><input class="regular-text" dir="ltr" type="password" name="navidban_settings[ippanel_token]" value="" placeholder="" autocomplete="new-password" /></td></tr>
+				<tr><th scope="row">شمارهٔ فرستنده</th><td><input class="regular-text" dir="ltr" name="navidban_settings[ippanel_from]" value="" /></td></tr>
+			</table>
 
-		<h3>کاوه‌نگار</h3>
-		<table class="form-table" role="presentation">
-			<tr><th scope="row">کلید API</th><td><input class="regular-text" dir="ltr" type="password" name="navidban_settings[kavenegar_api_key]" value="" placeholder="" autocomplete="new-password" /></td></tr>
-			<tr><th scope="row">شمارهٔ فرستنده</th><td><input class="regular-text" dir="ltr" name="navidban_settings[kavenegar_sender]" value="" /></td></tr>
-		</table>
+			<h3>کاوه‌نگار</h3>
+			<table class="form-table" role="presentation">
+				<tr><th scope="row">کلید API</th><td><input class="regular-text" dir="ltr" type="password" name="navidban_settings[kavenegar_api_key]" value="" placeholder="" autocomplete="new-password" /></td></tr>
+				<tr><th scope="row">شمارهٔ فرستنده</th><td><input class="regular-text" dir="ltr" name="navidban_settings[kavenegar_sender]" value="" /></td></tr>
+			</table>
 
-		<h3>درگاه عمومی REST</h3>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row">نشانی درگاه</th>
-				<td>
-					<input class="large-text" dir="ltr" type="url" name="navidban_settings[generic_url]" value="" placeholder="https://" />
-					<p class="description">فقط https و فقط دامنهٔ عمومی. نشانی‌های محلی، خصوصی و IP رد می‌شوند.</p>
-				</td>
-			</tr>
-			<tr><th scope="row">توکن (Bearer)</th><td><input class="large-text" dir="ltr" type="password" name="navidban_settings[generic_token]" value="" placeholder="" autocomplete="new-password" /></td></tr>
-			<tr>
-				<th scope="row">قالب داده</th>
-				<td>
-					<textarea class="large-text code" dir="ltr" rows="4" name="navidban_settings[generic_payload]">{&quot;to&quot;:&quot;{to}&quot;,&quot;message&quot;:&quot;{message}&quot;}</textarea>
-					<p class="description">جای‌نگهدارها: <code>{to}</code> و <code>{message}</code>. مقدارها به‌صورت JSON امن جای‌گذاری می‌شوند.</p>
-				</td>
-			</tr>
-		</table>
+			<h3>درگاه عمومی REST</h3>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">نشانی درگاه</th>
+					<td>
+						<input class="large-text" dir="ltr" type="url" name="navidban_settings[generic_url]" value="" placeholder="https://" />
+						<p class="description">فقط https و فقط دامنهٔ عمومی. نشانی‌های محلی، خصوصی و IP رد می‌شوند.</p>
+					</td>
+				</tr>
+				<tr><th scope="row">توکن (Bearer)</th><td><input class="large-text" dir="ltr" type="password" name="navidban_settings[generic_token]" value="" placeholder="" autocomplete="new-password" /></td></tr>
+				<tr>
+					<th scope="row">قالب داده</th>
+					<td>
+						<textarea class="large-text code" dir="ltr" rows="4" name="navidban_settings[generic_payload]">{&quot;to&quot;:&quot;{to}&quot;,&quot;message&quot;:&quot;{message}&quot;}</textarea>
+						<p class="description">جای‌نگهدارها: <code>{to}</code> و <code>{message}</code>. مقدارها به‌صورت JSON امن جای‌گذاری می‌شوند.</p>
+					</td>
+				</tr>
+			</table>
 
-		<h2>حریم خصوصی و پیشرفته</h2>
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row">حذف داده هنگام حذف افزونه</th>
-				<td>
-					<label><input type="checkbox" name="navidban_settings[delete_data_on_uninstall]" value="1"  /> فعال</label>
-					<p class="description">پیش‌فرض خاموش. با روشن کردن، هنگام حذف افزونه همهٔ جدول‌ها و تنظیمات پاک می‌شوند.</p>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row">ثبت لاگ اشکال‌زدایی</th>
-				<td><label><input type="checkbox" name="navidban_settings[debug_log]" value="1"  /> فعال</label></td>
-			</tr>
-		</table>
+		</div>
+		<div class="nvb-panel">
+			<h2>حریم خصوصی و پیشرفته</h2>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">حذف داده هنگام حذف افزونه</th>
+					<td>
+						<label><input type="checkbox" name="navidban_settings[delete_data_on_uninstall]" value="1"  /> فعال</label>
+						<p class="description">پیش‌فرض خاموش. با روشن کردن، هنگام حذف افزونه همهٔ جدول‌ها و تنظیمات پاک می‌شوند.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">ثبت لاگ اشکال‌زدایی</th>
+					<td><label><input type="checkbox" name="navidban_settings[debug_log]" value="1"  /> فعال</label></td>
+				</tr>
+			</table>
 
-		<button type="submit" class="button">ذخیرهٔ تنظیمات</button>	</form>
+		</div>
+		<div class="nvb-actions">
+			<input type="submit" name="submit" id="submit" class="button button-primary" value="ذخیرهٔ تنظیمات" />			<p>تغییرات پس از ذخیره، فوراً روی فرم فروشگاه اعمال می‌شود.</p>
+		</div>
+	</form>
 
 	<p class="nvb-footer">نویدبان — محصولی از اتحاد وردپرس</p></div>
 </body>

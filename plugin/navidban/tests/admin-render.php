@@ -237,6 +237,8 @@ NvbAdmin::ok( false !== strpos( $settings_html, 'options.php' ), 'فرم تنظ�
 NvbAdmin::ok( false !== strpos( $settings_html, 'navidban_settings[' ), 'نام آپشن در فرم درست است' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'option_page' ), 'settings_fields فراخوانی شده' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'nvb-form-heading' ), 'فیلد عنوان فرم هست' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'nvb-actions' ), 'نوار ذخیرهٔ تنظیمات رندر می‌شود' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'button button-primary' ) && false !== strpos( $settings_html, 'type="submit"' ), 'دکمهٔ ذخیره، دکمهٔ اصلی و از نوع submit است' );
 NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[sms_gateway]"' ), 'انتخاب درگاه پیامک هست' );
 
 foreach ( array( 'rebuild_snapshots', 'run_reconcile', 'flush_queue', 'empty_queue', 'prune', 'test_email', 'test_sms' ) as $tool ) {
@@ -251,6 +253,72 @@ NvbAdmin::ok( false === strpos( $rendered['waitlists'], 'buyer@example.com' ), '
 NvbAdmin::ok( false === stripos( $rendered['waitlists'], '<script' ), 'هیچ تگ script در خروجی نیست' );
 NvbAdmin::ok( false !== strpos( $rendered['waitlists'], '&lt;' ), 'کاراکتر خطرناک به موجودیت HTML تبدیل شده' );
 NvbAdmin::ok( false !== strpos( $rendered['dashboard'], 'InnoDB' ) || false !== strpos( $rendered['dashboard'], 'سالم' ), 'داشبورد وضعیت جدول‌ها را نشان می‌دهد' );
+
+/* -------------------------------------------------------------------------
+ * Stylesheet coverage
+ *
+ * The bug this guards against is subtle and already shipped once: an <input>
+ * with no type attribute is a text box in every browser, but the stylesheet
+ * only listed input[type="text"] etc., so those fields stayed as raw
+ * WordPress boxes while everything around them was styled.
+ * ---------------------------------------------------------------------- */
+NvbAdmin::group( 'پوشش استایل' );
+
+$nvb_css = (string) file_get_contents( NAVIDBAN_DIR . 'assets/css/navidban-admin.css' );
+NvbAdmin::ok( '' !== $nvb_css, 'فایل CSS پنل خوانده می‌شود' );
+
+$nvb_all_html = implode( "\n", $rendered );
+preg_match_all( '~<input\b[^>]*>~i', $nvb_all_html, $nvb_input_matches );
+preg_match_all( '~<textarea\b~i', $nvb_all_html, $nvb_textarea_matches );
+preg_match_all( '~<select\b~i', $nvb_all_html, $nvb_select_matches );
+
+NvbAdmin::ok( count( $nvb_input_matches[0] ) > 5, 'صفحات ورودی دارند', count( $nvb_input_matches[0] ) );
+NvbAdmin::ok( count( $nvb_select_matches[0] ) > 0 && false !== strpos( $nvb_css, '.nvb-wrap select' ), 'همهٔ select‌ها استایل دارند' );
+NvbAdmin::ok( count( $nvb_textarea_matches[0] ) > 0 && false !== strpos( $nvb_css, '.nvb-wrap textarea' ), 'همهٔ textarea‌ها استایل دارند' );
+
+$nvb_types = array();
+foreach ( $nvb_input_matches[0] as $nvb_tag ) {
+	if ( preg_match( '~type="([^"]+)"~i', $nvb_tag, $nvb_type_match ) ) {
+		$nvb_types[ $nvb_type_match[1] ] = true;
+	} else {
+		$nvb_types['(none)'] = true;
+	}
+}
+
+// These are not text-like controls and must not get the field look.
+$nvb_exempt = array( 'hidden', 'submit', 'button', 'checkbox', 'radio' );
+
+/**
+ * Does the stylesheet contain this selector as a real rule head?
+ *
+ * A plain substring check is not enough: `input[type="text"]:focus` also
+ * contains `input[type="text"]`, and a field styled only on focus is exactly
+ * the bug we are guarding against. The selector has to be followed by a
+ * comma or an opening brace.
+ *
+ * @param string $css      Stylesheet.
+ * @param string $selector Selector.
+ * @return bool
+ */
+$nvb_has_rule = static function ( $css, $selector ) {
+	return 1 === preg_match( '~' . preg_quote( $selector, '~' ) . '\s*[,{]~', $css );
+};
+
+foreach ( array_keys( $nvb_types ) as $nvb_type ) {
+	if ( in_array( $nvb_type, $nvb_exempt, true ) ) {
+		continue;
+	}
+
+	$nvb_needle = '(none)' === $nvb_type ? 'input:not([type])' : 'input[type="' . $nvb_type . '"]';
+	NvbAdmin::ok( $nvb_has_rule( $nvb_css, '.' . 'nvb-wrap ' . $nvb_needle ), 'استایل برای ورودی نوع ' . $nvb_type . ' هست' );
+}
+
+// Checkbox and radio must at least be themed, not restyled from scratch.
+NvbAdmin::ok( false !== strpos( $nvb_css, 'input[type="checkbox"]' ) && false !== strpos( $nvb_css, 'accent-color' ), 'چک‌باکس‌ها با accent-color رنگ می‌گیرند' );
+
+// The front stylesheet must keep covering the storefront form's controls.
+$nvb_front_css = (string) file_get_contents( NAVIDBAN_DIR . 'assets/css/navidban-front.css' );
+NvbAdmin::ok( false !== strpos( $nvb_front_css, '.nvb-form__field input' ), 'فرم فروشگاه استایل ورودی دارد' );
 
 /* -------------------------------------------------------------------------
  * "Why did nothing send?" panel

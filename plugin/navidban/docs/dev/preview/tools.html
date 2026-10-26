@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نویدبان 1.0.4 — ابزارها</title>
+<title>نویدبان 1.0.5 — ابزارها</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -241,7 +241,7 @@ body {
 
 .nvb-tabs a[aria-current="page"] {
 	color: #fff;
-	background: linear-gradient(135deg, var(--nvb-primary), var(--nvb-primary-hover));
+	background: linear-gradient(135deg, #0a4741, #0f6f66);
 	box-shadow: 0 8px 18px -10px rgba(14, 92, 85, 0.9);
 }
 
@@ -321,6 +321,61 @@ body {
 	margin-bottom: 18px;
 }
 
+/* Section heading: a small gradient tick + the title, so every block has an
+   obvious start without a decorative icon font. */
+.nvb-panel > h2,
+.nvb-panel > h3 {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--nvb-primary);
+}
+
+.nvb-panel > h2::before,
+.nvb-panel > h3::before {
+	content: "";
+	flex: 0 0 4px;
+	width: 4px;
+	height: 1.05em;
+	border-radius: 2px;
+	background: linear-gradient(180deg, var(--nvb-primary), var(--nvb-accent));
+}
+
+.nvb-panel > h3 {
+	margin-top: 22px;
+	font-size: 14px;
+	color: var(--nvb-ink);
+}
+
+.nvb-panel > h3::before {
+	height: 0.95em;
+	background: linear-gradient(180deg, var(--nvb-primary-hover), rgba(20, 133, 123, 0.35));
+}
+
+.nvb-panel > p:first-of-type {
+	margin-top: 2px;
+}
+
+/* A card placed inside a panel is a sub-block, not a second sheet of glass:
+   two frosted layers on top of each other look muddy. */
+.nvb-panel .nvb-card {
+	background: rgba(255, 255, 255, 0.5);
+	box-shadow: none;
+}
+
+.nvb-panel .nvb-card::after {
+	display: none;
+}
+
+/* Inside a panel the first field should not push the heading away. */
+.nvb-panel .form-table tr:first-child th,
+.nvb-panel .form-table tr:first-child td {
+	padding-top: 4px;
+}
+
 .nvb-panel > h2:first-child,
 .nvb-panel > h3:first-child {
 	margin-top: 0;
@@ -348,13 +403,28 @@ body {
  * Forms
  * ---------------------------------------------------------------------- */
 
+/*
+ * Any input that is not a button-like control gets the field look.
+ *
+ * `input:not([type])` matters more than it looks: an <input> with no type
+ * attribute is a text box in every browser, but `input[type="text"]` does NOT
+ * match it. WordPress views written without an explicit type (title fields,
+ * gateway credentials, the test-phone box) stayed as raw WP boxes until this
+ * selector existed.
+ */
+.nvb-wrap input:not([type]),
 .nvb-wrap input[type="text"],
 .nvb-wrap input[type="email"],
 .nvb-wrap input[type="url"],
 .nvb-wrap input[type="password"],
 .nvb-wrap input[type="number"],
 .nvb-wrap input[type="search"],
+.nvb-wrap input[type="tel"],
 .nvb-wrap input[type="date"],
+.nvb-wrap input[type="datetime-local"],
+.nvb-wrap input[type="time"],
+.nvb-wrap input[type="month"],
+.nvb-wrap input[type="week"],
 .nvb-wrap select,
 .nvb-wrap textarea {
 	min-height: 36px;
@@ -376,13 +446,17 @@ body {
 	line-height: 1.9;
 }
 
+.nvb-wrap input:not([type]):focus,
 .nvb-wrap input[type="text"]:focus,
 .nvb-wrap input[type="email"]:focus,
 .nvb-wrap input[type="url"]:focus,
 .nvb-wrap input[type="password"]:focus,
 .nvb-wrap input[type="number"]:focus,
 .nvb-wrap input[type="search"]:focus,
+.nvb-wrap input[type="tel"]:focus,
 .nvb-wrap input[type="date"]:focus,
+.nvb-wrap input[type="datetime-local"]:focus,
+.nvb-wrap input[type="time"]:focus,
 .nvb-wrap select:focus,
 .nvb-wrap textarea:focus {
 	border-color: var(--nvb-primary-hover);
@@ -392,6 +466,36 @@ body {
 
 .nvb-wrap .form-table {
 	margin: 0;
+}
+
+/* Widths are declared here rather than inherited from wp-admin's stylesheet:
+   the panel must look the same even if a security plugin strips core CSS, and
+   the static preview (no wp-admin CSS) has to be representative. */
+.nvb-wrap .regular-text {
+	width: 25em;
+	max-width: 100%;
+}
+
+.nvb-wrap .large-text {
+	width: 100%;
+	max-width: 42em;
+}
+
+.nvb-wrap textarea.code {
+	direction: ltr;
+	text-align: left;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12.5px;
+	line-height: 1.8;
+}
+
+.nvb-wrap .check-column {
+	width: 2.4em;
+	text-align: center;
+}
+
+.nvb-wrap .widefat {
+	border: 0;
 }
 
 .nvb-wrap .form-table th {
@@ -410,9 +514,41 @@ body {
 }
 
 .nvb-wrap .description {
+	display: block;
+	margin: 5px 0 0;
 	color: var(--nvb-ink-soft);
 	font-size: 12px;
 	line-height: 1.9;
+	max-width: 60ch;
+}
+
+/* A description that has to sit next to a control (not under it). */
+.nvb-wrap .description--inline {
+	display: inline-block;
+	margin: 0 8px 0 0;
+}
+
+.nvb-wrap .description code,
+.nvb-wrap .description strong {
+	font-size: inherit;
+}
+
+/* Native checkboxes and radios, themed with accent-color (no custom sprite,
+   so keyboard and screen-reader behaviour stays untouched). */
+.nvb-wrap input[type="checkbox"],
+.nvb-wrap input[type="radio"] {
+	width: 18px;
+	height: 18px;
+	margin: 0 0 0 2px;
+	vertical-align: -3px;
+	accent-color: var(--nvb-primary);
+	cursor: pointer;
+}
+
+.nvb-wrap label {
+	font-size: 13px;
+	line-height: 1.95;
+	color: var(--nvb-ink);
 }
 
 /* Switch-style checkbox rows: keeps long Persian labels from jumping. */
@@ -479,10 +615,51 @@ body {
 	border-color: rgba(198, 72, 60, 0.35);
 }
 
+.nvb-wrap .button:focus,
+.nvb-wrap .button-secondary:focus,
+.nvb-wrap .button-primary:focus,
+.nvb-wrap button.button:focus {
+	box-shadow: 0 0 0 3px rgba(20, 133, 123, 0.28);
+	outline: 0;
+}
+
 .nvb-wrap .button:disabled,
 .nvb-wrap .button[disabled] {
 	opacity: 0.55;
 	transform: none;
+}
+
+/* Save/submit bar: sits at the end of a long settings form and stays reachable
+   while scrolling a tall panel list. */
+.nvb-actions {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin: 18px 0 0;
+	padding: 12px 16px;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: rgba(255, 255, 255, 0.88);
+	-webkit-backdrop-filter: blur(18px) saturate(1.4);
+	backdrop-filter: blur(18px) saturate(1.4);
+	box-shadow: 0 -8px 24px -18px rgba(14, 92, 85, 0.8);
+}
+
+.nvb-actions .button-primary,
+.nvb-actions input[type="submit"] {
+	padding: 8px 26px;
+	min-height: 40px;
+	font-size: 14px;
+}
+
+.nvb-actions p {
+	margin: 0;
+	font-size: 12px;
+	color: var(--nvb-ink-soft);
 }
 
 /* -------------------------------------------------------------------------
@@ -633,6 +810,47 @@ body {
 	line-height: 2;
 }
 
+/* Pagination (WordPress core classes, restyled to match the cards). */
+.nvb-wrap .tablenav {
+	display: flex;
+	justify-content: flex-start;
+	margin: 14px 0 0;
+	height: auto;
+}
+
+.nvb-wrap .tablenav-pages {
+	float: none;
+	margin: 0;
+}
+
+.nvb-wrap .tablenav-pages a,
+.nvb-wrap .tablenav-pages span {
+	display: inline-block;
+	min-width: 30px;
+	padding: 4px 10px;
+	margin-inline-end: 4px;
+	border: 1px solid var(--nvb-line);
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.75);
+	font-size: 12.5px;
+	line-height: 1.9;
+	color: var(--nvb-primary);
+	text-align: center;
+	text-decoration: none;
+}
+
+.nvb-wrap .tablenav-pages a:hover {
+	background: #fff;
+	border-color: var(--nvb-primary-hover);
+}
+
+.nvb-wrap .tablenav-pages .current {
+	border-color: transparent;
+	background: linear-gradient(135deg, var(--nvb-primary), var(--nvb-primary-hover));
+	color: #fff;
+	font-weight: 700;
+}
+
 /* -------------------------------------------------------------------------
  * Notices and diagnostics
  * ---------------------------------------------------------------------- */
@@ -667,10 +885,13 @@ body {
 	direction: ltr;
 	unicode-bidi: embed;
 	display: inline-block;
+	max-width: 100%;
 	padding: 1px 6px;
 	border-radius: 6px;
 	background: rgba(14, 92, 85, 0.08);
 	font-size: 12px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 .nvb-diagnosis--warn {
@@ -787,6 +1008,16 @@ body {
 		padding: 14px 16px;
 	}
 
+	.nvb-tabs {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.nvb-tabs a {
+		white-space: nowrap;
+	}
+
 	.nvb-hero__title {
 		font-size: 18px;
 	}
@@ -802,11 +1033,22 @@ body {
 		padding-top: 0;
 	}
 
+	.nvb-table {
+		display: block;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
 	.nvb-table thead th,
 	.nvb-table tbody td,
 	.nvb-table tbody th {
 		font-size: 12px;
 		padding: 9px 8px;
+		white-space: nowrap;
+	}
+
+	.nvb-actions {
+		position: static;
 	}
 }
 
@@ -814,11 +1056,11 @@ body {
 </head>
 <body>
 <p class="nvb-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.4.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.5.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">ابزارهای نویدبان<small>تشخیص، بازسازی و نگهداری</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۴</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools" aria-current="page">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
+<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">ابزارهای نویدبان<small>تشخیص، بازسازی و نگهداری</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۵</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools" aria-current="page">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
 	
 	<p class="nvb-muted">
 		آخرین پایش: هرگز		· پیام در صف: ۰	</p>
@@ -886,38 +1128,42 @@ body {
 		</form>
 	</div>
 
-	<h2>چرا برای این محصول پیامی نرفت؟</h2>
-	<form method="get" action="https://shop.test/wp-admin/admin.php" class="nvb-card">
-		<input type="hidden" name="page" value="navidban-tools" />
-		<p>شناسهٔ محصول را وارد کنید. فقط خوانده می‌شود؛ هیچ چیزی تغییر نمی‌کند.</p>
-		<input dir="ltr" type="number" min="1" name="diag_product" value="" placeholder="123" />
-		<button class="button">بررسی</button>
-	</form>
+	<div class="nvb-panel">
+		<h2>چرا برای این محصول پیامی نرفت؟</h2>
+		<form method="get" action="https://shop.test/wp-admin/admin.php" class="nvb-card">
+			<input type="hidden" name="page" value="navidban-tools" />
+			<p>شناسهٔ محصول را وارد کنید. فقط خوانده می‌شود؛ هیچ چیزی تغییر نمی‌کند.</p>
+			<input dir="ltr" type="number" min="1" name="diag_product" value="" placeholder="123" />
+			<button class="button">بررسی</button>
+		</form>
 
-	
-	<h2>وضعیت جدول‌ها</h2>
-	<table class="widefat striped nvb-table">
-		<thead><tr><th>جدول</th><th>موتور</th></tr></thead>
-		<tbody>
-							<tr>
-					<td>wp_nvb_waitlists</td>
-					<td>InnoDB (درست)</td>
-				</tr>
-							<tr>
-					<td>wp_nvb_stock_snapshots</td>
-					<td>InnoDB (درست)</td>
-				</tr>
-							<tr>
-					<td>wp_nvb_queue</td>
-					<td>InnoDB (درست)</td>
-				</tr>
-							<tr>
-					<td>wp_nvb_logs</td>
-					<td>InnoDB (درست)</td>
-				</tr>
-					</tbody>
-	</table>
+		
+	</div>
+	<div class="nvb-panel">
+		<h2>وضعیت جدول‌ها</h2>
+		<table class="widefat striped nvb-table">
+			<thead><tr><th>جدول</th><th>موتور</th></tr></thead>
+			<tbody>
+									<tr>
+						<td>wp_nvb_waitlists</td>
+						<td>InnoDB (درست)</td>
+					</tr>
+									<tr>
+						<td>wp_nvb_stock_snapshots</td>
+						<td>InnoDB (درست)</td>
+					</tr>
+									<tr>
+						<td>wp_nvb_queue</td>
+						<td>InnoDB (درست)</td>
+					</tr>
+									<tr>
+						<td>wp_nvb_logs</td>
+						<td>InnoDB (درست)</td>
+					</tr>
+							</tbody>
+		</table>
 
+	</div>
 	<p class="nvb-footer">نویدبان — محصولی از اتحاد وردپرس</p></div>
 </body>
 </html>

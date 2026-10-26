@@ -27,7 +27,8 @@ TITLES = {
     "settings": "تنظیمات",
     "tools": "ابزارها",
     "help": "راهنما",
-    "form": "فرم فروشگاه",
+    "form": "فرم فروشگاه (هر دو کانال)",
+    "form-sms": "فرم فروشگاه (فقط پیامک)",
     "email": "ایمیل اعلان موجودی",
 }
 
@@ -128,7 +129,7 @@ def main() -> int:
     target.mkdir(parents=True, exist_ok=True)
 
     for key, markup in screens.items():
-        is_form = key == "form"
+        is_form = key in ("form", "form-sms")
         is_email = key == "email"
         page = PAGE.format(
             version=html.escape(str(version)),
@@ -137,6 +138,17 @@ def main() -> int:
             plugin=front_css if is_form else ("" if is_email else admin_css),
             body=('<div class="nvb-demo">' + markup + "</div>") if is_form else markup,
         )
+        if is_email:
+            # The skin already returns a complete document; nest it nowhere and
+            # put the preview notice inside its <body> instead.
+            note = (
+                '<p style="max-width:560px;margin:0 auto 14px;padding:10px 14px;'
+                'border-radius:12px;background:#fffbe6;border:1px solid #f0d98a;'
+                'font:12px/1.9 Tahoma,Arial,sans-serif;color:#6b5200;direction:rtl;">'
+                "پیش‌نمایش قالب ایمیل. این فایل بخشی از بستهٔ انتشار نیست.</p>"
+            )
+            import re as _re
+            page = _re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + note, markup, count=1)
         (target / f"{key}.html").write_text(page, encoding="utf-8")
         print(f"wrote {target / (key + '.html')}")
 
