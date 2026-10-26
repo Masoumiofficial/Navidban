@@ -36,7 +36,7 @@ final class Http {
 			'sslverify'   => true,
 			'headers'     => $headers,
 			'body'        => $body,
-			'user-agent'  => 'Navidban/' . ( defined( 'NAVIDBAN_VERSION' ) ? NAVIDBAN_VERSION : '1.0.1' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
+			'user-agent'  => 'Navidban/' . ( defined( 'NAVIDBAN_VERSION' ) ? NAVIDBAN_VERSION : '1.0.2' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
 		);
 
 		if ( 'json' === $format && ! isset( $args['headers']['Content-Type'] ) ) {

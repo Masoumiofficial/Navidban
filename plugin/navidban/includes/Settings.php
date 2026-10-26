@@ -36,6 +36,7 @@ final class Settings {
 	 */
 	public static function defaults() {
 		$site_name = function_exists( 'get_bloginfo' ) ? get_bloginfo( 'name' ) : '';
+		$admin     = function_exists( 'get_option' ) ? (string) get_option( 'admin_email', '' ) : '';
 
 		return array(
 			// General.
@@ -58,6 +59,11 @@ final class Settings {
 			'confirm_ttl_hours'     => 48,
 
 			// Messaging.
+			// The From address is an explicit setting, not an afterthought: a
+			// sender whose domain does not match the sending host is the most
+			// common reason a "successful" wp_mail() lands in spam or is dropped.
+			'from_email'            => $admin,
+			'from_name'             => $site_name,
 			'email_subject'         => 'بازگشت موجودی: {product_name}',
 			'email_body'            => "سلام {customer_name}،\n\nخبر خوب: {product_name} دوباره موجود شد.\n{product_url}\n\nاگر دیگر نمی‌خواهید اعلان بگیرید: {unsubscribe_url}\n\n{site_name}",
 			'sms_template'          => '{product_name} موجود شد: {product_url} | لغو: {unsubscribe_url}',

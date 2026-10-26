@@ -732,6 +732,23 @@ $GLOBALS['nvb_mail_ok']    = true;
 $GLOBALS['nvb_mail_error'] = '';
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() . " WHERE event_key = 'restock:20261026:longerr'" );
 
+// From resolution: an explicit setting wins, an invalid one falls back to the
+// site admin address, and the header always carries a syntactically valid value.
+Settings::update( array( 'from_email' => 'noreply@shop.example' ) );
+NvbInt::same( 'noreply@shop.example', \Navidban\Channels\EmailChannel::from_address(), 'فرستندهٔ تنظیم‌شده استفاده می‌شود' );
+
+Settings::update( array( 'from_email' => 'not-an-email' ) );
+NvbInt::same( strtolower( (string) get_option( 'admin_email', '' ) ), \Navidban\Channels\EmailChannel::from_address(), 'فرستندهٔ نامعتبر به ایمیل مدیر برمی‌گردد' );
+
+Settings::update( array( 'from_email' => 'noreply@shop.example' ) );
+$GLOBALS['nvb_mails'] = array();
+$mail_channel->send( 'buyer@example.com', 'موضوع', 'متن', array() );
+$sent_headers = implode( "\n", (array) ( $GLOBALS['nvb_mails'][0]['headers'] ?? array() ) );
+NvbInt::ok( false !== strpos( $sent_headers, 'noreply@shop.example' ), 'هدر From نشانی تنظیم‌شده را دارد', $sent_headers );
+NvbInt::ok( false !== strpos( $sent_headers, 'Reply-To' ), 'هدر Reply-To تنظیم می‌شود' );
+
+Settings::update( array( 'from_email' => '' ) );
+
 NvbInt::group( 'کانال پیامک' );
 
 nvb_reset_rate_limit();

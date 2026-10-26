@@ -63,6 +63,21 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 				</td>
 			</tr>
 			<tr>
+				<th scope="row"><label for="nvb-from-email">نشانی فرستنده</label></th>
+				<td>
+					<input id="nvb-from-email" class="regular-text" dir="ltr" name="<?php echo esc_attr( Settings::OPTION ); ?>[from_email]" value="<?php echo esc_attr( (string) $settings['from_email'] ); ?>" placeholder="noreply@example.com" />
+					<p class="description">
+						بهتر است دامنهٔ همین نشانی با دامنهٔ سایت یکی باشد؛ فرستندهٔ ناهم‌خوان، رایج‌ترین
+						دلیل «ارسال شد ولی ایمیل نیامد» است. خالی بگذارید تا ایمیل مدیر سایت
+						(<code dir="ltr"><?php echo esc_html( (string) get_option( 'admin_email', '' ) ); ?></code>) استفاده شود.
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="nvb-from-name">نام فرستنده</label></th>
+				<td><input id="nvb-from-name" class="regular-text" name="<?php echo esc_attr( Settings::OPTION ); ?>[from_name]" value="<?php echo esc_attr( (string) $settings['from_name'] ); ?>" /></td>
+			</tr>
+			<tr>
 				<th scope="row">پیامک</th>
 				<td>
 					<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_enabled]" value="1" <?php checked( ! empty( $settings['sms_enabled'] ) ); ?> /> فعال</label>

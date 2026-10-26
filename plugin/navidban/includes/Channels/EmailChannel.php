@@ -59,8 +59,8 @@ final class EmailChannel implements ChannelInterface {
 			return Http::error( 'navidban_no_mail', 'تابع ایمیل در دسترس نیست.' );
 		}
 
-		$from_name  = (string) Settings::get( 'site_name', '' );
-		$from_email = function_exists( 'get_option' ) ? (string) get_option( 'admin_email', '' ) : '';
+		$from_name  = (string) Settings::get( 'from_name', (string) Settings::get( 'site_name', '' ) );
+		$from_email = self::from_address();
 
 		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
 
@@ -120,14 +120,40 @@ final class EmailChannel implements ChannelInterface {
 	}
 
 	/**
+	 * The address this plugin will actually put in the From header.
+	 *
+	 * Order: explicit setting, then the site admin address, then nothing (in
+	 * which case WordPress falls back to wordpress@<host>, which many hosts
+	 * treat as spam).
+	 *
+	 * @return string
+	 */
+	public static function from_address() {
+		$configured = strtolower( trim( (string) Settings::get( 'from_email', '' ) ) );
+
+		if ( '' !== $configured && Validator::is_email( $configured ) ) {
+			return $configured;
+		}
+
+		$admin = function_exists( 'get_option' ) ? strtolower( trim( (string) get_option( 'admin_email', '' ) ) ) : '';
+
+		return Validator::is_email( $admin ) ? $admin : '';
+	}
+
+	/**
 	 * Facts about how this server would send mail. No secrets, no guessing.
 	 *
-	 * @return array<string,string|bool>
+	 * @return array<string,string|bool|null>
 	 */
 	public static function diagnose() {
 		$sendmail = (string) ini_get( 'sendmail_path' );
 		$smtp     = (string) ini_get( 'SMTP' );
 		$plugin   = self::mailer_plugin();
+		$from     = self::from_address();
+		$admin    = function_exists( 'get_option' ) ? strtolower( trim( (string) get_option( 'admin_email', '' ) ) ) : '';
+		$host     = self::site_host();
+
+		$from_domain = ( false !== strpos( $from, '@' ) ) ? substr( $from, (int) strpos( $from, '@' ) + 1 ) : '';
 
 		return array(
 			'mail_function'   => function_exists( 'mail' ) ? 'available' : 'missing',
@@ -136,7 +162,31 @@ final class EmailChannel implements ChannelInterface {
 			'smtp_host'       => $smtp,
 			'smtp_port'       => (string) ini_get( 'smtp_port' ),
 			'mailer_plugin'   => $plugin,
+			'admin_email'     => $admin,
+			'from_email'      => $from,
+			'from_domain'     => $from_domain,
+			'site_host'       => $host,
+			// null = cannot tell (no From address configured), not "false".
+			'from_matches_site' => ( '' === $from_domain || '' === $host ) ? null : ( $from_domain === $host || substr( $host, -strlen( '.' . $from_domain ) ) === '.' . $from_domain ),
 		);
+	}
+
+	/**
+	 * Host of this WordPress site, without scheme or www.
+	 *
+	 * @return string
+	 */
+	private static function site_host() {
+		$url = function_exists( 'home_url' ) ? (string) home_url( '/' ) : '';
+
+		if ( '' === $url && function_exists( 'get_option' ) ) {
+			$url = (string) get_option( 'siteurl', '' );
+		}
+
+		$host = (string) parse_url( $url, PHP_URL_HOST ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+		$host = strtolower( trim( $host ) );
+
+		return (string) preg_replace( '/^www\./', '', $host );
 	}
 
 	/**
@@ -153,6 +203,10 @@ final class EmailChannel implements ChannelInterface {
 
 		if ( '' !== (string) $facts['mailer_plugin'] ) {
 			return 'یک افزونهٔ SMTP فعال است (' . $facts['mailer_plugin'] . ')؛ تنظیمات همان افزونه را بررسی کنید.';
+		}
+
+		if ( false === $facts['from_matches_site'] ) {
+			return 'نشانی فرستنده (' . $facts['from_email'] . ') با دامنهٔ سایت (' . $facts['site_host'] . ') یکی نیست؛ بسیاری از هاست‌ها چنین پیامی را بی‌صدا دور می‌ریزند یا به اسپم می‌فرستند. یک فرستنده با دامنهٔ خودِ سایت تنظیم کنید یا از افزونهٔ SMTP با SMTP واقعی استفاده کنید.';
 		}
 
 		if ( '' !== (string) $facts['sendmail_path'] && ! $facts['sendmail_exists'] ) {

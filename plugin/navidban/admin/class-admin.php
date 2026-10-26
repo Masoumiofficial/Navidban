@@ -162,6 +162,22 @@ final class Admin {
 			}
 		}
 
+		if ( isset( $input['from_name'] ) ) {
+			$out['from_name'] = Validator::plain_text( $input['from_name'], 120 );
+		}
+
+		if ( isset( $input['from_email'] ) ) {
+			$candidate = strtolower( trim( (string) $input['from_email'] ) );
+
+			if ( '' === $candidate ) {
+				$out['from_email'] = '';
+			} elseif ( Validator::is_email( $candidate ) ) {
+				$out['from_email'] = $candidate;
+			} else {
+				add_settings_error( 'navidban', 'from_email', 'نشانی فرستنده معتبر نیست؛ مقدار قبلی نگه داشته شد.', 'error' );
+			}
+		}
+
 		$textarea_fields = array( 'form_intro', 'email_body' );
 		foreach ( $textarea_fields as $key ) {
 			if ( isset( $input[ $key ] ) ) {
@@ -659,7 +675,19 @@ final class Admin {
 		);
 
 		if ( true === $result ) {
-			return 'پیام آزمایشی ارسال شد.';
+			if ( 'email' !== $channel ) {
+				return 'پیام آزمایشی ارسال شد.';
+			}
+
+			// wp_mail() returning true means "the local mail transport accepted
+			// the message", NOT "the message reached a mailbox". Saying "ارسال شد"
+			// here is technically true and practically misleading, so the message
+			// says exactly what was verified.
+			$to_note = '' !== $email ? ' به ' . $email : '';
+
+			return 'wp_mail پیام را پذیرفت' . $to_note . ' و به میل سرور تحویل داد. '
+				. 'این یعنی وردپرس خطا نگرفت؛ ولی رسیدن به صندوق ورودی را تضمین نمی‌کند. '
+				. 'اگر ایمیل نیامد: پوشهٔ اسپم را ببینید، و اگر افزونهٔ SMTP فعال است تنظیماتش را بررسی کنید.';
 		}
 
 		$message = is_object( $result ) && method_exists( $result, 'get_error_message' )

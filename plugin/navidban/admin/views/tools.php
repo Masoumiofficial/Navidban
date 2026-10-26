@@ -95,6 +95,7 @@ if ( $nvb_notice ) {
 				<?php if ( '' !== (string) $nvb_mail_facts['mailer_plugin'] ) : ?>
 					· افزونهٔ SMTP: <?php echo esc_html( (string) $nvb_mail_facts['mailer_plugin'] ); ?>
 				<?php endif; ?>
+				· فرستنده: <?php echo esc_html( '' === (string) $nvb_mail_facts['from_email'] ? 'تنظیم نشده' : (string) $nvb_mail_facts['from_email'] ); ?>
 			</p>
 			<?php if ( '' !== $nvb_mail_hint ) : ?>
 				<p class="nvb-diagnosis nvb-diagnosis--warn"><?php echo esc_html( $nvb_mail_hint ); ?></p>

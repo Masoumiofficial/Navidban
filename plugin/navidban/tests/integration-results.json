@@ -1,8 +1,8 @@
 {
     "plugin_version": "1.0.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-26T08:10:51+00:00",
-    "assertions": 108,
+    "generated_at": "2026-10-26T08:35:42+00:00",
+    "assertions": 112,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -35,7 +35,7 @@
             "failures": 0
         },
         "خطای ارسال ایمیل": {
-            "assertions": 9,
+            "assertions": 13,
             "failures": 0
         },
         "کانال پیامک": {

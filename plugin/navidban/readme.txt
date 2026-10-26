@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
+= 1.0.2 =
+افزودن تنظیم «نشانی فرستنده» و «نام فرستنده»، نمایش فرستنده در ابزارها، و
+اصلاح متن پیام آزمایشی: حالا دقیقاً می‌گوید wp_mail پیام را پذیرفت، نه
+اینکه ایمیل رسیده است.
+
 = 1.0.1 =
 اصلاح پیام خطای ارسال ایمیل (نمایش دلیل واقعی wp_mail)، افزودن تشخیص وضعیت
 ایمیل سرور در صفحهٔ ابزارها، و رفع برش بایتی متن فارسی در ستون خطای صف.
@@ -79,6 +84,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 انتشار نخست. جزئیات کامل: `CHANGELOG.md`.
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+به‌روزرسانی توصیه می‌شود؛ برای کسانی که «ارسال شد ولی ایمیل نیامد» را دیده‌اند.
 
 = 1.0.1 =
 اصلاح نسخهٔ ۱.۰.۰؛ به‌روزرسانی مستقیم توصیه می‌شود.

@@ -20,7 +20,7 @@ if ( ! defined( 'NAVIDBAN_DIR' ) ) {
 	define( 'NAVIDBAN_DIR', dirname( __DIR__ ) . '/' );
 }
 if ( ! defined( 'NAVIDBAN_VERSION' ) ) {
-	define( 'NAVIDBAN_VERSION', '1.0.1' );
+	define( 'NAVIDBAN_VERSION', '1.0.2' );
 }
 
 require_once NAVIDBAN_DIR . 'includes/Autoloader.php';
@@ -532,6 +532,15 @@ foreach ( array( 'mail_function', 'sendmail_path', 'sendmail_exists', 'smtp_host
 NvbTest::ok( in_array( $mail_facts['mail_function'], array( 'available', 'missing' ), true ), 'وضعیت mail() یکی از دو مقدار مجاز است' );
 NvbTest::ok( is_bool( $mail_facts['sendmail_exists'] ), 'sendmail_exists بولی است' );
 NvbTest::ok( is_string( \Navidban\Channels\EmailChannel::hint() ), 'hint رشته برمی‌گرداند' );
+
+// The From address decides whether a "successful" send survives spam filters,
+// so its resolution order is pinned here.
+foreach ( array( 'admin_email', 'from_email', 'from_domain', 'site_host', 'from_matches_site' ) as $key ) {
+	NvbTest::ok( array_key_exists( $key, $mail_facts ), 'کلید تشخیص فرستنده موجود است: ' . $key );
+}
+
+NvbTest::ok( in_array( $mail_facts['from_matches_site'], array( true, false, null ), true ), 'تطابق دامنهٔ فرستنده سه‌حالتی است (نمی‌دانیم ≠ نادرست)' );
+NvbTest::ok( is_string( \Navidban\Channels\EmailChannel::from_address() ), 'from_address رشته برمی‌گرداند' );
 
 NvbTest::group( 'HttpGuard / SSRF' );
 
