@@ -141,7 +141,7 @@
 |---|---|
 | `tools/lint-php.js` (گرامر 7.4 + 8.3 روی ۵۶ فایل) | ۱۱۲ parse، ۰ خطا |
 | `tools/check-methods.js` (۳۲۲ فراخوانی متد، ۴۵ کلاس) | ۰ ارجاع شکسته |
-| `tools/har-audit.sh` | CSS+JS فشرده ۴٬۳۹۲ بایت (بودجه ۱۲٬۲۸۸) |
+| `tools/har-audit.sh` | CSS+JS فشرده ۴٬۴۸۹ بایت (بودجه ۱۲٬۲۸۸) |
 | `tools/verify-release.py` | بخش ۸ |
 
 `check-methods.js` خودش هم اعتبارسنجی شده است: با افزودن یک فایل موقت حاوی
