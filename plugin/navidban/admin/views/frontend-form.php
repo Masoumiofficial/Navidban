@@ -11,6 +11,7 @@
  * @var int    $user_id
  * @var string $prefill_email
  * @var string $prefill_phone
+ * @var string $prefill_name
  * @var string $notice One-shot notice code.
  *
  * @package Navidban
@@ -68,6 +69,22 @@ $nvb_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 		<?php endif; ?>
 
 		<div class="nvb-form__fields">
+			<?php if ( ! empty( $settings['name_field'] ) ) : ?>
+				<p class="nvb-form__field" data-nvb="name-field">
+					<label for="nvb-name">نام و نام خانوادگی</label>
+					<input
+						type="text"
+						id="nvb-name"
+						name="name"
+						maxlength="120"
+						autocomplete="name"
+						placeholder="مثلاً مریم احمدی"
+						value="<?php echo esc_attr( isset( $prefill_name ) ? $prefill_name : '' ); ?>"
+						<?php echo ! empty( $settings['name_req'] ) ? 'required' : ''; ?>
+					/>
+				</p>
+			<?php endif; ?>
+
 			<?php if ( 'sms' !== $nvb_mode ) : ?>
 				<p class="nvb-form__field" data-nvb="email-field">
 					<label for="nvb-email">ایمیل</label>

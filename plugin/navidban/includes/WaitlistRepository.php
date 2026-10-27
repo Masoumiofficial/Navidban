@@ -65,6 +65,7 @@ final class WaitlistRepository {
 			'channel'      => 'email',
 			'email'        => '',
 			'phone'        => '',
+			'full_name'    => '',
 			'user_id'      => 0,
 			'status'       => 'pending',
 			'stock_at_signup' => 0,
@@ -76,6 +77,7 @@ final class WaitlistRepository {
 		$row['product_id']   = (int) $row['product_id'];
 		$row['variation_id'] = (int) $row['variation_id'];
 		$row['user_id']      = (int) $row['user_id'];
+		$row['full_name']    = substr( (string) $row['full_name'], 0, 120 );
 		$row['stock_at_signup'] = (int) $row['stock_at_signup'];
 
 		if ( $row['product_id'] <= 0 ) {
@@ -127,6 +129,7 @@ final class WaitlistRepository {
 				'channel'           => $row['channel'],
 				'email'             => substr( (string) $row['email'], 0, 190 ),
 				'phone'             => substr( (string) $row['phone'], 0, 20 ),
+				'full_name'         => $row['full_name'],
 				'user_id'           => $row['user_id'],
 				'status'            => $row['status'],
 				'consent_at'        => isset( $row['consent_at'] ) ? $row['consent_at'] : null,
@@ -136,7 +139,7 @@ final class WaitlistRepository {
 				'ip_hash'           => substr( (string) $row['ip_hash'], 0, 64 ),
 				'created_at'        => $row['created_at'],
 			),
-			array( '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s' )
+			array( '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s' )
 		);
 
 		if ( false === $inserted ) {
@@ -281,6 +284,48 @@ final class WaitlistRepository {
 		$updated = $wpdb->update( self::table(), $data, array( 'id' => (int) $id ), null, array( '%d' ) );
 
 		return false !== $updated;
+	}
+
+	/**
+	 * Mark (or unmark) a row as called.
+	 *
+	 * The shop's real flow is offline: the plugin sends the message, a human
+	 * dials the number. This is the one part of that flow the plugin can keep
+	 * honestly - which rows have been called, when, and by whom.
+	 *
+	 * @param int  $id      Row ID.
+	 * @param bool $called  Whether the customer was called.
+	 * @param int  $user_id Admin user who ticked the box.
+	 * @return bool
+	 */
+	public static function set_called( $id, $called, $user_id = 0 ) {
+		global $wpdb;
+
+		$table = self::table();
+
+		if ( $called ) {
+			return false !== $wpdb->update(
+				$table,
+				array(
+					'called_at' => gmdate( 'Y-m-d H:i:s' ),
+					'called_by' => (int) $user_id,
+				),
+				array( 'id' => (int) $id ),
+				array( '%s', '%d' ),
+				array( '%d' )
+			);
+		}
+
+		return false !== $wpdb->update(
+			$table,
+			array(
+				'called_at' => null,
+				'called_by' => 0,
+			),
+			array( 'id' => (int) $id ),
+			array( '%s', '%d' ),
+			array( '%d' )
+		);
 	}
 
 	/**
@@ -438,6 +483,7 @@ final class WaitlistRepository {
 			'product_id' => 0,
 			'status'     => '',
 			'channel'    => '',
+			'called'     => '',
 			'from'       => '',
 			'to'         => '',
 			'search'     => '',
@@ -477,9 +523,14 @@ final class WaitlistRepository {
 			$params[] = $args['to'] . ' 23:59:59';
 		}
 
+		if ( in_array( $args['called'], array( 'yes', 'no' ), true ) ) {
+			$where[] = ( 'yes' === $args['called'] ) ? 'called_at IS NOT NULL' : 'called_at IS NULL';
+		}
+
 		if ( '' !== $args['search'] ) {
 			$like = '%' . $wpdb->esc_like( (string) $args['search'] ) . '%';
-			$where[] = '(email LIKE %s OR phone LIKE %s)';
+			$where[] = '(email LIKE %s OR phone LIKE %s OR full_name LIKE %s)';
+			$params[] = $like;
 			$params[] = $like;
 			$params[] = $like;
 		}
@@ -526,6 +577,7 @@ final class WaitlistRepository {
 			'expired'      => 0,
 			'unsubscribed' => 0,
 			'total'        => 0,
+			'called'       => 0,
 		);
 
 		if ( is_array( $rows ) ) {
@@ -537,6 +589,10 @@ final class WaitlistRepository {
 				$counts['total'] += (int) $row['c'];
 			}
 		}
+
+		// A scalar query instead of a second GROUP BY: "called" is not a status,
+		// and a row can be called while it is still confirmed or notified.
+		$counts['called'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE called_at IS NOT NULL" ); // phpcs:ignore WordPress.DB.PreparedSQL
 
 		return $counts;
 	}

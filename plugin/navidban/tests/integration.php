@@ -256,6 +256,7 @@ $result = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'Maryam@Example.COM',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::ok( $result['ok'], 'ثبت ایمیل معتبر' );
@@ -278,6 +279,7 @@ $duplicate = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'maryam@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::ok( $duplicate['ok'], 'ثبت تکراری خطای سرور نمی‌دهد' );
@@ -291,6 +293,7 @@ $invalid = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'not-an-email',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::ok( ! $invalid['ok'], 'ایمیل نامعتبر رد شد' );
@@ -303,6 +306,7 @@ $invalid_phone = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'sms',
 		'phone'      => '12345',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::same( 'invalid_phone', $invalid_phone['code'], 'موبایل نامعتبر رد شد' );
@@ -315,6 +319,7 @@ $available = Subscribe::handle(
 		'product_id' => 41,
 		'channel'    => 'email',
 		'email'      => 'x@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::same( 'product_available', $available['code'], 'ثبت برای محصول موجود رد شد' );
@@ -329,6 +334,7 @@ $variation = Subscribe::handle(
 		'variation_id' => 43,
 		'channel'      => 'email',
 		'email'        => 'size43@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::ok( $variation['ok'], 'ثبت برای تنوع ناموجود مجاز است' );
@@ -341,6 +347,7 @@ $no_consent = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'noconsent@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::same( 'consent_required', $no_consent['code'], 'بدون رضایت ثبت نمی‌شود' );
@@ -349,6 +356,7 @@ $with_consent = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'noconsent@example.com',
+		'name'       => 'مریم احمدی',
 		'consent'    => 1,
 	)
 );
@@ -364,6 +372,7 @@ for ( $i = 0; $i < 8; $i++ ) {
 			'product_id' => 40,
 			'channel'    => 'email',
 			'email'      => 'bulk' . $i . '@example.com',
+			'name'       => 'مریم احمدی',
 		)
 	);
 }
@@ -391,6 +400,7 @@ $one_step = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'onestep@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 
@@ -411,6 +421,7 @@ $one_restock = Subscribe::handle(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'eligible@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 NvbInt::same( 'confirmed', WaitlistRepository::get( (int) $one_restock['data']['id'] )['status'], 'مشترک دوم هم مستقیماً تأیید شد' );
@@ -432,6 +443,7 @@ $fresh = WaitlistRepository::create(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'token@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 $fresh_row = WaitlistRepository::get( (int) $fresh['id'] );
@@ -446,6 +458,7 @@ $expired = WaitlistRepository::create(
 		'product_id' => 40,
 		'channel'    => 'email',
 		'email'      => 'expired@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 $GLOBALS['wpdb']->query(
@@ -600,6 +613,7 @@ for ( $i = 1; $i <= 200; $i++ ) {
 			'product_id' => 100,
 			'channel'    => 'email',
 			'email'      => 'fan' . $i . '@example.com',
+			'name'       => 'مریم احمدی',
 		)
 	);
 	WaitlistRepository::set_status( (int) $created['id'], 'confirmed' );
@@ -682,6 +696,7 @@ $created = WaitlistRepository::create(
 		'product_id' => 300,
 		'channel'    => 'email',
 		'email'      => 'reconcile@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 WaitlistRepository::set_status( (int) $created['id'], 'confirmed' );
@@ -738,6 +753,7 @@ for ( $i = 0; $i < 12; $i++ ) {
 			'product_id' => 400,
 			'channel'    => 'email',
 			'email'      => 'queue' . $i . '@example.com',
+			'name'       => 'مریم احمدی',
 		)
 	);
 	WaitlistRepository::set_status( (int) $created['id'], 'confirmed' );
@@ -805,6 +821,7 @@ $unsub = WaitlistRepository::create(
 		'product_id' => 400,
 		'channel'    => 'email',
 		'email'      => 'unsub@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 WaitlistRepository::set_status( (int) $unsub['id'], 'confirmed' );
@@ -824,6 +841,7 @@ $pending = WaitlistRepository::create(
 		'product_id' => 400,
 		'channel'    => 'email',
 		'email'      => 'pending@example.com',
+		'name'       => 'مریم احمدی',
 	)
 );
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
@@ -877,6 +895,7 @@ $long_waitlist = WaitlistRepository::create(
 		'variation_id' => 0,
 		'channel'      => 'email',
 		'email'        => 'long@example.com',
+		'name'       => 'مریم احمدی',
 		'phone'        => '',
 		'ip_hash'      => str_repeat( 'd', 64 ),
 		'status'       => 'confirmed',
@@ -1042,6 +1061,117 @@ NvbInt::same( 'کفش دویدن', $thin[1], 'مقدار موجود در جای 
 
 Settings::update( array( 'melipayamak_body_id' => '', 'sms_pattern_template' => '' ) );
 $GLOBALS['nvb_http_response'] = null;
+
+NvbInt::group( 'نام مشتری و پیگیری تماس' );
+
+$GLOBALS['nvb_options']['navidban_settings'] = Settings::defaults();
+Settings::flush_cache();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+nvb_reset_rate_limit();
+nvb_product( 70, array( 'status' => 'outofstock', 'qty' => 0 ) );
+
+// 1. The name is stored exactly as the visitor typed it (normalised, not mangled).
+$named = Subscribe::handle(
+	array(
+		'product_id' => 70,
+		'channel'    => 'email',
+		'email'      => 'named@example.com',
+		'name'       => '  مریم   احمدی ',
+	)
+);
+NvbInt::ok( $named['ok'], 'ثبت با نام موفق است' );
+$named_row = WaitlistRepository::get( (int) $named['data']['id'] );
+NvbInt::same( 'مریم احمدی', $named_row['full_name'], 'نام نرمال‌شده ذخیره شد' );
+
+// 2. Required by default: no name, no row.
+nvb_reset_rate_limit();
+$no_name = Subscribe::handle(
+	array(
+		'product_id' => 70,
+		'channel'    => 'email',
+		'email'      => 'noname@example.com',
+	)
+);
+NvbInt::same( 'invalid_name', $no_name['code'], 'بدون نام ثبت نمی‌شود (پیش‌فرض اجباری)' );
+NvbInt::same( 422, $no_name['status'], 'کد وضعیت ۴۲۲ است' );
+NvbInt::same( 1, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . WaitlistRepository::table() ), 'ردیف جدیدی ساخته نشد' );
+
+// 3. A phone number is not a name.
+nvb_reset_rate_limit();
+$digits = Subscribe::handle(
+	array(
+		'product_id' => 70,
+		'channel'    => 'email',
+		'email'      => 'digits@example.com',
+		'name'       => '09121234567',
+	)
+);
+NvbInt::same( 'invalid_name', $digits['code'], 'شمارهٔ موبایل به‌جای نام پذیرفته نمی‌شود' );
+
+// 4. Optional when the store says so.
+Settings::update( array( 'form_name_required' => false ) );
+nvb_reset_rate_limit();
+$optional = Subscribe::handle(
+	array(
+		'product_id' => 70,
+		'channel'    => 'email',
+		'email'      => 'optional@example.com',
+	)
+);
+NvbInt::ok( $optional['ok'], 'وقتی نام اجباری نیست، بدون نام هم ثبت می‌شود' );
+NvbInt::same( '', WaitlistRepository::get( (int) $optional['data']['id'] )['full_name'], 'نام خالی می‌ماند، نه «۰» یا NULL' );
+Settings::update( array( 'form_name_required' => true ) );
+
+// 5. The name reaches the message context, which is what the SMS pattern uses.
+$context = \Navidban\Notifier::build_context( $named_row, false );
+NvbInt::same( 'مریم احمدی', $context['customer_name'], 'متغیر {customer_name} نام ثبت‌شده است' );
+NvbInt::same( 'مریم احمدی', \Navidban\Logic\SmsPattern::value( 0, $context ), 'مقدار {0} الگوی پیامک همان نام است' );
+
+// Without a stored name, the old behaviour is kept.
+$context_fallback = \Navidban\Notifier::build_context(
+	array(
+		'id'           => 0,
+		'user_id'      => 0,
+		'full_name'    => '',
+		'product_id'   => 70,
+		'variation_id' => 0,
+		'token'        => str_repeat( 'a', 64 ),
+	),
+	false
+);
+NvbInt::same( 'همراه گرامی', $context_fallback['customer_name'], 'نبود نام، متن پیش‌فرض را نگه می‌دارد' );
+
+// 6. Call tracking.
+$id = (int) $named['data']['id'];
+NvbInt::ok( empty( $named_row['called_at'] ), 'ردیف تازه، تماس‌گرفته‌نشده است' );
+
+\Navidban\WaitlistRepository::set_called( $id, true, 7 );
+$called_row = WaitlistRepository::get( $id );
+NvbInt::ok( ! empty( $called_row['called_at'] ), 'زمان تماس ثبت شد' );
+NvbInt::same( 7, (int) $called_row['called_by'], 'کاربر ثبت‌کنندهٔ تماس ذخیره شد' );
+
+$counts_after = WaitlistRepository::counts();
+NvbInt::same( 1, (int) $counts_after['called'], 'شمارندهٔ تماس‌گرفته‌شده‌ها یک است' );
+
+$not_called = WaitlistRepository::query( array( 'called' => 'no' ) );
+$was_called = WaitlistRepository::query( array( 'called' => 'yes' ) );
+NvbInt::same( 1, (int) $not_called['total'], 'فیلتر «تماس گرفته نشده» فقط ردیف بی‌تماس را می‌دهد' );
+NvbInt::same( 1, (int) $was_called['total'], 'فیلتر «تماس گرفته شده» یک ردیف می‌دهد' );
+
+// Search finds the row by name, which is how a shop looks somebody up.
+$by_name = WaitlistRepository::query( array( 'search' => 'احمدی' ) );
+NvbInt::same( 1, (int) $by_name['total'], 'جست‌وجو با نام کار می‌کند' );
+
+// Unticking is a real operation, not a no-op.
+\Navidban\WaitlistRepository::set_called( $id, false );
+$uncalled_row = WaitlistRepository::get( $id );
+NvbInt::ok( empty( $uncalled_row['called_at'] ), 'تیک تماس برداشته شد' );
+NvbInt::same( 0, (int) $uncalled_row['called_by'], 'ثبت‌کننده هم پاک شد' );
+NvbInt::same( 0, (int) WaitlistRepository::counts()['called'], 'شمارنده به صفر برگشت' );
+
+// A row that does not exist must not blow up.
+NvbInt::ok( false !== \Navidban\WaitlistRepository::set_called( 999999, true, 1 ), 'به‌روزرسانی ردیف ناموجود خطا نمی‌دهد' );
 
 /**
  * Configure the SMS channel for a generic gateway test.

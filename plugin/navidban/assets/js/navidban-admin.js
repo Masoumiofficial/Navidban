@@ -7,6 +7,24 @@
 	'use strict';
 
 	document.addEventListener('DOMContentLoaded', function () {
+		// Per-row "customer was called" tick: submitting immediately is the whole
+		// point - an assistant marks it while the phone is still in their hand.
+		// Without JS the small "ثبت" button next to the box does the same thing.
+		Array.prototype.forEach.call(document.querySelectorAll('[data-nvb="call-toggle"]'), function (box) {
+			box.addEventListener('change', function () {
+				var form = box.closest('form');
+				if (!form) {
+					return;
+				}
+				box.disabled = true;
+				if (typeof form.requestSubmit === 'function') {
+					form.requestSubmit();
+				} else {
+					form.submit();
+				}
+			});
+		});
+
 		var selectAll = document.getElementById('nvb-select-all');
 
 		if (selectAll) {

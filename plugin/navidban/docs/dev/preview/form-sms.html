@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نویدبان 1.0.7 — فرم فروشگاه (فقط موبایل)</title>
+<title>نویدبان 1.0.9 — فرم فروشگاه (فقط موبایل)</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -140,9 +140,14 @@ body {
 }
 
 /* SMS-first: the phone input comes first, without touching the DOM order that
-   the JavaScript relies on. */
+   the JavaScript relies on. The name field stays above it - a visitor reads
+   "who are you" before "how do we reach you". */
 .nvb-form[data-mode="sms"] .nvb-form__fields [data-nvb="phone-field"] {
 	order: -1;
+}
+
+.nvb-form[data-mode="sms"] .nvb-form__fields [data-nvb="name-field"] {
+	order: -2;
 }
 
 .nvb-form__field {
@@ -310,7 +315,7 @@ body {
 </head>
 <body>
 <p class="nvb-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.7.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.9.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
@@ -335,6 +340,19 @@ body {
 					<input type="hidden" name="channel" value="sms" />
 		
 		<div class="nvb-form__fields">
+							<p class="nvb-form__field" data-nvb="name-field">
+					<label for="nvb-name">نام و نام خانوادگی</label>
+					<input
+						type="text"
+						id="nvb-name"
+						name="name"
+						maxlength="120"
+						autocomplete="name"
+						placeholder="مثلاً مریم احمدی"
+						value=""
+						required					/>
+				</p>
+			
 			
 							<p class="nvb-form__field" data-nvb="phone-field">
 					<label for="nvb-phone">شمارهٔ موبایل</label>

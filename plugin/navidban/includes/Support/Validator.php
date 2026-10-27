@@ -189,6 +189,50 @@ final class Validator {
 	}
 
 	/**
+	 * Sanitise a person's name (first name + surname).
+	 *
+	 * Why this is not plain_text(): a name is used in the SMS pattern, in the
+	 * admin list and in the CSV that a shop owner feeds to a call list. Letters,
+	 * a space, ZWNJ (نیم‌فاصله), hyphen, apostrophe and a dot are the only things
+	 * that belong in it. Everything else — digits, brackets, emoji, markup — is
+	 * dropped, so a row cannot smuggle a formula or a script into the export.
+	 *
+	 * Returns '' when nothing usable is left, which callers treat as "no name".
+	 *
+	 * @param string $value   Raw value.
+	 * @param int    $max_len Maximum length in characters.
+	 * @return string
+	 */
+	public static function person_name( $value, $max_len = 120 ) {
+		$value = self::plain_text( $value, $max_len );
+
+		if ( '' === $value ) {
+			return '';
+		}
+
+		// \p{L} letters, \p{M} combining marks (Arabic diacritics), space,
+		// ZWNJ/ZWJ, hyphen, apostrophe and dot.
+		$value = preg_replace( '/[^\\p{L}\\p{M}\\s\\x{200C}\\x{200D}\\-\'\.]/u', ' ', $value );
+
+		if ( null === $value ) {
+			return '';
+		}
+
+		$value = preg_replace( '/\s+/u', ' ', $value );
+		if ( null === $value ) {
+			return '';
+		}
+
+		$value = trim( (string) $value, " \t\n\r\0\x0B.-'" );
+
+		if ( Text::length( $value ) < 2 ) {
+			return '';
+		}
+
+		return Text::substring( $value, 0, $max_len );
+	}
+
+	/**
 	 * Sanitise a free-text value: strip control characters, tags and collapse whitespace.
 	 *
 	 * @param string $value   Raw value.

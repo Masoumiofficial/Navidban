@@ -81,6 +81,8 @@ $settings              = array(
 	'consent_req' => ! empty( $nvb_settings['consent_required'] ),
 	'consent'     => $nvb_settings['consent_label'],
 	'privacy'     => '',
+	'name_field'  => (bool) $nvb_settings['form_name_field'],
+	'name_req'    => (bool) $nvb_settings['form_name_required'],
 );
 $product_id            = 501;
 $variations            = array();
@@ -88,6 +90,7 @@ $default_channel       = 'sms';
 $user_id               = 0;
 $prefill_email         = '';
 $prefill_phone         = '';
+$prefill_name          = '';
 
 ob_start();
 include NAVIDBAN_DIR . 'admin/views/frontend-form.php';

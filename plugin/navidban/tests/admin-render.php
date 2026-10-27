@@ -257,6 +257,35 @@ NvbAdmin::ok( false !== strpos( $settings_html, 'مریم;کفش دویدن نا
 NvbAdmin::ok( false !== strpos( $settings_html, 'nvb-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تأیید می‌گیرد' );
 NvbAdmin::ok( false === strpos( $settings_html, 'nvb-pattern-findings' ), 'برای الگوی پیش‌فرض هیچ ایرادی رندر نمی‌شود' );
 
+// ---------------------------------------------------------------- name field
+NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[form_name_field]"' ), 'کلید نمایش فیلد نام هست' );
+NvbAdmin::ok( false !== strpos( $settings_html, 'name="navidban_settings[form_name_required]"' ), 'کلید اجباری‌بودن نام هست' );
+NvbAdmin::ok( 1 === substr_count( $settings_html, 'name="navidban_settings[form_name_field]"' ), 'کلید نام فقط یک‌بار رندر می‌شود' );
+
+// ------------------------------------------------------------- call tracking
+NvbAdmin::ok( false !== strpos( $settings_html, '[sms_pattern_template]' ), 'فیلد متن الگو سر جایش است' );
+
+$waitlists_html = $rendered['waitlists'];
+NvbAdmin::ok( false !== strpos( $waitlists_html, 'name="called"' ), 'فیلتر تماس در فرم فیلترها هست' );
+NvbAdmin::ok( false !== strpos( $waitlists_html, 'تماس گرفته نشده' ), 'گزینهٔ «تماس گرفته نشده» هست' );
+NvbAdmin::ok( false !== strpos( $waitlists_html, 'value="navidban_call"' ), 'فرم تک‌ردیفی به نقطهٔ پایانی تماس وصل است' );
+NvbAdmin::ok( false !== strpos( $waitlists_html, 'data-nvb="call-toggle"' ), 'تیک تماس در هر ردیف رندر می‌شود' );
+NvbAdmin::ok( false !== strpos( $waitlists_html, 'name="_wpnonce"' ), 'تیک تماس nonce دارد' );
+NvbAdmin::ok( false !== strpos( $waitlists_html, 'value="called"' ) && false !== strpos( $waitlists_html, 'value="uncalled"' ), 'عملیات گروهی تماس هست' );
+NvbAdmin::ok( false !== strpos( $waitlists_html, 'name="ids[]" form="nvb-bulk-form"' ), 'چک‌باکس‌های گروهی به فرم بیرونی وصل‌اند' );
+
+// A form inside a form is invalid HTML: the browser drops the inner one and the
+// call tick would silently stop working. The bulk form must be closed first.
+$nvb_bulk_end      = strpos( $waitlists_html, 'nvb-bulk' );
+$nvb_table_start   = strpos( $waitlists_html, 'nvb-table' );
+$nvb_between       = ( false !== $nvb_bulk_end && false !== $nvb_table_start && $nvb_table_start > $nvb_bulk_end )
+	? substr( $waitlists_html, $nvb_bulk_end, $nvb_table_start - $nvb_bulk_end )
+	: '';
+NvbAdmin::ok( false !== strpos( $nvb_between, '</form>' ), 'فرم گروهی پیش از جدول بسته می‌شود (بدون فرم تودرتو)' );
+NvbAdmin::ok( 1 === substr_count( $waitlists_html, 'id="nvb-bulk-form"' ), 'فقط یک فرم گروهی هست' );
+
+NvbAdmin::ok( false !== strpos( $rendered['dashboard'], 'تماس گرفته‌شده' ), 'داشبورد شمارندهٔ تماس را نشان می‌دهد' );
+
 foreach ( array( 'rebuild_snapshots', 'run_reconcile', 'flush_queue', 'empty_queue', 'prune', 'test_email', 'test_sms' ) as $tool ) {
 	NvbAdmin::ok( false !== strpos( $rendered['tools'], 'value="' . $tool . '"' ), 'ابزار موجود است: ' . $tool );
 }

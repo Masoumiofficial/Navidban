@@ -278,6 +278,24 @@ NvbTest::same( 'hello world', Validator::plain_text( "  hello\n\tworld  " ), 'pl
 NvbTest::same( 'alert(1)', Validator::plain_text( '<script>alert(1)</script>' ), 'plain_text strips tags' );
 NvbTest::same( 10, strlen( Validator::plain_text( 'abcdefghijklmnop', 10 ) ), 'plain_text respects max length' );
 
+NvbTest::group( 'Validator / نام و نام خانوادگی' );
+
+NvbTest::same( 'مریم احمدی', Validator::person_name( '  مریم   احمدی  ' ), 'person_name trims and collapses spaces' );
+NvbTest::same( 'نیم‌فاصله', Validator::person_name( 'نیم‌فاصله' ), 'ZWNJ (نیم‌فاصله) survives' );
+NvbTest::same( 'علی-رضا', Validator::person_name( 'علی-رضا' ), 'hyphen survives' );
+NvbTest::same( 'Maryam Ahmadi', Validator::person_name( ' Maryam  Ahmadi ' ), 'latin names survive' );
+NvbTest::same( 'مریم احمدی', Validator::person_name( '<b>مریم</b> احمدی' ), 'tags are stripped' );
+NvbTest::same( 'مریم', Validator::person_name( 'مریم 09121234567' ), 'digits are dropped' );
+$nvb_formula = Validator::person_name( '=cmd|calc' );
+NvbTest::same( 'cmd calc', $nvb_formula, 'formula characters are dropped, letters kept' );
+NvbTest::ok( ! in_array( Text::substring( $nvb_formula, 0, 1 ), array( '=', '+', '-', '@', '|' ), true ), 'name never starts with a formula trigger' );
+NvbTest::same( '', Validator::person_name( '09121234567' ), 'a phone number is not a name' );
+NvbTest::same( '', Validator::person_name( '   ' ), 'blank input is empty' );
+NvbTest::same( '', Validator::person_name( 'x' ), 'a single character is rejected' );
+NvbTest::same( '', Validator::person_name( '!!!' ), 'punctuation only is rejected' );
+NvbTest::same( 120, Text::length( Validator::person_name( str_repeat( 'ا', 200 ) ) ), 'length is capped at 120' );
+NvbTest::same( 'مریم احمدی', Validator::person_name( '«مریم» احمدی' ), 'quotes are dropped, letters kept' );
+
 /* -------------------------------------------------------------------------
  * Jalali
  * ---------------------------------------------------------------------- */

@@ -108,6 +108,7 @@ final class Database {
 			channel VARCHAR(16) NOT NULL DEFAULT 'email',
 			email VARCHAR(190) NOT NULL DEFAULT '',
 			phone VARCHAR(20) NOT NULL DEFAULT '',
+			full_name VARCHAR(120) NOT NULL DEFAULT '',
 			user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			status VARCHAR(16) NOT NULL DEFAULT 'pending',
 			consent_at DATETIME DEFAULT NULL,
@@ -116,6 +117,8 @@ final class Database {
 			confirm_expires_at DATETIME DEFAULT NULL,
 			stock_at_signup INT NOT NULL DEFAULT 0,
 			ip_hash CHAR(64) NOT NULL DEFAULT '',
+			called_at DATETIME DEFAULT NULL,
+			called_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			created_at DATETIME NOT NULL,
 			PRIMARY KEY  (id),
 			UNIQUE KEY uniq_token (token),
@@ -123,7 +126,9 @@ final class Database {
 			KEY idx_status_product (status, product_id, variation_id),
 			KEY idx_status_created (status, created_at),
 			KEY idx_phone (phone),
-			KEY idx_email (email)
+			KEY idx_email (email),
+			KEY idx_called (called_at),
+			KEY idx_name (full_name)
 		) ENGINE=InnoDB {$charset};";
 
 		$sql_snapshots = "CREATE TABLE {$snap} (

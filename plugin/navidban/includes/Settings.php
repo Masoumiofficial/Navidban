@@ -59,6 +59,11 @@ final class Settings {
 			// messages it already queued while showing only the phone input.
 			'form_email_field'      => true,
 			'form_phone_field'      => true,
+			// Name is asked by default: without it a waitlist row is only an
+			// address or a number, and the shop cannot call the customer back
+			// or tell two similar rows apart.
+			'form_name_field'       => true,
+			'form_name_required'    => true,
 			'notify_backorders'     => false,
 
 			// Consent / double opt-in.

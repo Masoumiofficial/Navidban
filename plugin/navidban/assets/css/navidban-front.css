@@ -105,9 +105,14 @@
 }
 
 /* SMS-first: the phone input comes first, without touching the DOM order that
-   the JavaScript relies on. */
+   the JavaScript relies on. The name field stays above it - a visitor reads
+   "who are you" before "how do we reach you". */
 .nvb-form[data-mode="sms"] .nvb-form__fields [data-nvb="phone-field"] {
 	order: -1;
+}
+
+.nvb-form[data-mode="sms"] .nvb-form__fields [data-nvb="name-field"] {
+	order: -2;
 }
 
 .nvb-form__field {

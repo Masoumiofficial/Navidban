@@ -168,7 +168,10 @@ final class Notifier {
 			'variation_name'  => ( $variation_id > 0 ) ? $product_name : '',
 			'product_url'     => self::product_url( $product_id, $variation_id ),
 			'price'           => self::product_price( $product_id ),
-			'customer_name'   => self::customer_name( (int) $waitlist['user_id'] ),
+			'customer_name'   => self::customer_name(
+				(int) $waitlist['user_id'],
+				isset( $waitlist['full_name'] ) ? (string) $waitlist['full_name'] : ''
+			),
 			'unsubscribe_url' => Consent::unsubscribe_url( (string) $waitlist['token'] ),
 			'confirm_url'     => Consent::confirm_url( (string) $waitlist['token'] ),
 			'waitlist_id'     => (string) $waitlist['id'],
@@ -258,7 +261,16 @@ final class Notifier {
 	 * @param int $user_id User ID.
 	 * @return string
 	 */
-	public static function customer_name( $user_id ) {
+	public static function customer_name( $user_id, $full_name = '' ) {
+		// What the visitor typed on the product page is the most current and
+		// most specific answer: a guest has no account at all, and a logged-in
+		// customer may be buying for somebody else.
+		$full_name = trim( (string) $full_name );
+
+		if ( '' !== $full_name ) {
+			return \Navidban\Support\Persian::normalize( $full_name );
+		}
+
 		if ( $user_id <= 0 || ! function_exists( 'get_userdata' ) ) {
 			return 'همراه گرامی';
 		}

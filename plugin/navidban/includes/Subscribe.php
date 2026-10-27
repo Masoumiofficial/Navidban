@@ -39,6 +39,7 @@ final class Subscribe {
 		$channel      = isset( $input['channel'] ) ? (string) $input['channel'] : 'email';
 		$email        = isset( $input['email'] ) ? Validator::normalize_email( $input['email'] ) : '';
 		$phone        = isset( $input['phone'] ) ? Validator::normalize_phone( $input['phone'] ) : '';
+		$name         = isset( $input['name'] ) ? Validator::person_name( $input['name'], 120 ) : '';
 		$consent      = ! empty( $input['consent'] );
 		$event_type   = isset( $input['event_type'] ) ? (string) $input['event_type'] : 'restock';
 
@@ -67,6 +68,13 @@ final class Subscribe {
 		// the endpoint cannot be used to harvest addresses on buyable products.
 		if ( $product->is_in_stock() && ! self::variation_is_unavailable( $product_id, $variation_id ) ) {
 			return self::fail( 'product_available', 409, 'این محصول موجود است.', $ip_hash );
+		}
+
+		// The name field is what turns a row into something a human can call
+		// back. When the store makes it mandatory, an unusable name is a form
+		// error - not a silent empty column in the export.
+		if ( (bool) Settings::get( 'form_name_field', true ) && (bool) Settings::get( 'form_name_required', true ) && '' === $name ) {
+			return self::fail( 'invalid_name', 422, 'نام و نام خانوادگی را کامل بنویسید.', $ip_hash );
 		}
 
 		if ( (int) Settings::enabled( 'consent_required' ) && ! $consent ) {
@@ -134,6 +142,7 @@ final class Subscribe {
 				'channel'         => $channel,
 				'email'           => $email,
 				'phone'           => $phone,
+				'full_name'       => $name,
 				'user_id'         => $user_id,
 				'stock_at_signup' => $stock_at_signup,
 				'ip_hash'         => $ip_hash,

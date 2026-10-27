@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نویدبان 1.0.7 — ابزارها</title>
+<title>نویدبان 1.0.9 — ابزارها</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1245,6 +1245,70 @@ body {
 	color: #fff;
 }
 
+/* Call tracking ------------------------------------------------------------ */
+
+.nvb-call {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	flex-wrap: wrap;
+}
+
+.nvb-call__box {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	cursor: pointer;
+}
+
+.nvb-call__box input[type="checkbox"] {
+	width: 20px;
+	height: 20px;
+	margin: 0;
+	accent-color: var(--nvb-ok);
+	cursor: pointer;
+}
+
+/* Without JavaScript the tick needs a way to be saved, so the button stays in
+   the DOM. It is small and secondary so it does not compete with the row. */
+.nvb-call__save {
+	border: 1px solid var(--nvb-line);
+	background: var(--nvb-glass-strong);
+	color: var(--nvb-primary);
+	border-radius: 8px;
+	padding: 2px 8px;
+	font-size: 11px;
+	line-height: 1.6;
+	cursor: pointer;
+	box-shadow: var(--nvb-shadow-soft);
+}
+
+.nvb-call__save:hover,
+.nvb-call__save:focus {
+	border-color: var(--nvb-primary-hover);
+	color: var(--nvb-primary-hover);
+}
+
+.nvb-call__when {
+	display: block;
+	width: 100%;
+	color: var(--nvb-ink-soft);
+	font-size: 11px;
+	line-height: 1.7;
+}
+
+/* The save button is redundant once JavaScript submits on change, but hiding
+   it outright would break the no-JS path, so it is simply quiet. */
+.nvb-call__save {
+	opacity: 0.7;
+}
+
+.nvb-call__save:hover,
+.nvb-call__save:focus {
+	opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.nvb-wrap *,
 	.nvb-wrap *::before,
@@ -1313,11 +1377,11 @@ body {
 </head>
 <body>
 <p class="nvb-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.7.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.9.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">ابزارهای نویدبان<small>تشخیص، بازسازی و نگهداری</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۷</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools" aria-current="page">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
+<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">ابزارهای نویدبان<small>تشخیص، بازسازی و نگهداری</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۹</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools" aria-current="page">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
 	
 	<p class="nvb-muted">
 		آخرین پایش: هرگز		· پیام در صف: ۰	</p>

@@ -172,6 +172,7 @@ final class Frontend {
 				'strings'   => array(
 					'duplicate'   => 'این شماره یا ایمیل پیش‌تر ثبت شده است. اگر پیام تأیید را دریافت نکردید، چند دقیقهٔ دیگر دوباره تلاش کنید.',
 					'invalid'     => 'شمارهٔ موبایل یا ایمیل را درست وارد کنید.',
+					'invalidName' => 'نام و نام خانوادگی را کامل بنویسید.',
 					'consent'     => 'برای ادامه باید رضایت خود را تأیید کنید.',
 					'network'     => 'ارتباط برقرار نشد. لطفاً دوباره تلاش کنید.',
 					'success'     => (string) Settings::get( 'success_message', '' ),
@@ -290,11 +291,16 @@ final class Frontend {
 
 		$prefill_email = '';
 		$prefill_phone = '';
+		$prefill_name  = '';
 
 		if ( $user_id > 0 ) {
 			$user = function_exists( 'get_userdata' ) ? get_userdata( $user_id ) : null;
 			if ( $user ) {
 				$prefill_email = (string) $user->user_email;
+
+				$nvb_first = (string) get_user_meta( $user_id, 'first_name', true );
+				$nvb_last  = (string) get_user_meta( $user_id, 'last_name', true );
+				$prefill_name = \Navidban\Support\Validator::person_name( trim( $nvb_first . ' ' . $nvb_last ), 120 );
 			}
 
 			$billing_phone = (string) get_user_meta( $user_id, 'billing_phone', true );
@@ -320,6 +326,8 @@ final class Frontend {
 			'consent_req' => Consent::requires_checkbox(),
 			'privacy'     => Consent::privacy_url(),
 			'mode'        => $this->channel_mode(),
+			'name_field'  => (bool) Settings::get( 'form_name_field', true ),
+			'name_req'    => (bool) Settings::get( 'form_name_required', true ),
 			'notice'      => $notice,
 		);
 

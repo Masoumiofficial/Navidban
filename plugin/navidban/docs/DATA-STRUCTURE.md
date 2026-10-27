@@ -19,6 +19,7 @@
 | `channel` | VARCHAR(16) | `email` یا `sms` |
 | `email` | VARCHAR(190) NOT NULL DEFAULT '' | خالی برای ردیف‌های فقط‌پیامک |
 | `phone` | VARCHAR(20) NOT NULL DEFAULT '' | نرمال‌شده به `09xxxxxxxxx` |
+| `full_name` | VARCHAR(120) NOT NULL DEFAULT '' | نامی که خودِ مشتری در فرم نوشته؛ خالی = بی‌نام |
 | `user_id` | BIGINT UNSIGNED (0) | ۰ = مهمان |
 | `status` | VARCHAR(16) | `pending` / `confirmed` / `unsubscribed` / `notified` / `expired` |
 | `consent_at` | DATETIME NULL | زمان رضایت |
@@ -27,6 +28,8 @@
 | `confirm_expires_at` | DATETIME NULL | انقضای توکن (پیش‌فرض +۴۸ ساعت) |
 | `stock_at_signup` | INT | موجودی لحظهٔ ثبت (۰ = ناموجود) |
 | `ip_hash` | CHAR(64) | SHA-256 نمکی IP — **IP خام هرگز ذخیره نمی‌شود** |
+| `called_at` | DATETIME NULL | زمان تیک «تماس گرفته شد»؛ NULL = تماس گرفته نشده |
+| `called_by` | BIGINT UNSIGNED (0) | شناسهٔ کاربر وردپرسی که تیک را زده |
 | `created_at` | DATETIME | مبنای ترتیب «قدیمی‌تر اول» |
 
 کلیدها:
@@ -38,7 +41,10 @@
 - `KEY idx_status_product (status, product_id, variation_id)` — کوئری اصلی
   fair sending.
 - `KEY idx_status_created (status, created_at)` — پیمایش «قدیمی‌تر اول».
-- `KEY idx_phone`, `KEY idx_email` — جست‌وجوی ادمین.
+- `KEY idx_phone`, `KEY idx_email`, `KEY idx_name` — جست‌وجوی ادمین (ایمیل،
+  موبایل یا نام).
+- `KEY idx_called (called_at)` — فیلتر «تماس گرفته شده / نشده» بدون
+  اسکن کل جدول.
 
 ## ۲) `nvb_stock_snapshots` — تصویر موجودی
 

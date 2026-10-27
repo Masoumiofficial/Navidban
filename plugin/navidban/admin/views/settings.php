@@ -55,6 +55,27 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 			<h2>کانال‌ها</h2>
 			<table class="form-table" role="presentation">
 				<tr>
+					<th scope="row">فیلد نام و نام خانوادگی</th>
+					<td>
+						<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[form_name_field]" value="1" <?php checked( ! empty( $settings['form_name_field'] ) ); ?> /> نمایش داده شود</label>
+						<p class="description">
+							نام در پیامک (متغیر <code>{0}</code> و <code>{customer_name}</code>) استفاده می‌شود، در لیست انتظارها
+							و خروجی CSV می‌آید، و به شما اجازه می‌دهد مشتری را تلفنی پیگیری کنید.
+							اگر مشتری وارد حسابش شده باشد، از قبل پر می‌شود.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">نام اجباری باشد؟</th>
+					<td>
+						<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[form_name_required]" value="1" <?php checked( ! empty( $settings['form_name_required'] ) ); ?> /> بله، بدون نام ثبت نشود</label>
+						<p class="description">
+							اجباری بودن، ثبت‌نام بعضی مشتری‌ها را متوقف می‌کند؛ اختیاری بودن، ردیف‌های
+							بی‌نام تولید می‌کند. تصمیم با شماست — پیش‌فرض «اجباری» است.
+						</p>
+					</td>
+				</tr>
+				<tr>
 					<th scope="row"><label for="nvb-channel-choice">اولویت کانال در فرم</label></th>
 					<td>
 						<select id="nvb-channel-choice" name="<?php echo esc_attr( Settings::OPTION ); ?>[channel_choice]">

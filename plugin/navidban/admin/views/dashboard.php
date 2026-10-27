@@ -40,6 +40,10 @@ $nvb_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $
 			<strong class="nvb-card__value"><?php echo esc_html( Persian::number( $counts['notified'] ) ); ?></strong>
 		</div>
 		<div class="nvb-card">
+			<span class="nvb-card__label">تماس گرفته‌شده</span>
+			<strong class="nvb-card__value"><?php echo esc_html( Persian::number( $counts['called'] ) ); ?></strong>
+		</div>
+		<div class="nvb-card">
 			<span class="nvb-card__label">لغو اشتراک</span>
 			<strong class="nvb-card__value"><?php echo esc_html( Persian::number( $counts['unsubscribed'] ) ); ?></strong>
 		</div>

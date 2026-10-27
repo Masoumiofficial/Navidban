@@ -1,8 +1,8 @@
 {
-    "plugin_version": "1.0.8",
+    "plugin_version": "1.0.9",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-26T10:30:35+00:00",
-    "assertions": 278,
+    "generated_at": "2026-10-27T11:54:31+00:00",
+    "assertions": 292,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -20,6 +20,10 @@
         },
         "Validator / متن": {
             "assertions": 3,
+            "failures": 0
+        },
+        "Validator / نام و نام خانوادگی": {
+            "assertions": 14,
             "failures": 0
         },
         "Jalali / تبدیل": {

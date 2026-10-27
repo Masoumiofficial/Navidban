@@ -26,7 +26,7 @@ define(
 	'NAVIDBAN_VERSION',
 	preg_match( '~^[ \t/*#@]*Version:\s*([0-9][0-9.\-a-zA-Z]*)~mi', $nvb_header_source, $nvb_header_match ) ? trim( $nvb_header_match[1] ) : '0.0.0'
 );
-define( 'NAVIDBAN_DB_VERSION', '1' );
+define( 'NAVIDBAN_DB_VERSION', '2' );
 define( 'AUTH_SALT', 'test-salt' );
 define( 'ARRAY_A', 'ARRAY_A' );
 

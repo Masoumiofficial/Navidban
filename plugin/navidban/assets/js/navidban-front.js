@@ -79,6 +79,7 @@
 			product_id: parseInt(qs(form, 'input[name="product_id"]').value, 10) || 0,
 			variation_id: parseInt(qs(form, 'input[name="variation_id"]').value, 10) || 0,
 			channel: currentChannel(form),
+			name: (qs(form, '#nvb-name') || {}).value || '',
 			email: (qs(form, '#nvb-email') || {}).value || '',
 			phone: (qs(form, '#nvb-phone') || {}).value || '',
 			consent: form.querySelector('input[name="consent"]') && form.querySelector('input[name="consent"]').checked ? 1 : 0
@@ -118,6 +119,7 @@
 			if (!ok) {
 				var map = {
 					duplicate: data.strings ? data.strings.duplicate : '',
+					invalid_name: data.strings ? data.strings.invalidName : '',
 					invalid_email: data.strings ? data.strings.invalid : '',
 					invalid_phone: data.strings ? data.strings.invalid : '',
 					consent_required: data.strings ? data.strings.consent : ''

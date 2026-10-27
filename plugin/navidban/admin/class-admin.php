@@ -58,6 +58,7 @@ final class Admin {
 		add_action( 'admin_post_navidban_export', array( $this, 'export_csv' ) );
 		add_action( 'admin_post_navidban_tool', array( $this, 'handle_tool' ) );
 		add_action( 'admin_post_navidban_bulk', array( $this, 'handle_bulk' ) );
+		add_action( 'admin_post_navidban_call', array( $this, 'handle_call' ) );
 		add_filter( 'plugin_action_links_' . NAVIDBAN_BASENAME, array( $this, 'action_links' ) );
 	}
 
@@ -195,6 +196,8 @@ final class Admin {
 			'sms_enabled',
 			'form_email_field',
 			'form_phone_field',
+			'form_name_field',
+			'form_name_required',
 			'notify_backorders',
 			'double_opt_in',
 			'fair_sending',
@@ -408,6 +411,7 @@ final class Admin {
 			'product_id' => isset( $_GET['product_id'] ) ? (int) $_GET['product_id'] : 0,
 			'status'     => isset( $_GET['status'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['status'] ) ) : '',
 			'channel'    => isset( $_GET['channel'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['channel'] ) ) : '',
+			'called'     => isset( $_GET['called'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['called'] ) ) : '',
 			'from'       => isset( $_GET['from'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['from'] ) ) : '',
 			'to'         => isset( $_GET['to'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['to'] ) ) : '',
 			'search'     => isset( $_GET['s'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['s'] ) ) : '',
@@ -579,6 +583,7 @@ final class Admin {
 			'product_id' => isset( $_GET['product_id'] ) ? (int) $_GET['product_id'] : 0,
 			'status'     => isset( $_GET['status'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['status'] ) ) : '',
 			'channel'    => isset( $_GET['channel'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['channel'] ) ) : '',
+			'called'     => isset( $_GET['called'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['called'] ) ) : '',
 			'from'       => isset( $_GET['from'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['from'] ) ) : '',
 			'to'         => isset( $_GET['to'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['to'] ) ) : '',
 			'search'     => isset( $_GET['s'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['s'] ) ) : '',
@@ -601,12 +606,15 @@ final class Admin {
 			$out,
 			array(
 				'شناسه',
+				'نام و نام خانوادگی',
 				'محصول',
 				'تنوع',
 				'کانال',
 				'ایمیل',
 				'موبایل',
 				'وضعیت',
+				'تماس گرفته شد',
+				'تاریخ تماس (شمسی)',
 				'تاریخ ثبت (میلادی)',
 				'تاریخ ثبت (شمسی)',
 				'تاریخ تأیید (میلادی)',
@@ -617,12 +625,15 @@ final class Admin {
 		foreach ( $result['rows'] as $row ) {
 			$cells = array(
 				$row['id'],
+				(string) ( isset( $row['full_name'] ) ? $row['full_name'] : '' ),
 				Notifier::product_name( (int) $row['product_id'], (int) $row['variation_id'] ),
 				$row['variation_id'],
 				$row['channel'],
 				$row['email'],
 				$row['phone'],
 				$row['status'],
+				empty( $row['called_at'] ) ? 'خیر' : 'بله',
+				empty( $row['called_at'] ) ? '' : Jalali::format( (string) $row['called_at'], 'Y/m/d H:i' ),
 				$row['created_at'],
 				Jalali::format( (string) $row['created_at'], 'Y/m/d' ),
 				(string) $row['confirmed_at'],
@@ -822,6 +833,18 @@ final class Admin {
 					}
 					break;
 
+				case 'called':
+					if ( WaitlistRepository::set_called( $id, true, get_current_user_id_compat() ) ) {
+						$affected++;
+					}
+					break;
+
+				case 'uncalled':
+					if ( WaitlistRepository::set_called( $id, false ) ) {
+						$affected++;
+					}
+					break;
+
 				case 'delete':
 					$affected += $this->delete_row( $id );
 					break;
@@ -837,6 +860,59 @@ final class Admin {
 		);
 
 		wp_safe_redirect_compat( admin_url( 'admin.php?page=' . self::SLUG . '-waitlists' ) );
+		exit;
+	}
+
+	/**
+	 * Toggle the "customer was called" flag for one row.
+	 *
+	 * Deliberately a separate endpoint from the bulk form: the checkbox sits in
+	 * the row itself, and a shop assistant ticking it while on the phone must not
+	 * have to press Save afterwards. The nonce is per-row-independent because the
+	 * action is idempotent and reversible.
+	 *
+	 * @return void
+	 */
+	public function handle_call() {
+		$this->guard();
+
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field_compat( wp_unslash_compat( $_POST['_wpnonce'] ) ), 'navidban_call' ) ) {
+			wp_die_compat( 'درخواست معتبر نیست.' );
+		}
+
+		$id     = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
+		$called = isset( $_POST['called'] ) && '1' === (string) $_POST['called'];
+
+		if ( $id <= 0 ) {
+			wp_die_compat( 'ردیف مشخص نیست.' );
+		}
+
+		$ok = WaitlistRepository::set_called( $id, $called, get_current_user_id_compat() );
+
+		Logger::log( 'info', 'admin_call', 'id=' . $id . '|called=' . ( $called ? '1' : '0' ) . '|ok=' . ( $ok ? '1' : '0' ) );
+
+		set_transient_compat(
+			'navidban_tool_notice',
+			$called ? 'ردیف به «تماس گرفته شد» تغییر کرد.' : 'تیک تماس از این ردیف برداشته شد.',
+			60
+		);
+
+		// Back to exactly the page and filters the admin was looking at, so a
+		// person working through "not called yet" does not lose their place.
+		$return = isset( $_POST['return'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['return'] ) ) : '';
+		$return = ltrim( $return, '&' );
+
+		// Only a query string is accepted: the redirect must stay on our screen.
+		if ( '' !== $return && ! preg_match( '/^[A-Za-z0-9_%\-&=+.]+$/', $return ) ) {
+			$return = '';
+		}
+
+		$target = admin_url( 'admin.php?page=' . self::SLUG . '-waitlists' );
+		if ( '' !== $return ) {
+			$target .= ( false === strpos( $target, '?' ) ? '?' : '&' ) . $return;
+		}
+
+		wp_safe_redirect_compat( $target );
 		exit;
 	}
 
@@ -936,6 +1012,15 @@ function wp_safe_redirect_compat( $url ) {
 	if ( function_exists( 'wp_safe_redirect' ) ) {
 		wp_safe_redirect( $url );
 	}
+}
+
+/**
+ * get_current_user_id() fallback.
+ *
+ * @return int
+ */
+function get_current_user_id_compat() {
+	return function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
 }
 
 /**
