@@ -1,6 +1,6 @@
 # ساختار داده
 
-چهار جدول، همه InnoDB، همه با collation سرور (از `$wpdb->get_charset_collate()`)،
+پنج جدول، همه InnoDB، همه با collation سرور (از `$wpdb->get_charset_collate()`)،
 همه با پیشوند `{$wpdb->prefix}mjy_`.
 
 > چرا InnoDB: قفل سطح‌ردیف (یک اجرای صف نباید فروشگاه را قفل کند)،
@@ -28,8 +28,13 @@
 | `confirm_expires_at` | DATETIME NULL | انقضای توکن (پیش‌فرض +۴۸ ساعت) |
 | `stock_at_signup` | INT | موجودی لحظهٔ ثبت (۰ = ناموجود) |
 | `ip_hash` | CHAR(64) | SHA-256 نمکی IP — **IP خام هرگز ذخیره نمی‌شود** |
-| `called_at` | DATETIME NULL | زمان تیک «تماس گرفته شد»؛ NULL = تماس گرفته نشده |
-| `called_by` | BIGINT UNSIGNED (0) | شناسهٔ کاربر وردپرسی که تیک را زده |
+| `called_at` | DATETIME NULL | زمان آخرین تماس ثبت‌شده؛ NULL = هیچ تماسی ثبت نشده |
+| `called_by` | BIGINT UNSIGNED (0) | کاربری که آخرین تماس را ثبت کرد |
+| `call_state` | VARCHAR(16) NOT NULL DEFAULT 'open' | `open` (در جریان) یا `closed` (خاتمه‌یافته) |
+| `call_closed_at` | DATETIME NULL | زمان خاتمه |
+| `call_closed_by` | BIGINT UNSIGNED (0) | کاربری که پیگیری را بست |
+| `call_close_reason` | VARCHAR(32) NOT NULL DEFAULT '' | کد دلیل خاتمه (کلیدهای `CallLog::CLOSE_REASONS`) |
+| `call_close_note` | VARCHAR(190) NOT NULL DEFAULT '' | توضیح خاتمه |
 | `created_at` | DATETIME | مبنای ترتیب «قدیمی‌تر اول» |
 
 کلیدها:
@@ -43,6 +48,7 @@
 - `KEY idx_status_created (status, created_at)` — پیمایش «قدیمی‌تر اول».
 - `KEY idx_phone`, `KEY idx_email`, `KEY idx_name` — جست‌وجوی ادمین (ایمیل،
   موبایل یا نام).
+- `KEY idx_call_state (call_state)` — جدا کردن پیگیری‌های بسته از لیست کار.
 - `KEY idx_called (called_at)` — فیلتر «تماس گرفته شده / نشده» بدون
   اسکن کل جدول.
 
@@ -91,7 +97,30 @@
 - `KEY idx_waitlist (waitlist_id)` — پاک‌سازی آبشاری منطقی.
 - `KEY idx_sent (status, sent_at)` — شمارش نرخ دقیقه.
 
-## ۴) `mjy_logs` — لاگ امنیتی و شمارش نرخ
+## ۴) `mjy_call_log` — تاریخچهٔ تماس‌های پیگیری
+
+یک ردیف برای هر تماس. مرحله («تماس اول»، «تماس دوم»…) **ذخیره نمی‌شود**؛ از
+تعداد ردیف‌های همین جدول برای آن مشترک ساخته می‌شود، تا دو کاربر که همزمان ثبت
+می‌کنند دو «تماس دوم» نسازند.
+
+| ستون | نوع | توضیح |
+|---|---|---|
+| `id` | BIGINT UNSIGNED AI | کلید اصلی |
+| `waitlist_id` | BIGINT UNSIGNED | ردیف لیست انتظار |
+| `stage` | INT UNSIGNED | شمارهٔ مرحله در لحظهٔ ثبت (برای نمایش و مرتب‌سازی) |
+| `outcome` | VARCHAR(32) | کد نتیجه؛ کلیدهای `CallLog::OUTCOMES` |
+| `note` | VARCHAR(500) | توضیح تایپ‌شده؛ پاک‌سازی‌شده و محدود |
+| `user_id` | BIGINT UNSIGNED (0) | کاربری که تماس گرفت |
+| `created_at` | DATETIME | زمان ثبت |
+
+- `KEY idx_waitlist_stage (waitlist_id, stage)` — تاریخچهٔ یک مشترک.
+- `KEY idx_created (created_at)` — گزارش‌های زمانی.
+
+> **بدون کلید خارجی:** این افزونه FK نمی‌سازد (بعضی هاست‌ها و موتورهای قدیمی
+> مشکل دارند). حذف ردیف لیست انتظار، ردیف‌های تاریخچه را رها می‌کند؛ پاک‌سازی
+> هنگام حذف ردیف در `delete_row()` انجام می‌شود و در آزمون بررسی شده است.
+
+## ۵) `mjy_logs` — لاگ امنیتی و شمارش نرخ
 
 | ستون | نوع | توضیح |
 |---|---|---|
@@ -106,7 +135,7 @@
 
 لاگ **هرگز** ایمیل/موبایل خام ندارد؛ فقط هش IP و نام رویداد.
 
-## ۵) نگهداشت و حذف
+## ۶) نگهداشت و حذف
 
 | داده | سیاست |
 |---|---|
@@ -115,7 +144,7 @@
 | ردیف‌های صف `sent` قدیمی‌تر از ۳۰ روز | حذف روزانه |
 | حذف افزونه | فقط اگر مدیر `delete_data_on_uninstall` را روشن کرده باشد |
 
-## ۶) مهاجرت
+## ۷) مهاجرت
 
 `MOJODYAR_DB_VERSION = '1'`. روی هر بارگذاری، `Database::maybe_upgrade()`
 نسخهٔ ذخیره‌شده در آپشن `mojoodyar_db_version` را با ثابت مقایسه می‌کند و
@@ -126,7 +155,7 @@
 `ALTER TABLE … ENGINE=InnoDB` اجرا می‌کند. اگر `SHOW` در دسترس نباشد
 (بعضی هاست‌های محدود)، بی‌صدا رد می‌شود و افزونه کار می‌کند.
 
-## ۷) آنچه اندازه‌گیری نشد
+## ۸) آنچه اندازه‌گیری نشد
 
 - کارایی این چهار جدول روی MySQL با ۱۰۰٬۰۰۰+ ردیف واقعی. `tests/load.php`
   ده‌هزار ردیف را روی SQLite می‌آزماید و صریحاً می‌گوید «بنچمارک MySQL نیست».

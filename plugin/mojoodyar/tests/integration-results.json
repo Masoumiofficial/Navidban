@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.0.0",
+    "plugin_version": "2.1.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-27T18:36:43+00:00",
-    "assertions": 210,
+    "generated_at": "2026-10-27T19:15:30+00:00",
+    "assertions": 257,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -60,6 +60,10 @@
         },
         "نام مشتری و پیگیری تماس": {
             "assertions": 27,
+            "failures": 0
+        },
+        "پیگیری تلفنی مرحله‌ای": {
+            "assertions": 47,
             "failures": 0
         },
         "مهاجرت از برند قدیم (۱.۰.x)": {

@@ -3,7 +3,7 @@
  * Plugin Name:       موجودیار | لیست انتظار و اعلان بازگشت موجودی
  * Plugin URI:        https://github.com/Masoumiofficial/Mojoodyar
  * Description:       لیست انتظار و اعلان بازگشت موجودی برای ووکامرس. فقط در صفحهٔ محصولِ ناموجود بارگذاری می‌شود. بدون IonCube، بدون Composer، بدون تماس اجباری با سرور بیرونی.
- * Version:           2.0.0
+ * Version:           2.1.0
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            اتحاد وردپرس
@@ -20,8 +20,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MOJODYAR_VERSION', '2.0.0' );
-define( 'MOJODYAR_DB_VERSION', '3' );
+define( 'MOJODYAR_VERSION', '2.1.0' );
+define( 'MOJODYAR_DB_VERSION', '4' );
 define( 'MOJODYAR_FILE', __FILE__ );
 define( 'MOJODYAR_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MOJODYAR_URL', plugin_dir_url( __FILE__ ) );

@@ -10,6 +10,7 @@
 
 namespace Mojoodyar\Admin;
 
+use Mojoodyar\CallLog;
 use Mojoodyar\Capabilities;
 use Mojoodyar\Consent;
 use Mojoodyar\Database;
@@ -97,6 +98,13 @@ final class Admin {
 		add_submenu_page( self::SLUG, 'تنظیمات', 'تنظیمات', Capabilities::MANAGE, self::SLUG . '-settings', array( $this, 'render_settings' ) );
 		add_submenu_page( self::SLUG, 'ابزارها', 'ابزارها', Capabilities::MANAGE, self::SLUG . '-tools', array( $this, 'render_tools' ) );
 		add_submenu_page( self::SLUG, 'راهنما', 'راهنما', Capabilities::MANAGE, self::SLUG . '-help', array( $this, 'render_help' ) );
+
+		// Reachable by URL for the no-JavaScript path, but never shown in the menu.
+		add_submenu_page( self::SLUG, 'پیگیری تلفنی', 'پیگیری تلفنی', Capabilities::MANAGE, self::SLUG . '-followup', array( $this, 'render_followup' ) );
+
+		if ( function_exists( 'remove_submenu_page' ) ) {
+			remove_submenu_page( self::SLUG, self::SLUG . '-followup' );
+		}
 	}
 
 	/**
@@ -431,6 +439,33 @@ final class Admin {
 				'total'    => $result['total'],
 				'args'     => $args,
 				'per_page' => 20,
+			)
+		);
+	}
+
+	/**
+	 * Render the standalone phone follow-up screen.
+	 *
+	 * @return void
+	 */
+	public function render_followup() {
+		$this->guard();
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only, ID only.
+		$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+		// phpcs:enable
+
+		$row = $id > 0 ? WaitlistRepository::get( $id ) : null;
+
+		if ( null === $row ) {
+			wp_die_compat( 'این ردیف پیدا نشد؛ شاید حذف شده باشد.' );
+		}
+
+		$this->view(
+			'followup',
+			array(
+				'row'     => $row,
+				'history' => CallLog::history( $id ),
 			)
 		);
 	}
@@ -864,12 +899,16 @@ final class Admin {
 	}
 
 	/**
-	 * Toggle the "customer was called" flag for one row.
+	 * Phone follow-up endpoint for one row.
 	 *
-	 * Deliberately a separate endpoint from the bulk form: the checkbox sits in
-	 * the row itself, and a shop assistant ticking it while on the phone must not
-	 * have to press Save afterwards. The nonce is per-row-independent because the
-	 * action is idempotent and reversible.
+	 * Three actions share this endpoint because they are three buttons inside
+	 * the same dialog:
+	 *  - `attempt`: log one call attempt (stage = attempts so far + 1);
+	 *  - `close`:   end the follow-up with a reason;
+	 *  - `reopen`:  put it back into the working list.
+	 *
+	 * The old checkbox (`called=1`) is still accepted so a bookmarked form or a
+	 * cached admin page keeps working.
 	 *
 	 * @return void
 	 */
@@ -887,13 +926,23 @@ final class Admin {
 			wp_die_compat( 'ردیف مشخص نیست.' );
 		}
 
-		$ok = WaitlistRepository::set_called( $id, $called, get_current_user_id_compat() );
+		$result = $this->process_call(
+			array(
+				'id'           => $id,
+				'call_action'  => isset( $_POST['call_action'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['call_action'] ) ) : '',
+				'outcome'      => isset( $_POST['outcome'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['outcome'] ) ) : '',
+				'close_reason' => isset( $_POST['close_reason'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['close_reason'] ) ) : '',
+				'note'         => isset( $_POST['note'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['note'] ) ) : '',
+				'called'       => $called,
+				'user_id'      => get_current_user_id_compat(),
+			)
+		);
 
-		Logger::log( 'info', 'admin_call', 'id=' . $id . '|called=' . ( $called ? '1' : '0' ) . '|ok=' . ( $ok ? '1' : '0' ) );
+		Logger::log( 'info', 'admin_call', 'id=' . $id . '|action=' . $result['action'] . '|ok=' . ( $result['ok'] ? '1' : '0' ) );
 
 		set_transient_compat(
 			'mojoodyar_tool_notice',
-			$called ? 'ردیف به «تماس گرفته شد» تغییر کرد.' : 'تیک تماس از این ردیف برداشته شد.',
+			$result['notice'],
 			60
 		);
 
@@ -917,6 +966,84 @@ final class Admin {
 	}
 
 	/**
+	 * Do the work of the follow-up endpoint and return what happened.
+	 *
+	 * Split out of handle_call() so the logic is testable without the redirect
+	 * and exit that a real request needs.
+	 *
+	 * @param array $input Unslashed input: id, call_action, outcome, close_reason,
+	 *                     note, called, user_id.
+	 * @return array{ok:bool,notice:string,action:string}
+	 */
+	public function process_call( array $input ) {
+		$id     = isset( $input['id'] ) ? (int) $input['id'] : 0;
+		$action = isset( $input['call_action'] ) ? (string) $input['call_action'] : '';
+		$outcome = isset( $input['outcome'] ) ? (string) $input['outcome'] : '';
+		$note    = isset( $input['note'] ) ? (string) $input['note'] : '';
+		$userId  = isset( $input['user_id'] ) ? (int) $input['user_id'] : 0;
+
+		if ( ! in_array( $action, array( 'attempt', 'close', 'reopen' ), true ) ) {
+			$action = 'legacy';
+		}
+
+		$ok = true;
+
+		if ( 'attempt' === $action ) {
+			$result = CallLog::add_attempt( $id, $outcome, $note, $userId );
+			$ok     = (bool) $result['ok'];
+
+			if ( $ok ) {
+				$notice = CallLog::stage_label( $result['stage'] ) . ' ثبت شد: ' . CallLog::outcome_label( $outcome ) . '.';
+
+				if ( $result['closed'] ) {
+					$notice .= ' چون نتیجه «' . CallLog::outcome_label( $outcome ) . '» است، پیگیری بسته شد.';
+				}
+			} else {
+				$notice = $this->call_error_message( (string) $result['reason'] );
+			}
+		} elseif ( 'close' === $action ) {
+			$reason = isset( $input['close_reason'] ) ? (string) $input['close_reason'] : '';
+			$result = CallLog::close( $id, $reason, $note, $userId );
+			$ok     = (bool) $result['ok'];
+			$notice = $ok
+				? 'پیگیری بسته شد: ' . CallLog::reason_label( $reason ) . '.'
+				: $this->call_error_message( (string) $result['reason'] );
+		} elseif ( 'reopen' === $action ) {
+			$result = CallLog::reopen( $id );
+			$ok     = (bool) $result['ok'];
+			$notice = $ok ? 'پیگیری دوباره باز شد؛ در لیست تماس برمی‌گردد.' : $this->call_error_message( (string) $result['reason'] );
+		} else {
+			$called = ! empty( $input['called'] );
+			$ok     = WaitlistRepository::set_called( $id, $called, $userId );
+			$notice = $called ? 'ردیف به «تماس گرفته شد» تغییر کرد.' : 'تیک تماس از این ردیف برداشته شد.';
+		}
+
+		return array(
+			'ok'     => (bool) $ok,
+			'notice' => (string) $notice,
+			'action' => $action,
+		);
+	}
+
+	/**
+	 * Persian message for a follow-up failure.
+	 *
+	 * @param string $reason Machine reason code.
+	 * @return string
+	 */
+	private function call_error_message( $reason ) {
+		$map = array(
+			'invalid_outcome' => 'نتیجهٔ تماس را انتخاب کنید.',
+			'invalid_reason'  => 'دلیل خاتمه را انتخاب کنید.',
+			'not_found'       => 'این ردیف پیدا نشد؛ شاید همزمان حذف شده باشد.',
+			'closed'          => 'این پیگیری بسته شده است. اول دوباره بازش کنید.',
+			'db_error'        => 'ذخیره نشد. دوباره تلاش کنید.',
+		);
+
+		return isset( $map[ (string) $reason ] ) ? $map[ (string) $reason ] : 'ثبت انجام نشد.';
+	}
+
+	/**
 	 * Delete one waitlist row and its queue entries.
 	 *
 	 * @param int $id Row ID.
@@ -926,6 +1053,12 @@ final class Admin {
 		global $wpdb;
 
 		Queue::delete_for_waitlists( array( (int) $id ) );
+
+		// No foreign keys in this schema (some hosts and older engines choke on
+		// them), so the call history has to be cleaned up here.
+		$calls = CallLog::table();
+
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$calls} WHERE waitlist_id = %d", (int) $id ) );
 
 		$table = WaitlistRepository::table();
 

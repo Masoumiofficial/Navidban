@@ -32,6 +32,7 @@ function mojoodyar_uninstall_site() {
 		$prefix . 'mjy_stock_snapshots',
 		$prefix . 'mjy_queue',
 		$prefix . 'mjy_logs',
+		$prefix . 'mjy_call_log',
 	);
 
 	foreach ( $tables as $table ) {

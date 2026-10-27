@@ -7,22 +7,71 @@
 	'use strict';
 
 	document.addEventListener('DOMContentLoaded', function () {
-		// Per-row "customer was called" tick: submitting immediately is the whole
-		// point - an assistant marks it while the phone is still in their hand.
-		// Without JS the small "ثبت" button next to the box does the same thing.
-		Array.prototype.forEach.call(document.querySelectorAll('[data-mjy="call-toggle"]'), function (box) {
-			box.addEventListener('change', function () {
-				var form = box.closest('form');
-				if (!form) {
+		// Phone follow-up dialog.
+		//
+		// The link is a real link to a standalone page, so it works with
+		// JavaScript off, in a new tab, and with middle click. When <dialog> is
+		// available we intercept the click and open the same panel as a modal.
+		// Nothing about the form depends on this script: the fields, the nonce
+		// and the two submit buttons are plain HTML.
+		var supportsDialog = typeof window.HTMLDialogElement !== 'undefined';
+
+		Array.prototype.forEach.call(document.querySelectorAll('[data-mjy="call-open"]'), function (link) {
+			link.addEventListener('click', function (event) {
+				var id = link.getAttribute('data-target');
+				var modal = id ? document.getElementById(id) : null;
+
+				if (!modal || !supportsDialog || typeof modal.showModal !== 'function') {
 					return;
 				}
-				box.disabled = true;
-				if (typeof form.requestSubmit === 'function') {
-					form.requestSubmit();
-				} else {
-					form.submit();
+
+				event.preventDefault();
+				modal.showModal();
+				focusFirst(modal);
+			});
+		});
+
+		Array.prototype.forEach.call(document.querySelectorAll('[data-mjy="call-modal"]'), function (modal) {
+			// Click on the backdrop closes. The panel swallows its own clicks.
+			modal.addEventListener('click', function (event) {
+				if (event.target === modal) {
+					modal.close();
 				}
 			});
+
+			Array.prototype.forEach.call(modal.querySelectorAll('[data-mjy="call-close"]'), function (button) {
+				button.addEventListener('click', function () {
+					modal.close();
+				});
+			});
+
+			// A note counter, so nobody types past the column length and loses text.
+			var note = modal.querySelector('[data-mjy="note"]');
+			var counter = modal.querySelector('[data-mjy="counter"]');
+
+			if (note && counter) {
+				var update = function () {
+					counter.textContent = note.value.length + ' / 500';
+				};
+				note.addEventListener('input', update);
+				update();
+			}
+
+			// "End follow-up" needs a reason before it does anything.
+			var closeButton = modal.querySelector('[data-mjy="follow-close"]');
+
+			if (closeButton) {
+				closeButton.addEventListener('click', function (event) {
+					var form = closeButton.closest('form');
+					var reason = form ? form.querySelector('select[name="close_reason"]') : null;
+
+					if (reason && reason.value === '') {
+						event.preventDefault();
+						reason.focus();
+						window.alert('برای خاتمهٔ پیگیری، دلیل را انتخاب کنید.');
+					}
+				});
+			}
 		});
 
 		var selectAll = document.getElementById('mjy-select-all');
@@ -68,4 +117,20 @@
 			});
 		});
 	});
+
+	/**
+	 * Put the cursor on the first useful control inside a dialog.
+	 *
+	 * @param {Element} modal Dialog element.
+	 * @return {void}
+	 */
+	function focusFirst(modal) {
+		var target = modal.querySelector('[data-mjy="note"]') || modal.querySelector('input[name="outcome"]');
+
+		if (target && typeof target.focus === 'function') {
+			target.focus();
+		}
+
+		modal.scrollTop = 0;
+	}
 })();

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.0.0 — داشبورد</title>
+<title>موجودیار 2.1.0 — داشبورد</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1245,69 +1245,373 @@ body {
 	color: #fff;
 }
 
-/* Call tracking ------------------------------------------------------------ */
-
-.mjy-call {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin: 0;
-	flex-wrap: wrap;
-}
-
-.mjy-call__box {
+.mjy-call__open {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
-	cursor: pointer;
-}
-
-.mjy-call__box input[type="checkbox"] {
-	width: 20px;
-	height: 20px;
-	margin: 0;
-	accent-color: var(--mjy-ok);
-	cursor: pointer;
-}
-
-/* Without JavaScript the tick needs a way to be saved, so the button stays in
-   the DOM. It is small and secondary so it does not compete with the row. */
-.mjy-call__save {
+	gap: 6px;
+	padding: 5px 12px;
 	border: 1px solid var(--mjy-line);
+	border-radius: 999px;
 	background: var(--mjy-glass-strong);
 	color: var(--mjy-primary);
-	border-radius: 8px;
-	padding: 2px 8px;
-	font-size: 11px;
-	line-height: 1.6;
-	cursor: pointer;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.7;
+	text-decoration: none;
+	white-space: nowrap;
 	box-shadow: var(--mjy-shadow-soft);
+	transition: transform 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out;
 }
 
-.mjy-call__save:hover,
-.mjy-call__save:focus {
-	border-color: var(--mjy-primary-hover);
+.mjy-call__open::before {
+	content: "";
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--mjy-accent);
+	box-shadow: 0 0 0 3px rgba(242, 169, 59, 0.18);
+}
+
+.mjy-call__open:hover,
+.mjy-call__open:focus {
 	color: var(--mjy-primary-hover);
+	border-color: var(--mjy-primary-hover);
+	transform: translateY(-1px);
+}
+
+.mjy-call__open.is-closed::before {
+	background: var(--mjy-ink-soft);
+	box-shadow: 0 0 0 3px rgba(91, 107, 102, 0.14);
 }
 
 .mjy-call__when {
 	display: block;
 	width: 100%;
+	margin-top: 4px;
 	color: var(--mjy-ink-soft);
 	font-size: 11px;
 	line-height: 1.7;
 }
 
-/* The save button is redundant once JavaScript submits on change, but hiding
-   it outright would break the no-JS path, so it is simply quiet. */
-.mjy-call__save {
-	opacity: 0.7;
+/* Follow-up dialog -------------------------------------------------------- */
+
+.mjy-modal {
+	width: min(680px, calc(100% - 32px));
+	max-height: min(86vh, 760px);
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	border-radius: var(--mjy-radius);
+	background: #fbfdfc;
+	box-shadow: 0 30px 80px -30px rgba(14, 92, 85, 0.55);
+	overflow: hidden;
+	color: var(--mjy-ink);
 }
 
-.mjy-call__save:hover,
-.mjy-call__save:focus {
-	opacity: 1;
+.mjy-modal::backdrop {
+	background: rgba(16, 32, 30, 0.42);
+	backdrop-filter: blur(3px);
 }
+
+.mjy-modal__panel {
+	display: flex;
+	flex-direction: column;
+	max-height: inherit;
+}
+
+.mjy-modal__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--mjy-line);
+	background: linear-gradient(135deg, rgba(14, 92, 85, 0.06), rgba(20, 133, 123, 0.03));
+}
+
+.mjy-modal__title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+}
+
+.mjy-modal__x {
+	border: 0;
+	background: transparent;
+	font-size: 22px;
+	line-height: 1;
+	padding: 2px 8px;
+	border-radius: 8px;
+	color: var(--mjy-ink-soft);
+	cursor: pointer;
+}
+
+.mjy-modal__x:hover,
+.mjy-modal__x:focus {
+	background: rgba(14, 92, 85, 0.08);
+	color: var(--mjy-primary);
+}
+
+.mjy-modal__body {
+	padding: 18px 20px 22px;
+	overflow-y: auto;
+}
+
+/* Follow-up panel --------------------------------------------------------- */
+
+.mjy-follow__who {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+.mjy-follow__name {
+	display: block;
+	font-size: 15px;
+	color: var(--mjy-ink);
+}
+
+.mjy-follow__phone {
+	display: inline-block;
+	margin-top: 3px;
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.4px;
+	color: var(--mjy-primary-hover);
+	text-decoration: none;
+	border-bottom: 1px dashed rgba(20, 133, 123, 0.45);
+}
+
+.mjy-follow__badge {
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.mjy-follow__badge.is-open {
+	background: rgba(242, 169, 59, 0.16);
+	color: #8a5a10;
+}
+
+.mjy-follow__badge.is-closed {
+	background: rgba(91, 107, 102, 0.12);
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__closed-note {
+	margin: 0 0 14px;
+	padding: 10px 12px;
+	border-radius: 12px;
+	background: rgba(91, 107, 102, 0.08);
+	font-size: 12px;
+	line-height: 1.9;
+}
+
+.mjy-follow__title {
+	margin: 0 0 8px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__empty {
+	margin: 0 0 16px;
+	padding: 12px;
+	border: 1px dashed var(--mjy-line);
+	border-radius: 12px;
+	font-size: 12px;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__timeline {
+	margin: 0 0 18px;
+	padding: 0;
+	list-style: none;
+	border-inline-start: 2px solid rgba(14, 92, 85, 0.14);
+}
+
+.mjy-follow__item {
+	position: relative;
+	display: flex;
+	gap: 10px;
+	padding: 0 14px 12px;
+}
+
+.mjy-follow__item::before {
+	content: "";
+	position: absolute;
+	inset-inline-start: -7px;
+	top: 6px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--mjy-primary-hover);
+	box-shadow: 0 0 0 3px #fbfdfc;
+}
+
+.mjy-follow__stage {
+	min-width: 72px;
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-follow__body strong {
+	font-size: 13px;
+}
+
+.mjy-follow__note {
+	margin: 4px 0 2px;
+	font-size: 12px;
+	line-height: 1.9;
+	color: var(--mjy-ink);
+	white-space: pre-wrap;
+}
+
+.mjy-follow__outcomes {
+	margin: 0 0 14px;
+	padding: 12px;
+	border: 1px solid var(--mjy-line);
+	border-radius: 14px;
+}
+
+.mjy-follow__outcomes legend {
+	padding: 0 6px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-outcome {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 8px;
+	padding: 6px 10px;
+	border: 1px solid var(--mjy-line);
+	border-radius: 999px;
+	background: #fff;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.mjy-outcome input[type="radio"] {
+	margin: 0;
+	accent-color: var(--mjy-primary);
+}
+
+.mjy-outcome:has(input:checked) {
+	border-color: var(--mjy-primary);
+	box-shadow: 0 0 0 3px rgba(14, 92, 85, 0.1);
+}
+
+.mjy-follow__field {
+	margin: 0 0 12px;
+}
+
+.mjy-follow__field label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__field textarea,
+.mjy-follow__field select {
+	width: 100%;
+	border-radius: 12px;
+}
+
+.mjy-follow__counter {
+	display: block;
+	margin-top: 2px;
+	font-size: 11px;
+	color: var(--mjy-ink-soft);
+	text-align: end;
+}
+
+.mjy-follow__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.mjy-btn {
+	padding: 8px 18px;
+	border-radius: 999px;
+	border: 1px solid var(--mjy-line);
+	background: #fff;
+	color: var(--mjy-primary);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.8;
+	cursor: pointer;
+	transition: transform 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+.mjy-btn:hover,
+.mjy-btn:focus {
+	transform: translateY(-1px);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-btn--primary {
+	border-color: transparent;
+	background: var(--mjy-primary);
+	color: #fff;
+}
+
+.mjy-btn--primary:hover,
+.mjy-btn--primary:focus {
+	background: var(--mjy-primary-hover);
+	color: #fff;
+}
+
+.mjy-btn--danger {
+	border-color: rgba(198, 72, 60, 0.35);
+	color: var(--mjy-error);
+}
+
+.mjy-btn--danger:hover,
+.mjy-btn--danger:focus {
+	border-color: var(--mjy-error);
+	color: var(--mjy-error);
+}
+
+.mjy-follow__hint,
+.mjy-follow__fallback {
+	margin: 0 0 6px;
+	font-size: 11px;
+	line-height: 1.9;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__back {
+	margin-top: 16px;
+}
+
+@media screen and (max-width: 782px) {
+	.mjy-modal {
+		width: calc(100% - 16px);
+		max-height: 92vh;
+	}
+
+	.mjy-modal__body {
+		padding: 14px;
+	}
+
+	.mjy-outcome {
+		font-size: 11px;
+	}
+}
+
 
 @media (prefers-reduced-motion: reduce) {
 	.mjy-wrap *,
@@ -1377,11 +1681,11 @@ body {
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.0.0.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.1.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — داشبورد<small>نگهبانِ خبرهای خوب فروشگاه شما</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۰.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar" aria-current="page">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — داشبورد<small>نگهبانِ خبرهای خوب فروشگاه شما</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۱.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar" aria-current="page">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
 	
 	<div class="mjy-grid">
 		<div class="mjy-card">
@@ -1464,6 +1768,12 @@ body {
 					</tr>
 									<tr>
 						<td>wp_mjy_logs</td>
+						<td>
+															<span class="mjy-ok">InnoDB</span>
+													</td>
+					</tr>
+									<tr>
+						<td>wp_mjy_call_log</td>
 						<td>
 															<span class="mjy-ok">InnoDB</span>
 													</td>

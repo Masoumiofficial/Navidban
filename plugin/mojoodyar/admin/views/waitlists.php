@@ -19,6 +19,16 @@ use Mojoodyar\Support\Persian;
 use Mojoodyar\WaitlistRepository;
 
 $mjy_pages = max( 1, (int) ceil( $total / max( 1, $per_page ) ) );
+
+// One query for the whole page instead of two per row.
+$mjy_row_ids   = array();
+$mjy_histories = array();
+
+foreach ( (array) $rows as $mjy_row_for_ids ) {
+	$mjy_row_ids[] = (int) $mjy_row_for_ids['id'];
+}
+
+$mjy_call_counts = \Mojoodyar\CallLog::summaries( $mjy_row_ids );
 $mjy_export = wp_nonce_url(
 	add_query_arg(
 		array_merge(
@@ -192,7 +202,7 @@ $mjy_statuses = array(
 						<td>
 							<?php
 							$mjy_called = ! empty( $row['called_at'] );
-							$mjy_return = http_build_query(
+							$return = http_build_query(
 								array_filter(
 									array(
 										'product_id' => $args['product_id'] ?: '',
@@ -207,20 +217,26 @@ $mjy_statuses = array(
 								)
 							);
 							?>
-							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-call" data-mjy="call-form">
-								<?php wp_nonce_field( 'mojoodyar_call' ); ?>
-								<input type="hidden" name="action" value="mojoodyar_call" />
-								<input type="hidden" name="id" value="<?php echo esc_attr( (string) $row['id'] ); ?>" />
-								<input type="hidden" name="return" value="<?php echo esc_attr( $mjy_return ); ?>" />
-								<label class="mjy-call__box" title="<?php echo $mjy_called ? esc_attr( 'تماس گرفته شده' ) : esc_attr( 'هنوز تماس گرفته نشده' ); ?>">
-									<input type="checkbox" name="called" value="1" data-mjy="call-toggle" <?php checked( $mjy_called ); ?> />
-									<span class="screen-reader-text">تماس گرفته شد</span>
-								</label>
-								<button type="submit" class="mjy-call__save" data-mjy="call-save">ثبت</button>
-								<?php if ( $mjy_called ) : ?>
-									<small class="mjy-call__when"><?php echo esc_html( Jalali::format( (string) $row['called_at'], 'j F' ) ); ?></small>
-								<?php endif; ?>
-							</form>
+							<?php
+							$mjy_attempts = isset( $mjy_call_counts[ (int) $row['id'] ] ) ? (int) $mjy_call_counts[ (int) $row['id'] ] : 0;
+							$mjy_closed   = isset( $row['call_state'] ) && 'closed' === $row['call_state'];
+							?>
+							<?php /* The link works on its own (no JavaScript, new tab, middle click); the script upgrades it to the dialog. */ ?>
+							<a
+								class="mjy-call__open <?php echo $mjy_closed ? 'is-closed' : ''; ?>"
+								href="<?php echo esc_url( admin_url( 'admin.php?page=mojoodyar-followup&id=' . (int) $row['id'] ) ); ?>"
+								data-mjy="call-open"
+								data-target="mjy-call-<?php echo esc_attr( (string) $row['id'] ); ?>"
+							>
+								پیگیری تلفنی
+							</a>
+							<?php if ( $mjy_closed ) : ?>
+								<small class="mjy-call__when">بسته — <?php echo esc_html( \Mojoodyar\CallLog::reason_label( (string) $row['call_close_reason'] ) ); ?></small>
+							<?php elseif ( $mjy_attempts > 0 ) : ?>
+								<small class="mjy-call__when">
+									<?php echo esc_html( \Mojoodyar\CallLog::stage_label( $mjy_attempts ) . ' — ' . Jalali::format( (string) $row['called_at'], 'j F' ) ); ?>
+								</small>
+							<?php endif; ?>
 						</td>
 						<td><?php echo $row['confirmed_at'] ? esc_html( Jalali::format( (string) $row['confirmed_at'], 'j F Y' ) ) : '—'; ?></td>
 						<td><?php echo $row['notified_at'] ? esc_html( Jalali::format( (string) $row['notified_at'], 'j F Y' ) ) : '—'; ?></td>
@@ -229,6 +245,44 @@ $mjy_statuses = array(
 			<?php endif; ?>
 			</tbody>
 	</table>
+
+	<?php if ( ! empty( $rows ) ) : ?>
+		<?php foreach ( $rows as $row ) : ?>
+			<?php
+			$history = \Mojoodyar\CallLog::history( (int) $row['id'] );
+			$variant = 'modal';
+			?>
+			<dialog class="mjy-modal" id="mjy-call-<?php echo esc_attr( (string) $row['id'] ); ?>" data-mjy="call-modal" aria-labelledby="mjy-call-title-<?php echo esc_attr( (string) $row['id'] ); ?>">
+				<div class="mjy-modal__panel">
+					<header class="mjy-modal__head">
+						<h2 id="mjy-call-title-<?php echo esc_attr( (string) $row['id'] ); ?>" class="mjy-modal__title">
+							پیگیری تلفنی — <?php echo esc_html( '' !== (string) ( $row['full_name'] ?? '' ) ? (string) $row['full_name'] : 'مشتری بی‌نام' ); ?>
+						</h2>
+						<button type="button" class="mjy-modal__x" data-mjy="call-close" aria-label="بستن">&times;</button>
+					</header>
+					<div class="mjy-modal__body">
+						<?php
+						$return = http_build_query(
+							array_filter(
+								array(
+									'product_id' => $args['product_id'] ?: '',
+									'status'     => $args['status'],
+									'channel'    => $args['channel'],
+									'called'     => $args['called'],
+									'from'       => $args['from'],
+									'to'         => $args['to'],
+									's'          => $args['search'],
+									'paged'      => $args['page'] > 1 ? $args['page'] : '',
+								)
+							)
+						);
+						?>
+						<?php include MOJODYAR_DIR . 'admin/views/call-panel.php'; ?>
+					</div>
+				</div>
+			</dialog>
+		<?php endforeach; ?>
+	<?php endif; ?>
 
 	<?php if ( $mjy_pages > 1 ) : ?>
 		<div class="tablenav"><div class="tablenav-pages">

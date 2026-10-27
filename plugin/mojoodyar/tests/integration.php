@@ -17,6 +17,7 @@ require_once MOJODYAR_DIR . 'includes/Autoloader.php';
 \Mojoodyar\Autoloader::register();
 
 use Mojoodyar\Activator;
+use Mojoodyar\CallLog;
 use Mojoodyar\Capabilities;
 use Mojoodyar\Consent;
 use Mojoodyar\Database;
@@ -156,11 +157,11 @@ MjyInt::group( 'نصب و چیدمان پایگاه داده' );
 Activator::activate( false );
 
 $tables = Database::inspect();
-MjyInt::same( 4, count( $tables ), 'چهار جدول ثبت شد' );
+MjyInt::same( 5, count( $tables ), 'پنج جدول ثبت شد (چهار جدول اصلی + تاریخچهٔ تماس)' );
 MjyInt::ok( isset( $GLOBALS['mjy_ddl'] ) && count( $GLOBALS['mjy_ddl'] ) >= 4, 'dbDelta برای هر جدول فراخوانی شد' );
 
 $ddl = implode( "\n", $GLOBALS['mjy_ddl'] );
-MjyInt::same( 4, substr_count( $ddl, 'ENGINE=InnoDB' ), 'همهٔ جدول‌ها InnoDB' );
+MjyInt::same( 5, substr_count( $ddl, 'ENGINE=InnoDB' ), 'همهٔ جدول‌ها InnoDB' );
 MjyInt::ok( false === strpos( $ddl, 'MyISAM' ), 'هیچ جدول MyISAM نیست' );
 MjyInt::ok( false !== strpos( $ddl, 'UNIQUE KEY uniq_subscriber' ), 'کلید یکتای مشترک وجود دارد' );
 MjyInt::ok( false !== strpos( $ddl, 'UNIQUE KEY uniq_payload' ), 'کلید یکتای پیام صف وجود دارد' );
@@ -1224,6 +1225,179 @@ function mjy_sms_state( $gateway ) {
 		)
 	);
 }
+
+MjyInt::group( 'پیگیری تلفنی مرحله‌ای' );
+
+$GLOBALS['mjy_options']['mojoodyar_settings'] = Settings::defaults();
+Settings::flush_cache();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . CallLog::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+mjy_reset_rate_limit();
+mjy_product( 95, array( 'status' => 'outofstock', 'qty' => 0 ) );
+
+$follow = Subscribe::handle(
+	array(
+		'product_id' => 95,
+		'channel'    => 'email',
+		'email'      => 'follow@example.com',
+		'phone'      => '09121234567',
+		'name'       => 'سارا رضایی',
+	)
+);
+$follow_id = (int) $follow['data']['id'];
+$follow_row = WaitlistRepository::get( $follow_id );
+
+MjyInt::ok( ! empty( $follow_row['call_state'] ) && 'open' === $follow_row['call_state'], 'ردیف تازه پیگیری باز دارد' );
+MjyInt::same( 0, CallLog::attempt_count( $follow_id ), 'هیچ تماسی ثبت نشده است' );
+MjyInt::same( array(), CallLog::history( $follow_id ), 'تاریخچهٔ خالی آرایه است، نه null' );
+
+// 1. First attempt -> stage 1.
+$first = CallLog::add_attempt( $follow_id, 'no_answer', 'زنگ خورد، جواب نداد', 5 );
+MjyInt::ok( $first['ok'], 'ثبت تماس اول موفق است' );
+MjyInt::same( 1, $first['stage'], 'تماس اول شمارهٔ مرحلهٔ ۱ می‌گیرد' );
+MjyInt::same( 'تماس اول', CallLog::stage_label( 1 ), 'برچسب مرحلهٔ ۱ درست است' );
+
+$row_after_first = WaitlistRepository::get( $follow_id );
+MjyInt::ok( ! empty( $row_after_first['called_at'] ), 'ستون قدیمی called_at هم پر می‌شود تا فیلترها بشکنند' );
+MjyInt::same( 5, (int) $row_after_first['called_by'], 'کاربر ثبت‌کننده ذخیره شد' );
+
+// 2. Second attempt -> stage 2, history newest first.
+$second = CallLog::add_attempt( $follow_id, 'callback', 'گفت فردا صبح زنگ بزنم', 5 );
+MjyInt::same( 2, $second['stage'], 'تماس دوم شمارهٔ مرحلهٔ ۲ می‌گیرد' );
+MjyInt::same( 'تماس دوم', CallLog::stage_label( 2 ), 'برچسب مرحلهٔ ۲ درست است' );
+MjyInt::same( 3, CallLog::stage_label( 3 ) === 'تماس سوم' ? 3 : 0, 'برچسب مرحلهٔ ۳ درست است' );
+
+$history = CallLog::history( $follow_id );
+MjyInt::same( 2, count( $history ), 'هر دو تماس در تاریخچه هست' );
+MjyInt::same( 2, (int) $history[0]['stage'], 'تاریخچه از تازه به قدیم مرتب است' );
+MjyInt::same( 'گفت فردا صبح زنگ بزنم', (string) $history[0]['note'], 'متن تایپ‌شدهٔ مرحلهٔ دوم ذخیره شد' );
+MjyInt::same( 'no_answer', (string) $history[1]['outcome'], 'نتیجهٔ مرحلهٔ اول ذخیره شد' );
+
+// 3. Validation: unknown outcome, empty outcome, missing row.
+$bad_outcome = CallLog::add_attempt( $follow_id, 'whatever', '', 5 );
+MjyInt::same( 'invalid_outcome', $bad_outcome['reason'], 'نتیجهٔ ناشناخته رد می‌شود' );
+MjyInt::same( 2, CallLog::attempt_count( $follow_id ), 'رد شدن، مرحله را جلو نمی‌برد' );
+
+$missing = CallLog::add_attempt( 999999, 'answered', '', 5 );
+MjyInt::same( 'not_found', $missing['reason'], 'ردیف ناموجود خطا می‌دهد، نه ردیف یتیم' );
+
+// 4. A very long note is bounded, never fatal.
+$long = CallLog::add_attempt( $follow_id, 'answered', str_repeat( 'ب', 900 ), 5 );
+MjyInt::ok( $long['ok'], 'یادداشت بلند ثبت را نمی‌شکند' );
+$long_row = CallLog::history( $follow_id );
+MjyInt::ok( \Mojoodyar\Support\Text::length( (string) $long_row[0]['note'] ) <= 500, 'یادداشت به ۵۰۰ کاراکتر محدود می‌شود' );
+
+// 5. Terminal outcomes close the follow-up by themselves.
+$closed = CallLog::add_attempt( $follow_id, 'ordered', 'سفارش داد', 5 );
+MjyInt::ok( $closed['closed'], 'نتیجهٔ «سفارش داد» پیگیری را می‌بندد' );
+$closed_row = WaitlistRepository::get( $follow_id );
+MjyInt::same( 'closed', (string) $closed_row['call_state'], 'وضعیت پیگیری بسته شد' );
+MjyInt::same( 'ordered', (string) $closed_row['call_close_reason'], 'دلیل بسته‌شدن ثبت شد' );
+
+// 6. A closed follow-up refuses new attempts until reopened.
+$refused = CallLog::add_attempt( $follow_id, 'answered', '', 5 );
+MjyInt::same( 'closed', $refused['reason'], 'روی پیگیری بسته، تماس تازه ثبت نمی‌شود' );
+
+$reopen = CallLog::reopen( $follow_id );
+MjyInt::ok( $reopen['ok'], 'بازکردن دوباره موفق است' );
+$reopened = WaitlistRepository::get( $follow_id );
+MjyInt::same( 'open', (string) $reopened['call_state'], 'وضعیت به باز برگشت' );
+MjyInt::same( 4, CallLog::attempt_count( $follow_id ), 'بازکردن تاریخچه را پاک نمی‌کند' );
+
+// 7. Manual close needs a known reason.
+$no_reason = CallLog::close( $follow_id, '', '', 5 );
+MjyInt::same( 'invalid_reason', $no_reason['reason'], 'خاتمهٔ بدون دلیل پذیرفته نمی‌شود' );
+
+$manual = CallLog::close( $follow_id, 'unreachable', 'چند بار زنگ زدیم', 5 );
+MjyInt::ok( $manual['ok'], 'خاتمه با دلیل درست ثبت می‌شود' );
+$manual_row = WaitlistRepository::get( $follow_id );
+MjyInt::same( 'unreachable', (string) $manual_row['call_close_reason'], 'دلیل دستی ذخیره شد' );
+MjyInt::same( 'چند بار زنگ زدیم', (string) $manual_row['call_close_note'], 'توضیح خاتمه ذخیره شد' );
+MjyInt::same( 'بسته: دیگر پاسخ نمی‌دهد', CallLog::state_label( $manual_row ), 'برچسب وضعیت برای جدول ساخته می‌شود' );
+
+// 8. One query for the whole page.
+$counts = CallLog::summaries( array( $follow_id, 0, -3 ) );
+MjyInt::same( 4, (int) ( $counts[ $follow_id ] ?? 0 ), 'خلاصهٔ صفحه تعداد تماس‌ها را می‌دهد' );
+
+// 9. The admin endpoint itself: nonce, action dispatch, dispatcher defaults.
+$_POST = array(
+	'_wpnonce'    => wp_create_nonce( 'mojoodyar_call' ),
+	'id'          => $follow_id,
+	'call_action' => 'reopen',
+);
+$GLOBALS['mjy_caps'][ \Mojoodyar\Capabilities::MANAGE ] = true;
+$admin = new \Mojoodyar\Admin\Admin();
+
+$opened = $admin->process_call(
+	array(
+		'id'          => $follow_id,
+		'call_action' => 'reopen',
+		'user_id'     => 5,
+	)
+);
+MjyInt::ok( $opened['ok'], 'اکشن reopen موفق است' );
+MjyInt::same( 'open', (string) WaitlistRepository::get( $follow_id )['call_state'], 'endpoint پیگیری را باز می‌کند' );
+
+$logged = $admin->process_call(
+	array(
+		'id'          => $follow_id,
+		'call_action' => 'attempt',
+		'outcome'     => 'busy',
+		'note'        => 'از طریق فرم پنل',
+		'user_id'     => 5,
+	)
+);
+MjyInt::ok( $logged['ok'], 'اکشن attempt از مسیر پنل موفق است' );
+$after_admin = CallLog::history( $follow_id );
+MjyInt::same( 'busy', (string) $after_admin[0]['outcome'], 'endpoint یک تماس تازه ثبت می‌کند' );
+MjyInt::same( 'از طریق فرم پنل', (string) $after_admin[0]['note'], 'یادداشت فرم پنل ذخیره می‌شود' );
+MjyInt::same( 5, CallLog::attempt_count( $follow_id ), 'شمارش مرحله‌ها بعد از ثبت پنل درست است' );
+
+// A failure returns a Persian message instead of dying.
+$failed = $admin->process_call(
+	array(
+		'id'          => $follow_id,
+		'call_action' => 'attempt',
+		'outcome'     => '',
+		'user_id'     => 5,
+	)
+);
+MjyInt::ok( ! $failed['ok'], 'بدون نتیجه، ثبت انجام نمی‌شود' );
+MjyInt::ok( false !== strpos( $failed['notice'], 'نتیجهٔ تماس' ), 'پیام خطا فارسی و گویاست' );
+
+$closed_admin = $admin->process_call(
+	array(
+		'id'           => $follow_id,
+		'call_action'  => 'close',
+		'close_reason' => 'other',
+		'user_id'      => 5,
+	)
+);
+MjyInt::ok( $closed_admin['ok'], 'اکشن close موفق است' );
+MjyInt::same( 'other', (string) WaitlistRepository::get( $follow_id )['call_close_reason'], 'endpoint اکشن close را اجرا می‌کند' );
+
+// A cached form from 1.0.x still posts `called=1` with no call_action.
+$legacy = $admin->process_call(
+	array(
+		'id'      => $follow_id,
+		'called'  => 1,
+		'user_id' => 5,
+	)
+);
+MjyInt::same( 'legacy', $legacy['action'], 'فرم قدیمی به مسیر سازگاری می‌رود' );
+MjyInt::ok( ! empty( WaitlistRepository::get( $follow_id )['called_at'] ), 'فرم قدیمی (called=1) هنوز کار می‌کند' );
+
+// 8b. Deleting the waitlist row takes its call history with it (no FK in the
+// schema, so this is the only thing that prevents orphan rows).
+$admin_for_delete = new \Mojoodyar\Admin\Admin();
+$orphan_probe = new ReflectionMethod( '\\Mojoodyar\\Admin\\Admin', 'delete_row' );
+$orphan_probe->setAccessible( true );
+$before_delete = (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . CallLog::table() );
+MjyInt::ok( $before_delete > 0, 'قبل از حذف، تاریخچه وجود دارد' );
+$orphan_probe->invoke( $admin_for_delete, $follow_id );
+MjyInt::same( 0, CallLog::attempt_count( $follow_id ), 'حذف ردیف، تاریخچهٔ تماس را هم پاک می‌کند' );
+
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . CallLog::table() );
 
 MjyInt::group( 'مهاجرت از برند قدیم (۱.۰.x)' );
 

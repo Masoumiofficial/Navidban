@@ -52,6 +52,13 @@ final class Database {
 	const LOGS = 'mjy_logs';
 
 	/**
+	 * Phone-follow-up log (one row per call attempt).
+	 *
+	 * @var string
+	 */
+	const CALL_LOG = 'mjy_call_log';
+
+	/**
 	 * Fully qualified table name.
 	 *
 	 * @param string $table Table constant.
@@ -74,6 +81,7 @@ final class Database {
 			self::table( self::SNAPSHOTS ),
 			self::table( self::QUEUE ),
 			self::table( self::LOGS ),
+			self::table( self::CALL_LOG ),
 		);
 	}
 
@@ -119,6 +127,11 @@ final class Database {
 			ip_hash CHAR(64) NOT NULL DEFAULT '',
 			called_at DATETIME DEFAULT NULL,
 			called_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			call_state VARCHAR(16) NOT NULL DEFAULT 'open',
+			call_closed_at DATETIME DEFAULT NULL,
+			call_closed_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			call_close_reason VARCHAR(32) NOT NULL DEFAULT '',
+			call_close_note VARCHAR(190) NOT NULL DEFAULT '',
 			created_at DATETIME NOT NULL,
 			PRIMARY KEY  (id),
 			UNIQUE KEY uniq_token (token),
@@ -128,6 +141,7 @@ final class Database {
 			KEY idx_phone (phone),
 			KEY idx_email (email),
 			KEY idx_called (called_at),
+			KEY idx_call_state (call_state),
 			KEY idx_name (full_name)
 		) ENGINE=InnoDB {$charset};";
 
@@ -176,10 +190,30 @@ final class Database {
 			KEY idx_level (level)
 		) ENGINE=InnoDB {$charset};";
 
+		$call_log = self::table( self::CALL_LOG );
+
+		// One row per phone attempt. The stage number is not stored as a
+		// counter on the waitlist row: it is the number of rows that exist for
+		// that subscriber, so two admins saving at the same time cannot both
+		// produce "تماس دوم".
+		$sql_call_log = "CREATE TABLE {$call_log} (
+			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			waitlist_id BIGINT UNSIGNED NOT NULL,
+			stage INT UNSIGNED NOT NULL DEFAULT 1,
+			outcome VARCHAR(32) NOT NULL DEFAULT '',
+			note VARCHAR(500) NOT NULL DEFAULT '',
+			user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+			created_at DATETIME NOT NULL,
+			PRIMARY KEY  (id),
+			KEY idx_waitlist_stage (waitlist_id, stage),
+			KEY idx_created (created_at)
+		) ENGINE=InnoDB {$charset};";
+
 		dbDelta( $sql_waitlists );
 		dbDelta( $sql_snapshots );
 		dbDelta( $sql_queue );
 		dbDelta( $sql_logs );
+		dbDelta( $sql_call_log );
 
 		self::force_innodb();
 
