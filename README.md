@@ -1,22 +1,22 @@
-# Navidban / نویدبان
+# Mojoodyar / موجودیار
 
 لیست انتظار و اعلان بازگشت موجودی برای ووکامرس — ساخته‌شده برای فروشگاه‌های
 ایرانی. بدون Composer، بدون npm، بدون build، بدون IonCube، بدون لایسنس.
 
 ```
-Navidban/            پژوهش بازار، برند و پرامپت ساخت (اسناد طراحی)
-plugin/navidban/     سورس افزونه + تست‌ها + ابزارها + مستندات
+Mojoodyar/            پژوهش بازار، برند و پرامپت ساخت (اسناد طراحی)
+plugin/mojoodyar/     سورس افزونه + تست‌ها + ابزارها + مستندات
 plugin/release/      بستهٔ انتشار ساخته‌شده
 ```
 
 ## بستهٔ انتشار
 
-`plugin/release/navidban-1.0.9.zip` — همین را در وردپرس نصب کنید.
+`plugin/release/mojoodyar-2.0.0.zip` — همین را در وردپرس نصب کنید.
 
 بازسازی و بازبینی:
 
 ```bash
-cd plugin/navidban
+cd plugin/mojoodyar
 python3 tools/verify-release.py --build     # ۲۲ بررسی، باید ۰ خطا باشد
 ```
 
@@ -25,7 +25,7 @@ python3 tools/verify-release.py --build     # ۲۲ بررسی، باید ۰ خط
 ```bash
 # با PHP نصب‌شده
 php tests/run.php            # ۲۹۲ assertion
-php tests/integration.php    # ۱۹۳ assertion
+php tests/integration.php    # ۲۱۰ assertion
 php tests/admin-render.php   # ۱۰۵ assertion (رندر واقعی پنل)
 php tests/load.php           # ۱۰٬۰۰۰ مشترک
 
@@ -34,24 +34,24 @@ npm install --no-save @php-wasm/node @php-wasm/universal
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php
 ```
 
-نتیجهٔ آخر: **۲۹۲/۲۹۲**، **۱۹۳/۱۹۳** و **۱۰۵/۱۰۵** روی PHP **8.3.33** و **7.4.33**.
-جزئیات: `plugin/navidban/docs/TEST-REPORT.md`.
+نتیجهٔ آخر: **۲۹۲/۲۹۲**، **۲۱۰/۲۱۰** و **۱۰۵/۱۰۵** روی PHP **8.3.33** و **7.4.33**.
+جزئیات: `plugin/mojoodyar/docs/TEST-REPORT.md`.
 
 ## مستندات
 
 | سند | مسیر |
 |---|---|
-| مشخصات | `plugin/navidban/docs/SPEC.md` |
-| معماری | `plugin/navidban/docs/ARCHITECTURE.md` |
-| ساختار داده | `plugin/navidban/docs/DATA-STRUCTURE.md` |
-| سیاست زمان‌بندی | `plugin/navidban/docs/SCHEDULER-POLICY.md` |
-| عملکرد (تولیدشده) | `plugin/navidban/docs/PERFORMANCE.md` |
-| امنیت | `plugin/navidban/docs/SECURITY.md` |
-| عیب‌یابی | `plugin/navidban/docs/TROUBLESHOOTING.md` |
-| چک‌لیست QA | `plugin/navidban/docs/QA-CHECKLIST.md` |
-| گزارش آزمون | `plugin/navidban/docs/TEST-REPORT.md` |
-| راهنمای کاربر | `plugin/navidban/docs/USER-GUIDE.md` |
-| متن صفحهٔ فروش | `plugin/navidban/docs/dev/listing-fa.md` |
+| مشخصات | `plugin/mojoodyar/docs/SPEC.md` |
+| معماری | `plugin/mojoodyar/docs/ARCHITECTURE.md` |
+| ساختار داده | `plugin/mojoodyar/docs/DATA-STRUCTURE.md` |
+| سیاست زمان‌بندی | `plugin/mojoodyar/docs/SCHEDULER-POLICY.md` |
+| عملکرد (تولیدشده) | `plugin/mojoodyar/docs/PERFORMANCE.md` |
+| امنیت | `plugin/mojoodyar/docs/SECURITY.md` |
+| عیب‌یابی | `plugin/mojoodyar/docs/TROUBLESHOOTING.md` |
+| چک‌لیست QA | `plugin/mojoodyar/docs/QA-CHECKLIST.md` |
+| گزارش آزمون | `plugin/mojoodyar/docs/TEST-REPORT.md` |
+| راهنمای کاربر | `plugin/mojoodyar/docs/USER-GUIDE.md` |
+| متن صفحهٔ فروش | `plugin/mojoodyar/docs/dev/listing-fa.md` |
 
 ## قاعدهٔ حاکم
 

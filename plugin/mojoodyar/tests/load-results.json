@@ -1,0 +1,60 @@
+{
+    "php_version": "8.3.33",
+    "storage": "SQLite (test harness) — not a MySQL benchmark",
+    "generated_at": "2026-10-27T18:36:48+00:00",
+    "subscribers": 10000,
+    "remaining_after_batch": 950,
+    "batch_sent": 50,
+    "timings_ms": {
+        "insert_10000_rows": 770,
+        "restock_with_10000": 11,
+        "enqueue_1000": 48,
+        "process_one_batch": 26,
+        "total": 946
+    },
+    "checks": [
+        {
+            "label": "۱۰٬۰۰۰ مشترک ثبت شد",
+            "passed": true,
+            "expected": "10000",
+            "actual": "10000"
+        },
+        {
+            "label": "موجودی ۵ با ۱۰٬۰۰۰ مشترک: دقیقاً ۵ اعلان",
+            "passed": true,
+            "expected": "5",
+            "actual": "5"
+        },
+        {
+            "label": "دستهٔ اول از سقف اندازهٔ دسته عبور نمی‌کند",
+            "passed": true,
+            "expected": "<= 50",
+            "actual": "5"
+        },
+        {
+            "label": "۱۰۰۰ پیام در صف قرار گرفت",
+            "passed": true,
+            "expected": "1000",
+            "actual": "1000"
+        },
+        {
+            "label": "یک اجرا بیش از اندازهٔ دسته ارسال نمی‌کند",
+            "passed": true,
+            "expected": "<= 50",
+            "actual": "50"
+        },
+        {
+            "label": "زمان اجرا زیر ۳۰ ثانیه ماند",
+            "passed": true,
+            "expected": "< 30000 ms",
+            "actual": "26 ms"
+        },
+        {
+            "label": "باقی پیام‌ها در صف ماندند و گم نشدند",
+            "passed": true,
+            "expected": "950",
+            "actual": "950"
+        }
+    ],
+    "failures": 0
+}
