@@ -710,6 +710,43 @@ final class WaitlistRepository {
 		);
 
 		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		// Units that were announced last time but have since been sold are no
+		// longer free for the next restock, so the baseline can never sit above
+		// what is actually on the shelf. Without this clamp a product that sells
+		// through (5 units announced, stock back to 0) and returns with fewer
+		// units than before (2) computes 2 - 5 <= 0 and announces nothing at all.
+		if ( $is_managed ) {
+			self::clamp_announced_qty( $product_id, $variation_id, (int) $qty );
+		}
+	}
+
+	/**
+	 * Pull the announced baseline down to the observed quantity.
+	 *
+	 * Only ever lowers the value: a bigger restock must not raise the baseline
+	 * here, that happens in set_announced_qty() after a successful announcement.
+	 *
+	 * @param int $product_id   Product ID.
+	 * @param int $variation_id Variation ID.
+	 * @param int $qty          Quantity currently observed.
+	 * @return void
+	 */
+	public static function clamp_announced_qty( $product_id, $variation_id, $qty ) {
+		global $wpdb;
+
+		$table = self::snapshots();
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET announced_qty = %d
+				 WHERE product_id = %d AND variation_id = %d AND announced_qty > %d",
+				(int) $qty,
+				(int) $product_id,
+				(int) $variation_id,
+				(int) $qty
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**

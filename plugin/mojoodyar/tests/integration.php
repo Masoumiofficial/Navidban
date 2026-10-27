@@ -1226,6 +1226,174 @@ function mjy_sms_state( $gateway ) {
 	);
 }
 
+MjyInt::group( 'زنجیرهٔ اعلان پیامکی از فرم تا صف' );
+
+// This is the exact complaint that opened 2.2.0: "the test SMS arrives, the
+// restock SMS never does". A test message and a restock message travel
+// different roads (one is synchronous, the other goes through the queue), so the
+// whole road has to be walked in one test: form -> row -> hook -> queue -> send.
+mjy_reset_state();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::snapshots() );
+
+Settings::update(
+	array(
+		'double_opt_in'  => false,
+		'sms_enabled'    => true,
+		'sms_gateway'    => 'generic',
+		'generic_url'    => 'https://api.sms-provider.ir/send',
+		'generic_token'  => 'tok',
+		'fair_sending'   => true,
+		'send_window_enabled' => false,
+		'sms_template'   => '{customer_name} عزیز، {product_name} دوباره موجود شد. {site_name}',
+	)
+);
+
+mjy_product( 120, array( 'status' => 'outofstock', 'qty' => 0 ) );
+$watcher_sms = new StockWatcher();
+$watcher_sms->on_stock_status( 120, 'outofstock', wc_get_product( 120 ) );
+
+$sms_signup = Subscribe::handle(
+	array(
+		'product_id' => 120,
+		'channel'    => 'sms',
+		'phone'      => '09351234567',
+		'name'       => 'مینا کاظمی',
+	)
+);
+MjyInt::ok( $sms_signup['ok'], 'ثبت با شمارهٔ موبایل موفق است' );
+$sms_row = WaitlistRepository::get( (int) $sms_signup['data']['id'] );
+MjyInt::same( 'sms', (string) $sms_row['channel'], 'کانال ردیف پیامک است' );
+MjyInt::same( 'confirmed', (string) $sms_row['status'], 'بدون تأیید دومرحله‌ای، ردیف مستقیماً تأییدشده است' );
+
+// Restock: 3 units, one subscriber.
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"status":200}' );
+mjy_product( 120, array( 'status' => 'instock', 'qty' => 3 ) );
+$watcher_sms->on_stock_status( 120, 'instock', wc_get_product( 120 ) );
+
+$queued_sms = $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() . " WHERE event_key LIKE 'restock%'" );
+MjyInt::same( 1, count( $queued_sms ), 'بازگشت موجودی یک پیام در صف گذاشت' );
+MjyInt::same( 'sms', (string) $queued_sms[0]['channel'], 'پیام صف روی کانال پیامک است' );
+
+// Now the part a shopkeeper cannot see: dispatching the queue.
+$GLOBALS['mjy_http_calls'] = array();
+Settings::flush_cache();
+Queue::release_lock();
+$run = Queue::process( 10 );
+MjyInt::same( 1, (int) $run['sent'], 'پردازش صف یک پیام را فرستاد' );
+MjyInt::same( 1, count( $GLOBALS['mjy_http_calls'] ), 'درگاه پیامک دقیقاً یک بار صدا زده شد' );
+
+$sent_body = json_decode( (string) $GLOBALS['mjy_http_calls'][0][1]['body'], true );
+$sent_text = is_array( $sent_body ) && isset( $sent_body['message'] ) ? (string) $sent_body['message'] : (string) $GLOBALS['mjy_http_calls'][0][1]['body'];
+MjyInt::ok( false !== strpos( $sent_text, 'مینا کاظمی' ), 'نام مشتری در پیام آمده است' );
+$sent_to = is_array( $sent_body ) && isset( $sent_body['to'] ) ? (string) $sent_body['to'] : '';
+MjyInt::same( '09351234567', $sent_to, 'شمارهٔ درست مقصد پیام است' );
+MjyInt::same( 'notified', (string) WaitlistRepository::get( (int) $sms_signup['data']['id'] )['status'], 'ردیف به «اعلان‌شده» رفت' );
+
+// A gateway error must leave a visible reason on the queue row, not silence.
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+WaitlistRepository::set_status( (int) $sms_signup['data']['id'], 'confirmed' );
+$watcher_sms->on_stock_status( 120, 'outofstock', wc_get_product( 120 ) );
+mjy_product( 120, array( 'status' => 'instock', 'qty' => 6 ) );
+$watcher_sms->on_stock_status( 120, 'instock', wc_get_product( 120 ) );
+
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"status":401,"message":"نام کاربری یا رمز اشتباه است"}' );
+Queue::release_lock();
+$failed_run = Queue::process( 10 );
+MjyInt::ok( (int) $failed_run['failed'] >= 1, 'خطای درگاه به‌عنوان شکست ثبت می‌شود' );
+
+$failed_rows = $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() . ' ORDER BY id DESC LIMIT 1' );
+MjyInt::ok( ! empty( $failed_rows[0]['last_error'] ), 'دلیل خطا روی ردیف صف ذخیره می‌شود' );
+MjyInt::ok( false !== strpos( (string) $failed_rows[0]['last_error'], 'رمز' ), 'پیام درگاه به فارسی و خوانا ذخیره شد' );
+$GLOBALS['mjy_http_response'] = null;
+
+MjyInt::group( 'حالت‌هایی که اعلان را بی‌صدا می‌خوردند' );
+
+// Two real-world paths where a restock produced no message at all. Both were
+// reported as "the test SMS arrives, the restock SMS never does".
+
+// --- A. Sell-through: announce 5, sell them, restock 2 ---------------------
+mjy_reset_state();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::snapshots() );
+Settings::update( array( 'fair_sending' => true, 'notify_backorders' => false ) );
+
+mjy_product( 130, array( 'status' => 'outofstock', 'qty' => 0 ) );
+$watcher_sell = new StockWatcher();
+$watcher_sell->on_stock_status( 130, 'outofstock', wc_get_product( 130 ) );
+
+for ( $i = 1; $i <= 7; $i++ ) {
+	$created = WaitlistRepository::create(
+		array(
+			'product_id' => 130,
+			'channel'    => 'email',
+			'email'      => 'sell' . $i . '@example.com',
+			'name'       => 'خریدار ' . $i,
+		)
+	);
+	WaitlistRepository::set_status( (int) $created['id'], 'confirmed' );
+}
+
+// First restock: 5 units, 5 people told, baseline becomes 5.
+mjy_product( 130, array( 'status' => 'instock', 'qty' => 5 ) );
+$watcher_sell->on_stock_status( 130, 'instock', wc_get_product( 130 ) );
+$wave_one = $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() . " WHERE event_key LIKE 'restock%'" );
+MjyInt::same( 5, count( $wave_one ), 'موج اول: ۵ اعلان' );
+
+// The five units sell out, so the product is unavailable again.
+mjy_product( 130, array( 'status' => 'outofstock', 'qty' => 0 ) );
+$watcher_sell->on_stock_status( 130, 'outofstock', wc_get_product( 130 ) );
+
+// Two new units arrive — fewer than the previous restock.
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+mjy_product( 130, array( 'status' => 'instock', 'qty' => 2 ) );
+$watcher_sell->on_stock_status( 130, 'instock', wc_get_product( 130 ) );
+$wave_two = $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() . " WHERE event_key LIKE 'restock%'" );
+
+MjyInt::same( 2, count( $wave_two ), 'بعد از فروش کامل، ۲ واحد تازه هم اعلان می‌گیرد (نه صفر)' );
+
+// --- B. Subscriber who signed up before the plugin ever saw the product ----
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::snapshots() );
+mjy_reset_rate_limit();
+
+mjy_product( 140, array( 'status' => 'outofstock', 'qty' => 0 ) );
+
+// No snapshot row exists: nothing has observed this product yet.
+MjyInt::ok( null === WaitlistRepository::snapshot_get( 140, 0 ), 'قبل از ثبت، هیچ تصویری از محصول نیست' );
+
+$late = Subscribe::handle(
+	array(
+		'product_id' => 140,
+		'channel'    => 'sms',
+		'phone'      => '09121110000',
+		'name'       => 'مشتری دیرآمده',
+	)
+);
+MjyInt::ok( $late['ok'], 'ثبت روی محصولی که افزونه هنوز ندیده موفق است' );
+
+// The form only exists for unavailable products, so subscribing is proof that
+// the product was unavailable: the baseline must be recorded right there.
+MjyInt::ok( null !== WaitlistRepository::snapshot_get( 140, 0 ), 'ثبت درخواست، تصویر «ناموجود» را می‌سازد' );
+
+mjy_product( 140, array( 'status' => 'instock', 'qty' => 1 ) );
+$watcher_sell->on_stock_status( 140, 'instock', wc_get_product( 140 ) );
+$late_queue = $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() . " WHERE event_key LIKE 'restock%'" );
+MjyInt::same( 1, count( $late_queue ), 'بازگشت موجودی برای مشتری دیرآمده هم پیام می‌سازد' );
+
+// The old number must not poison a later, smaller restock here either.
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+mjy_product( 140, array( 'status' => 'outofstock', 'qty' => 0 ) );
+$watcher_sell->on_stock_status( 140, 'outofstock', wc_get_product( 140 ) );
+mjy_product( 140, array( 'status' => 'instock', 'qty' => 1 ) );
+$watcher_sell->on_stock_status( 140, 'instock', wc_get_product( 140 ) );
+MjyInt::same( 1, count( $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() . " WHERE event_key LIKE 'restock%'" ) ), 'چرخهٔ دوم با ۱ واحد هم اعلان می‌سازد' );
+
+Settings::update( array( 'fair_sending' => true ) );
+
 MjyInt::group( 'پیگیری تلفنی مرحله‌ای' );
 
 $GLOBALS['mjy_options']['mojoodyar_settings'] = Settings::defaults();

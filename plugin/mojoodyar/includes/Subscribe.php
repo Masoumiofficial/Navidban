@@ -134,6 +134,35 @@ final class Subscribe {
 			$stock_at_signup = null === $qty ? 0 : (int) $qty;
 		}
 
+		// The form is only served for unavailable products, so a signup is
+		// first-hand proof that this product is out of stock. Record that as the
+		// baseline: without it, a product the plugin never watched (added before
+		// activation, sold out through an import, or written directly in the
+		// database) has no snapshot row, and the restock hook treats the first
+		// "in stock" write as a first sighting and announces nothing - the exact
+		// "the row is in the waitlist but no SMS arrived" report.
+		if ( null === WaitlistRepository::snapshot_get( $product_id, $variation_id ) ) {
+			$watched = $product;
+
+			if ( $variation_id > 0 && function_exists( 'wc_get_product' ) ) {
+				$maybe_variation = wc_get_product( $variation_id );
+				if ( $maybe_variation ) {
+					$watched = $maybe_variation;
+				}
+			}
+
+			$watched_qty     = method_exists( $watched, 'get_stock_quantity' ) ? $watched->get_stock_quantity() : null;
+			$watched_managed = method_exists( $watched, 'managing_stock' ) ? (bool) $watched->managing_stock() : true;
+
+			WaitlistRepository::snapshot_put(
+				$product_id,
+				$variation_id,
+				'outofstock',
+				null === $watched_qty ? 0 : (int) $watched_qty,
+				$watched_managed
+			);
+		}
+
 		$result = WaitlistRepository::create(
 			array(
 				'product_id'      => $product_id,
