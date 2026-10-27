@@ -1644,3 +1644,195 @@
 		position: static;
 	}
 }
+
+/* -------------------------------------------------------------------------
+ * Statistics screen
+ *
+ * The chart is plain divs. No canvas, no SVG library, no network request: the
+ * admin area stays usable on a host with no outbound connection, and the bars
+ * scale with the container instead of a fixed bitmap width.
+ * ---------------------------------------------------------------------- */
+
+.mjy-ranges {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 18px;
+}
+
+.mjy-range {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	padding: 0 18px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(14px);
+	backdrop-filter: blur(14px);
+	box-shadow: var(--mjy-shadow-soft);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+	text-decoration: none;
+	transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.mjy-range:hover,
+.mjy-range:focus {
+	color: var(--mjy-primary);
+	transform: translateY(-1px);
+	box-shadow: var(--mjy-shadow-soft), 0 0 0 2px rgba(20, 133, 123, 0.18);
+}
+
+.mjy-range.is-active,
+.mjy-range[aria-current="page"] {
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
+	color: #fff;
+	border-color: transparent;
+}
+
+.mjy-range-export {
+	margin-inline-start: auto;
+}
+
+.mjy-card__hint {
+	display: block;
+	margin-top: 4px;
+	font-size: 11.5px;
+	line-height: 1.8;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-chart {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 190px;
+	padding: 14px 6px 0;
+	margin-top: 10px;
+	border-radius: 16px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(14, 92, 85, 0.05));
+	border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.mjy-chart__col {
+	position: relative;
+	display: flex;
+	flex: 1 1 0;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	min-width: 2px;
+	height: 100%;
+}
+
+.mjy-chart__bar {
+	position: relative;
+	width: 100%;
+	max-width: 34px;
+	min-height: 0;
+	border-radius: 7px 7px 3px 3px;
+	background: linear-gradient(180deg, var(--mjy-primary-hover), var(--mjy-primary));
+	box-shadow: 0 4px 12px rgba(14, 92, 85, 0.18);
+	transition: filter 0.15s ease;
+}
+
+.mjy-chart--alt .mjy-chart__bar {
+	background: linear-gradient(180deg, var(--mjy-accent), #d78f28);
+	box-shadow: 0 4px 12px rgba(242, 169, 59, 0.22);
+}
+
+.mjy-chart__col:hover .mjy-chart__bar {
+	filter: brightness(1.08);
+}
+
+.mjy-chart__value {
+	position: absolute;
+	inset-inline-start: 50%;
+	bottom: 100%;
+	transform: translateX(50%);
+	margin-bottom: 4px;
+	font-size: 10.5px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-chart--alt .mjy-chart__value {
+	color: #8a5a10;
+}
+
+.mjy-chart__label {
+	position: absolute;
+	top: 100%;
+	margin-top: 6px;
+	font-size: 10px;
+	font-style: normal;
+	line-height: 1.5;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+	transform: translateY(0);
+}
+
+.mjy-chart__label.is-empty {
+	visibility: hidden;
+}
+
+.mjy-chart + .mjy-muted,
+.mjy-chart ~ .mjy-muted {
+	margin-top: 34px;
+}
+
+.mjy-split {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 16px;
+}
+
+.mjy-share {
+	position: relative;
+	min-width: 120px;
+}
+
+.mjy-share__bar {
+	display: block;
+	height: 8px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--mjy-primary), var(--mjy-primary-hover));
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.mjy-share__text {
+	display: block;
+	margin-top: 4px;
+	font-size: 11.5px;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-panel--warn {
+	border-color: rgba(242, 169, 59, 0.55);
+	box-shadow: var(--mjy-shadow-soft), inset 0 0 0 1px rgba(242, 169, 59, 0.18);
+}
+
+@media (max-width: 782px) {
+	.mjy-chart {
+		height: 150px;
+		gap: 2px;
+	}
+
+	.mjy-chart__value {
+		display: none;
+	}
+
+	.mjy-range-export {
+		margin-inline-start: 0;
+		width: 100%;
+	}
+
+	.mjy-split {
+		grid-template-columns: 1fr;
+	}
+}

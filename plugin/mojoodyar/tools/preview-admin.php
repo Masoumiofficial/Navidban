@@ -52,9 +52,20 @@ foreach ( array( 'sara@example.com', 'mehdi@example.com', 'reza@example.com' ) a
 	}
 }
 
+// Spread the sample rows over the last two weeks and give them the states a
+// real shop would have, so the report screen has something honest to show.
+$GLOBALS['wpdb']->query(
+	'UPDATE ' . WaitlistRepository::table() . " SET created_at = '" . gmdate( 'Y-m-d H:i:s', time() - ( 2 * 86400 ) ) . "' WHERE id = 1"
+);
+$GLOBALS['wpdb']->query(
+	'UPDATE ' . WaitlistRepository::table() . " SET status = 'notified', notified_at = '" . gmdate( 'Y-m-d H:i:s', time() - 86400 ) . "' WHERE id = 2"
+);
+\Mojoodyar\Logger::log( 'security', 'subscribe_rejected', 'duplicate', str_repeat( 'a', 64 ) );
+
 $admin   = new Admin();
 $screens = array(
 	'dashboard' => 'render_dashboard',
+	'stats'     => 'render_stats',
 	'waitlists' => 'render_waitlists',
 	'settings'  => 'render_settings',
 	'tools'     => 'render_tools',

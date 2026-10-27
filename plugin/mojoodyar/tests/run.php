@@ -42,6 +42,7 @@ use Mojoodyar\Support\Text;
 use Mojoodyar\Logic\FairSending;
 use Mojoodyar\Logic\Reconcile;
 use Mojoodyar\Logic\QueuePolicy;
+use Mojoodyar\Logic\StatsMath;
 use Mojoodyar\Logic\Template;
 use Mojoodyar\Logic\HttpGuard;
 use Mojoodyar\Logic\EmailSkin;
@@ -762,6 +763,63 @@ MjyTest::ok( ! SmsPattern::has_errors( SmsPattern::validate( '{0} عزیز، {1}
 // The four variables this plugin actually documents must all exist.
 MjyTest::same( 4, count( SmsPattern::labels() ), 'four documented variables' );
 MjyTest::same( 4, count( SmsPattern::VARIABLES ), 'four mapped variables' );
+
+/* -------------------------------------------------------------------------
+ * Statistics math (the numbers behind the report screen)
+ * ---------------------------------------------------------------------- */
+MjyTest::group( 'ریاضیات آمار' );
+
+$keys = StatsMath::day_keys( gmmktime( 0, 0, 0, 10, 1, 2026 ), 5 );
+
+MjyTest::same( 5, count( $keys ), 'a five-day period produces five day keys' );
+MjyTest::same( '2026-10-01', $keys[0], 'the first key is the requested day' );
+MjyTest::same( '2026-10-05', $keys[4], 'the last key is four days later' );
+
+// A partial timestamp must anchor to midnight, not shift the whole axis.
+$partial = StatsMath::day_keys( gmmktime( 17, 45, 30, 10, 1, 2026 ), 3 );
+MjyTest::same( $keys[0], $partial[0], 'a mid-day start still anchors to midnight' );
+
+$filled = StatsMath::fill(
+	array(
+		array( 'd' => '2026-10-02', 'c' => 4 ),
+		array( 'd' => '2026-10-05', 'c' => 2 ),
+	),
+	$keys
+);
+MjyTest::same( array( 0, 4, 0, 0, 2 ), $filled, 'quiet days stay in the axis as zeros' );
+MjyTest::same( 6, StatsMath::total( $filled ), 'series total adds the real values only' );
+
+// A DATETIME value must not create a second bucket for the same day.
+$datetime = StatsMath::fill( array( array( 'd' => '2026-10-02 13:20:00', 'c' => 3 ) ), $keys );
+MjyTest::same( array( 0, 3, 0, 0, 0 ), $datetime, 'a datetime value is bucketed by its date part' );
+
+$merged = StatsMath::fill(
+	array(
+		array( 'd' => '2026-10-03', 'c' => 2 ),
+		array( 'd' => '2026-10-03', 'c' => 5 ),
+	),
+	$keys
+);
+MjyTest::same( 7, $merged[2], 'two rows for the same day are added, not overwritten' );
+
+MjyTest::same( 0, StatsMath::percent( 0, 0 ), 'no rows means 0%, not a division error' );
+MjyTest::same( 0, StatsMath::percent( 5, 0 ), 'a part without a total is 0%' );
+MjyTest::same( 50, StatsMath::percent( 1, 2 ), 'one of two is 50%' );
+MjyTest::same( 100, StatsMath::percent( 7, 7 ), 'all of all is 100%' );
+MjyTest::same( 100, StatsMath::percent( 9, 7 ), 'a part larger than the total is clamped to 100%' );
+MjyTest::same( 33, StatsMath::percent( 1, 3 ), 'a third rounds to 33%' );
+
+MjyTest::same( 0, StatsMath::peak( array() ), 'an empty series has no peak' );
+MjyTest::same( 9, StatsMath::peak( array( 0, 9, 3 ) ), 'peak() finds the largest value' );
+MjyTest::same( 0, StatsMath::height( 0, 9 ), 'a zero value has no bar' );
+MjyTest::same( 100, StatsMath::height( 9, 9 ), 'the peak value fills the chart' );
+MjyTest::same( 50, StatsMath::height( 3, 6 ), 'half the peak is half the height' );
+MjyTest::same( 4, StatsMath::height( 1, 500 ), 'a small non-zero value keeps a visible bar' );
+
+MjyTest::same( 1, StatsMath::label_step( 7 ), 'a week labels every day' );
+MjyTest::same( 3, StatsMath::label_step( 30 ), 'a month labels every third day' );
+MjyTest::same( 7, StatsMath::label_step( 90 ), 'a quarter labels once a week' );
+MjyTest::same( 1, StatsMath::label_step( 0 ), 'a zero-length period does not divide by zero' );
 
 /* -------------------------------------------------------------------------
  * Report

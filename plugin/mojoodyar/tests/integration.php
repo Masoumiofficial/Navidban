@@ -22,9 +22,12 @@ use Mojoodyar\Capabilities;
 use Mojoodyar\Consent;
 use Mojoodyar\Database;
 use Mojoodyar\Frontend;
+use Mojoodyar\Logger;
+use Mojoodyar\Logic\StatsMath;
 use Mojoodyar\Notifier;
 use Mojoodyar\Queue;
 use Mojoodyar\Settings;
+use Mojoodyar\Stats;
 use Mojoodyar\StockWatcher;
 use Mojoodyar\Subscribe;
 use Mojoodyar\WaitlistRepository;
@@ -284,7 +287,7 @@ $duplicate = Subscribe::handle(
 	)
 );
 MjyInt::ok( $duplicate['ok'], 'ثبت تکراری خطای سرور نمی‌دهد' );
-MjyInt::same( 'duplicate', $duplicate['code'], 'ثبت تکراری تشخیص داده شد' );
+MjyInt::same( 'already_subscribed', $duplicate['code'], 'ثبت تکراری تشخیص داده شد' );
 MjyInt::same( 1, count( $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . WaitlistRepository::table() ) ), 'ردیف تکراری ساخته نشد' );
 
 // Invalid email.
@@ -1393,6 +1396,174 @@ $watcher_sell->on_stock_status( 140, 'instock', wc_get_product( 140 ) );
 MjyInt::same( 1, count( $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() . " WHERE event_key LIKE 'restock%'" ) ), 'چرخهٔ دوم با ۱ واحد هم اعلان می‌سازد' );
 
 Settings::update( array( 'fair_sending' => true ) );
+
+MjyInt::group( 'آمار و گزارش' );
+
+mjy_reset_state();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) );
+
+$today     = gmdate( 'Y-m-d H:i:s' );
+$three_ago = gmdate( 'Y-m-d H:i:s', time() - ( 3 * 86400 ) );
+$nine_ago  = gmdate( 'Y-m-d H:i:s', time() - ( 9 * 86400 ) );
+
+$stats_rows = array(
+	// product, channel, email, phone, status, created_at, notified_at
+	array( 701, 'sms', '', '09120000001', 'notified', $today, $today ),
+	array( 701, 'sms', '', '09120000002', 'confirmed', $today, null ),
+	array( 701, 'email', 'a@example.com', '', 'confirmed', $three_ago, null ),
+	array( 702, 'email', 'b@example.com', '', 'pending', $three_ago, null ),
+	array( 702, 'sms', '', '09120000003', 'unsubscribed', $three_ago, null ),
+	// Outside every offered period: must never show up in the 7/30/90 reports.
+	array( 703, 'email', 'old@example.com', '', 'notified', $nine_ago, $nine_ago ),
+);
+
+$stats_seq = 0;
+foreach ( $stats_rows as $stats_row ) {
+	$stats_seq++;
+	$GLOBALS['wpdb']->insert(
+		WaitlistRepository::table(),
+		array(
+			'token'             => str_pad( 'stats' . $stats_seq, 64, 'x' ),
+			'product_id'        => $stats_row[0],
+			'variation_id'      => 0,
+			'event_type'        => 'restock',
+			'channel'           => $stats_row[1],
+			'email'             => $stats_row[2],
+			'phone'             => $stats_row[3],
+			'user_id'           => 0,
+			'status'            => $stats_row[4],
+			'stock_at_signup'   => 0,
+			'ip_hash'           => str_repeat( 'd', 64 ),
+			'created_at'        => $stats_row[5],
+			'notified_at'       => $stats_row[6],
+		)
+	);
+}
+
+$stats_week = Stats::report( 7 );
+
+MjyInt::same( 5, $stats_week['summary']['total'], 'آمار ۷ روز: ۵ ثبت داخل بازه، ردیف ۹ روز پیش بیرون می‌ماند' );
+MjyInt::same( 2, $stats_week['summary']['confirmed'], 'آمار ۷ روز: دو ردیف تأییدشده' );
+MjyInt::same( 1, $stats_week['summary']['notified'], 'آمار ۷ روز: یک ردیف اعلان‌شده' );
+MjyInt::same( 1, $stats_week['summary']['pending'], 'آمار ۷ روز: یک ردیف در انتظار تأیید' );
+MjyInt::same( 1, $stats_week['summary']['unsubscribed'], 'آمار ۷ روز: یک لغو اشتراک' );
+MjyInt::same( 60, (int) $stats_week['summary']['confirm_rate'], 'درصد تأیید: ۳ از ۵ = ۶۰٪' );
+
+$stats_month = Stats::report( 30 );
+MjyInt::same( 6, $stats_month['summary']['total'], 'آمار ۳۰ روز: ردیف ۹ روز پیش هم حساب می‌شود' );
+
+MjyInt::same( 7, count( $stats_week['signups']['keys'] ), 'سری روزانه: هفت روز، حتی روزهای خالی' );
+MjyInt::same( 5, StatsMath::total( $stats_week['signups']['values'] ), 'سری روزانه: جمع میله‌ها با کل ثبت برابر است' );
+MjyInt::same( 2, (int) end( $stats_week['signups']['values'] ), 'سری روزانه: امروز ۲ ثبت' );
+MjyInt::same( 3, (int) $stats_week['signups']['values'][3], 'سری روزانه: سه روز پیش ۳ ثبت' );
+MjyInt::same( 1, (int) array_sum( $stats_week['notified']['values'] ), 'سری اعلان: اعلان‌ها با تاریخ notified_at شمرده می‌شوند' );
+
+MjyInt::same( 3, (int) $stats_week['channels']['sms'], 'تفکیک کانال: سه پیامکی' );
+MjyInt::same( 2, (int) $stats_week['channels']['email'], 'تفکیک کانال: دو ایمیلی' );
+
+$stats_statuses = Stats::by_status();
+MjyInt::same( 6, (int) $stats_statuses['confirmed'] + (int) $stats_statuses['notified'] + (int) $stats_statuses['pending'] + (int) $stats_statuses['unsubscribed'], 'تفکیک وضعیت همهٔ ردیف‌ها را می‌شمارد (نه فقط بازه)' );
+
+$stats_products = Stats::top_products( 7, 5 );
+MjyInt::same( 701, (int) $stats_products[0]['product_id'], 'پرتقاضاترین محصول اول فهرست است' );
+MjyInt::same( 3, (int) $stats_products[0]['total'], 'پرتقاضاترین محصول ۳ درخواست دارد' );
+MjyInt::same( 2, (int) $stats_products[0]['awaiting'], 'از ۳ درخواست، ۲ تا هنوز منتظرند' );
+MjyInt::same( 2, count( $stats_products ), 'فقط محصول‌های داخل بازه در فهرست‌اند' );
+
+// Rejections: the panel that explains an empty waitlist.
+mjy_reset_rate_limit();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) );
+Logger::log( 'security', 'subscribe_rejected', 'duplicate', str_repeat( 'e', 64 ) );
+Logger::log( 'security', 'subscribe_rejected', 'duplicate', str_repeat( 'e', 64 ) );
+Logger::log( 'security', 'subscribe_rejected', 'invalid_name', str_repeat( 'e', 64 ) );
+Logger::log( 'warning', 'subscribe_failed', 'reason=email', str_repeat( 'e', 64 ) );
+
+$stats_rej = Stats::rejections( 7 );
+MjyInt::same( 3, count( $stats_rej ), 'سه نوع دلیل ردشده گروه‌بندی می‌شود' );
+MjyInt::same( 2, (int) $stats_rej[0]['count'], 'پرتکرارترین دلیل اول می‌آید' );
+MjyInt::ok( false !== strpos( (string) $stats_rej[0]['label'], 'قبلاً' ), 'دلیل duplicate به فارسی توضیح داده می‌شود' );
+MjyInt::ok( false !== strpos( Stats::reason_label( 'subscribe_failed', 'reason=email' ), 'ایمیل' ), 'دلیل reason=email خوانده می‌شود' );
+MjyInt::same( 'کد ناشناخته', Stats::reason_label( 'subscribe_rejected', 'کد ناشناخته' ), 'کد ناشناخته دور ریخته نمی‌شود' );
+
+// The report is cached per request, so the page and the CSV share one read.
+MjyInt::ok( Stats::report( 7 ) === $stats_week, 'گزارش یک بازه در همان درخواست دوباره محاسبه نمی‌شود' );
+MjyInt::same( 30, Stats::normalize_range( 999 ), 'بازهٔ نامعتبر به پیش‌فرض برمی‌گردد' );
+MjyInt::same( 90, Stats::normalize_range( '90' ), 'بازهٔ معتبر پذیرفته می‌شود' );
+
+// The queue counters inside the report must be the live ones, not a copy.
+Queue::enqueue( 1, 'email', 'restock:20261027:stats001', array( 'subject' => 's', 'body' => 'b' ) );
+Stats::reset_cache();
+MjyInt::same( 1, (int) Stats::report( 7 )['queue']['queued'], 'شمارندهٔ صف در گزارش تازه است' );
+
+MjyInt::group( 'ثبت دوبارهٔ همان مشتری' );
+
+mjy_reset_state();
+mjy_reset_rate_limit();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+Settings::update( array( 'double_opt_in' => false, 'consent_required' => false, 'form_name_field' => true, 'form_name_required' => false ) );
+Settings::flush_cache();
+mjy_product( 150, array( 'status' => 'outofstock', 'qty' => 0 ) );
+
+$first = Subscribe::handle(
+	array(
+		'product_id' => 150,
+		'channel'    => 'sms',
+		'phone'      => '09351112222',
+		'name'       => 'سمیرا رضایی',
+	)
+);
+MjyInt::ok( $first['ok'], 'ثبت اول موفق است' );
+
+$again = Subscribe::handle(
+	array(
+		'product_id' => 150,
+		'channel'    => 'sms',
+		'phone'      => '09351112222',
+		'name'       => 'سمیرا رضایی',
+	)
+);
+MjyInt::ok( $again['ok'], 'ثبت دوبارهٔ همان شماره خطا نیست' );
+MjyInt::same( 'already_subscribed', $again['code'], 'پاسخ «از قبل ثبت شده‌اید» است، نه خطای ۵۰۰' );
+MjyInt::same( 200, (int) $again['status'], 'کد وضعیت ۲۰۰ است' );
+MjyInt::same( (int) $first['data']['id'], (int) $again['data']['id'], 'همان ردیف قبلی برگردانده می‌شود' );
+MjyInt::same( 1, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . WaitlistRepository::table() ), 'ردیف تکراری ساخته نمی‌شود' );
+
+// A customer who was already notified should be put back in line, otherwise a
+// second restock can never reach them.
+$existing_id = (int) $first['data']['id'];
+WaitlistRepository::set_status( $existing_id, 'notified' );
+
+$revive = Subscribe::handle(
+	array(
+		'product_id' => 150,
+		'channel'    => 'sms',
+		'phone'      => '09351112222',
+		'name'       => 'سمیرا ر.'
+	)
+);
+MjyInt::ok( $revive['ok'], 'ثبت دوبارهٔ مشتری اعلان‌شده موفق است' );
+$revived_row = WaitlistRepository::get( $existing_id );
+MjyInt::same( 'confirmed', (string) $revived_row['status'], 'ردیف اعلان‌شده دوباره فعال می‌شود' );
+MjyInt::ok( empty( $revived_row['notified_at'] ), 'تاریخ اعلان پاک می‌شود تا اعلان بعدی حساب شود' );
+MjyInt::same( 'سمیرا ر', (string) $revived_row['full_name'], 'نام تازه جای نام قبلی را می‌گیرد' );
+
+// An active subscriber must keep their state: a second submit is not consent.
+WaitlistRepository::set_status( $existing_id, 'confirmed' );
+$third = Subscribe::handle(
+	array(
+		'product_id' => 150,
+		'channel'    => 'sms',
+		'phone'      => '09351112222',
+		'name'       => ''
+	)
+);
+MjyInt::ok( $third['ok'], 'ثبت سوم هم بی‌خطاست' );
+$third_row = WaitlistRepository::get( $existing_id );
+MjyInt::same( 'confirmed', (string) $third_row['status'], 'ردیف فعال دست‌نخورده می‌ماند' );
+
+Settings::update( array( 'double_opt_in' => false ) );
 
 MjyInt::group( 'پیگیری تلفنی مرحله‌ای' );
 

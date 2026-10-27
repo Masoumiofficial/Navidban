@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.2.0",
+    "plugin_version": "2.3.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-27T19:21:20+00:00",
-    "assertions": 292,
+    "generated_at": "2026-10-27T19:38:24+00:00",
+    "assertions": 316,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -80,6 +80,10 @@
         },
         "SmsPattern / الگوی پیامک": {
             "assertions": 28,
+            "failures": 0
+        },
+        "ریاضیات آمار": {
+            "assertions": 24,
             "failures": 0
         }
     },

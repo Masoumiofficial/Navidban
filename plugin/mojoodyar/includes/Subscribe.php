@@ -179,14 +179,33 @@ final class Subscribe {
 		);
 
 		if ( $result['duplicate'] ) {
-			Logger::log( 'info', 'subscribe_duplicate', 'product=' . $product_id, $ip_hash );
+			// A returning visitor is not an error. The unique key stops the same
+			// person from filling the waitlist with duplicates, but answering
+			// "insert failed" to someone who is already on the list reads as a
+			// broken plugin.
+			//
+			// Worse: a row that was already notified stays "notified" forever,
+			// so a shop that restocks the same product twice can never message
+			// that customer again through the form. Signing up again is a real
+			// expression of interest, so a row that is no longer waiting is
+			// revived (a row that is still pending/confirmed is left alone).
+			$revived = WaitlistRepository::reactivate( (int) $result['id'], $name, (bool) Settings::enabled( 'double_opt_in' ) );
+
+			Logger::log( 'info', 'subscribe_duplicate', 'product=' . $product_id . '|id=' . (int) $result['id'] . '|revived=' . ( $revived ? 'yes' : 'no' ), $ip_hash );
 
 			return array(
 				'ok'      => true,
-				'code'    => 'duplicate',
+				'code'    => 'already_subscribed',
 				'status'  => 200,
-				'message' => 'این شماره یا ایمیل پیش‌تر برای همین محصول ثبت شده است.',
-				'data'    => array( 'id' => (int) $result['id'] ),
+				'message' => $revived
+					? 'دوباره در لیست انتظار این محصول قرار گرفتید. به‌محض بازگشت موجودی خبرتان می‌کنیم.'
+					: 'شما از قبل در لیست انتظار این محصول هستید؛ به‌محض بازگشت موجودی خبرتان می‌کنیم.',
+				'data'    => array(
+					'id'            => (int) $result['id'],
+					'needs_confirm' => false,
+					'already'       => true,
+					'revived'       => (bool) $revived,
+				),
 			);
 		}
 

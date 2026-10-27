@@ -1,17 +1,21 @@
 {
-    "plugin_version": "2.2.0",
+    "plugin_version": "2.3.0",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-27T19:21:24+00:00",
-    "assertions": 110,
+    "generated_at": "2026-10-27T19:38:28+00:00",
+    "assertions": 130,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
         "منو و سطوح دسترسی": {
-            "assertions": 6,
+            "assertions": 7,
             "failures": 0
         },
         "رندر صفحات": {
-            "assertions": 20,
+            "assertions": 24,
+            "failures": 0
+        },
+        "صفحهٔ آمار": {
+            "assertions": 15,
             "failures": 0
         },
         "پوستهٔ شیشه‌ای": {

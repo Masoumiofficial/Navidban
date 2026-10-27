@@ -258,6 +258,59 @@ final class WaitlistRepository {
 	}
 
 	/**
+	 * Put an existing subscriber back in the queue after they sign up again.
+	 *
+	 * Only rows that are no longer waiting are touched: a row that is already
+	 * ``pending`` or ``confirmed`` is left exactly as it is, so a repeated
+	 * submit cannot reset a confirmation the customer already gave. Rows that
+	 * were notified, expired or unsubscribed are revived - that is the whole
+	 * point, because a shop restocking the same product twice would otherwise
+	 * keep an old "notified" row forever and never message that customer again.
+	 *
+	 * @param int    $id       Row ID.
+	 * @param string $name     Freshly typed name (kept empty if not provided).
+	 * @param bool   $double   Whether double opt-in is on.
+	 * @return bool True when the row was actually revived.
+	 */
+	public static function reactivate( $id, $name = '', $double = false ) {
+		global $wpdb;
+
+		$id   = (int) $id;
+		$row  = self::get( $id );
+		$live = array( 'pending', 'confirmed' );
+
+		if ( ! is_array( $row ) || in_array( (string) $row['status'], $live, true ) ) {
+			return false;
+		}
+
+		$data = array(
+			'status'             => $double ? 'pending' : 'confirmed',
+			'notified_at'        => null,
+			'confirm_expires_at' => $double ? gmdate( 'Y-m-d H:i:s', time() + ( max( 1, (int) Settings::get( 'confirm_ttl_hours', 48 ) ) * 3600 ) ) : null,
+		);
+
+		if ( ! $double ) {
+			$data['confirmed_at'] = gmdate( 'Y-m-d H:i:s' );
+		}
+
+		$name = trim( (string) $name );
+
+		if ( '' !== $name ) {
+			$data['full_name'] = substr( $name, 0, 120 );
+		}
+
+		$updated = $wpdb->update(
+			self::table(),
+			$data,
+			array( 'id' => $id ),
+			null,
+			array( '%d' )
+		);
+
+		return false !== $updated && (int) $updated > 0;
+	}
+
+	/**
 	 * Update the status of one row and stamp the matching timestamp.
 	 *
 	 * @param int    $id     Row ID.

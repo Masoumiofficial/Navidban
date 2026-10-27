@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.1.0 — لیست انتظارها</title>
+<title>موجودیار 2.2.0 — لیست انتظارها</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1677,15 +1677,207 @@ body {
 	}
 }
 
+/* -------------------------------------------------------------------------
+ * Statistics screen
+ *
+ * The chart is plain divs. No canvas, no SVG library, no network request: the
+ * admin area stays usable on a host with no outbound connection, and the bars
+ * scale with the container instead of a fixed bitmap width.
+ * ---------------------------------------------------------------------- */
+
+.mjy-ranges {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 18px;
+}
+
+.mjy-range {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	padding: 0 18px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(14px);
+	backdrop-filter: blur(14px);
+	box-shadow: var(--mjy-shadow-soft);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+	text-decoration: none;
+	transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.mjy-range:hover,
+.mjy-range:focus {
+	color: var(--mjy-primary);
+	transform: translateY(-1px);
+	box-shadow: var(--mjy-shadow-soft), 0 0 0 2px rgba(20, 133, 123, 0.18);
+}
+
+.mjy-range.is-active,
+.mjy-range[aria-current="page"] {
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
+	color: #fff;
+	border-color: transparent;
+}
+
+.mjy-range-export {
+	margin-inline-start: auto;
+}
+
+.mjy-card__hint {
+	display: block;
+	margin-top: 4px;
+	font-size: 11.5px;
+	line-height: 1.8;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-chart {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 190px;
+	padding: 14px 6px 0;
+	margin-top: 10px;
+	border-radius: 16px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(14, 92, 85, 0.05));
+	border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.mjy-chart__col {
+	position: relative;
+	display: flex;
+	flex: 1 1 0;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	min-width: 2px;
+	height: 100%;
+}
+
+.mjy-chart__bar {
+	position: relative;
+	width: 100%;
+	max-width: 34px;
+	min-height: 0;
+	border-radius: 7px 7px 3px 3px;
+	background: linear-gradient(180deg, var(--mjy-primary-hover), var(--mjy-primary));
+	box-shadow: 0 4px 12px rgba(14, 92, 85, 0.18);
+	transition: filter 0.15s ease;
+}
+
+.mjy-chart--alt .mjy-chart__bar {
+	background: linear-gradient(180deg, var(--mjy-accent), #d78f28);
+	box-shadow: 0 4px 12px rgba(242, 169, 59, 0.22);
+}
+
+.mjy-chart__col:hover .mjy-chart__bar {
+	filter: brightness(1.08);
+}
+
+.mjy-chart__value {
+	position: absolute;
+	inset-inline-start: 50%;
+	bottom: 100%;
+	transform: translateX(50%);
+	margin-bottom: 4px;
+	font-size: 10.5px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-chart--alt .mjy-chart__value {
+	color: #8a5a10;
+}
+
+.mjy-chart__label {
+	position: absolute;
+	top: 100%;
+	margin-top: 6px;
+	font-size: 10px;
+	font-style: normal;
+	line-height: 1.5;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+	transform: translateY(0);
+}
+
+.mjy-chart__label.is-empty {
+	visibility: hidden;
+}
+
+.mjy-chart + .mjy-muted,
+.mjy-chart ~ .mjy-muted {
+	margin-top: 34px;
+}
+
+.mjy-split {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 16px;
+}
+
+.mjy-share {
+	position: relative;
+	min-width: 120px;
+}
+
+.mjy-share__bar {
+	display: block;
+	height: 8px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--mjy-primary), var(--mjy-primary-hover));
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.mjy-share__text {
+	display: block;
+	margin-top: 4px;
+	font-size: 11.5px;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-panel--warn {
+	border-color: rgba(242, 169, 59, 0.55);
+	box-shadow: var(--mjy-shadow-soft), inset 0 0 0 1px rgba(242, 169, 59, 0.18);
+}
+
+@media (max-width: 782px) {
+	.mjy-chart {
+		height: 150px;
+		gap: 2px;
+	}
+
+	.mjy-chart__value {
+		display: none;
+	}
+
+	.mjy-range-export {
+		margin-inline-start: 0;
+		width: 100%;
+	}
+
+	.mjy-split {
+		grid-template-columns: 1fr;
+	}
+}
+
 </style>
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.1.0.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.2.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">لیست انتظارها<small>همهٔ درخواست‌ها، با فیلتر و خروجی CSV</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۱.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists" aria-current="page">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">لیست انتظارها<small>همهٔ درخواست‌ها، با فیلتر و خروجی CSV</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۲.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists" aria-current="page">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
 	
 	<form method="get" class="mjy-filters">
 		<input type="hidden" name="page" value="mojoodyar-waitlists" />
@@ -1778,34 +1970,6 @@ body {
 			<tbody>
 												<tr>
 						<th scope="row" class="check-column">
-							<input type="checkbox" name="ids[]" form="mjy-bulk-form" value="1" />
-						</th>
-						<td>۱</td>
-						<td>
-															<span class="mjy-muted">— بی‌نام</span>
-													</td>
-						<td>
-							محصول 501													</td>
-						<td>پیامک</td>
-						<td>
-							0912***4567						</td>
-						<td>تأییدشده</td>
-						<td>۵ آبان ۱۴۰۵</td>
-						<td>
-																												<a
-								class="mjy-call__open "
-								href="https://shop.test/wp-admin/admin.php?page=mojoodyar-followup&id=1"
-								data-mjy="call-open"
-								data-target="mjy-call-1"
-							>
-								پیگیری تلفنی
-							</a>
-													</td>
-						<td>۵ آبان ۱۴۰۵</td>
-						<td>—</td>
-					</tr>
-									<tr>
-						<th scope="row" class="check-column">
 							<input type="checkbox" name="ids[]" form="mjy-bulk-form" value="2" />
 						</th>
 						<td>۲</td>
@@ -1817,7 +1981,7 @@ body {
 						<td>ایمیل</td>
 						<td>
 							m***@example.com						</td>
-						<td>تأییدشده</td>
+						<td>اعلان‌شده</td>
 						<td>۵ آبان ۱۴۰۵</td>
 						<td>
 																												<a
@@ -1830,7 +1994,7 @@ body {
 							</a>
 													</td>
 						<td>۵ آبان ۱۴۰۵</td>
-						<td>—</td>
+						<td>۴ آبان ۱۴۰۵</td>
 					</tr>
 									<tr>
 						<th scope="row" class="check-column">
@@ -1860,121 +2024,38 @@ body {
 						<td>۵ آبان ۱۴۰۵</td>
 						<td>—</td>
 					</tr>
+									<tr>
+						<th scope="row" class="check-column">
+							<input type="checkbox" name="ids[]" form="mjy-bulk-form" value="1" />
+						</th>
+						<td>۱</td>
+						<td>
+															<span class="mjy-muted">— بی‌نام</span>
+													</td>
+						<td>
+							محصول 501													</td>
+						<td>پیامک</td>
+						<td>
+							0912***4567						</td>
+						<td>تأییدشده</td>
+						<td>۳ آبان ۱۴۰۵</td>
+						<td>
+																												<a
+								class="mjy-call__open "
+								href="https://shop.test/wp-admin/admin.php?page=mojoodyar-followup&id=1"
+								data-mjy="call-open"
+								data-target="mjy-call-1"
+							>
+								پیگیری تلفنی
+							</a>
+													</td>
+						<td>۵ آبان ۱۴۰۵</td>
+						<td>—</td>
+					</tr>
 										</tbody>
 	</table>
 
-									<dialog class="mjy-modal" id="mjy-call-1" data-mjy="call-modal" aria-labelledby="mjy-call-title-1">
-				<div class="mjy-modal__panel">
-					<header class="mjy-modal__head">
-						<h2 id="mjy-call-title-1" class="mjy-modal__title">
-							پیگیری تلفنی — مشتری بی‌نام						</h2>
-						<button type="button" class="mjy-modal__x" data-mjy="call-close" aria-label="بستن">&times;</button>
-					</header>
-					<div class="mjy-modal__body">
-												<div class="mjy-follow" data-mjy="follow" data-stage="1">
-
-	<div class="mjy-follow__who">
-		<div>
-			<strong class="mjy-follow__name">
-				بدون نام			</strong>
-							<a class="mjy-follow__phone" dir="ltr" href="tel:09121234567">
-					09121234567				</a>
-					</div>
-		<span class="mjy-follow__badge is-open">
-			در انتظار اولین تماس		</span>
-	</div>
-
-	
-	<h3 class="mjy-follow__title">تاریخچهٔ تماس‌ها</h3>
-
-			<p class="mjy-follow__empty">هنوز تماسی برای این مشتری ثبت نشده است. نتیجهٔ تماس اول را انتخاب کنید.</p>
-	
-	<form method="post" action="https://shop.test/wp-admin/admin-post.php" class="mjy-follow__form" data-mjy="follow-form">
-		<input type="hidden" name="_wpnonce" value="stub-nonce" />		<input type="hidden" name="action" value="mojoodyar_call" />
-		<input type="hidden" name="id" value="1" />
-		<input type="hidden" name="return" value="" />
-
-					<fieldset class="mjy-follow__outcomes">
-				<legend>نتیجهٔ تماس اول</legend>
-									<label class="mjy-outcome">
-						<input type="radio" name="outcome" value="answered" required />
-						<span>پاسخ داد</span>
-					</label>
-									<label class="mjy-outcome">
-						<input type="radio" name="outcome" value="no_answer" required />
-						<span>پاسخ نداد</span>
-					</label>
-									<label class="mjy-outcome">
-						<input type="radio" name="outcome" value="busy" required />
-						<span>مشغول بود</span>
-					</label>
-									<label class="mjy-outcome">
-						<input type="radio" name="outcome" value="callback" required />
-						<span>بعداً تماس بگیرم</span>
-					</label>
-									<label class="mjy-outcome">
-						<input type="radio" name="outcome" value="ordered" required />
-						<span>سفارش داد</span>
-					</label>
-									<label class="mjy-outcome">
-						<input type="radio" name="outcome" value="wrong_number" required />
-						<span>شماره اشتباه بود</span>
-					</label>
-									<label class="mjy-outcome">
-						<input type="radio" name="outcome" value="unsubscribed" required />
-						<span>درخواست لغو کرد</span>
-					</label>
-							</fieldset>
-
-			<p class="mjy-follow__field">
-				<label for="mjy-note-1">توضیح این تماس (اختیاری)</label>
-				<textarea
-					id="mjy-note-1"
-					name="note"
-					rows="3"
-					maxlength="500"
-					placeholder="مثلاً: گفت تا آخر هفته تصمیم می‌گیرد"
-					data-mjy="note"
-				></textarea>
-				<span class="mjy-follow__counter" data-mjy="counter">۰ / ۵۰۰</span>
-			</p>
-
-			<div class="mjy-follow__actions">
-				<button type="submit" name="call_action" value="attempt" class="mjy-btn mjy-btn--primary" data-mjy="follow-save">
-					ثبت تماس اول				</button>
-				<button type="submit" name="call_action" value="close" class="mjy-btn mjy-btn--danger" data-mjy="follow-close" formnovalidate>
-					خاتمهٔ پیگیری
-				</button>
-			</div>
-
-			<p class="mjy-follow__field mjy-follow__reason">
-				<label for="mjy-reason-1">دلیل خاتمه (برای دکمهٔ «خاتمهٔ پیگیری»)</label>
-				<select id="mjy-reason-1" name="close_reason">
-					<option value="">— انتخاب کنید —</option>
-											<option value="ordered">سفارش داد</option>
-											<option value="wrong_number">شماره اشتباه</option>
-											<option value="unsubscribed">درخواست لغو</option>
-											<option value="unreachable">دیگر پاسخ نمی‌دهد</option>
-											<option value="duplicate">ردیف تکراری</option>
-											<option value="other">سایر</option>
-									</select>
-			</p>
-
-			<p class="mjy-follow__hint">
-				نتیجه‌های «سفارش داد»، «شماره اشتباه بود» و «درخواست لغو کرد» پیگیری را خودکار می‌بندند.
-			</p>
-			</form>
-
-			<p class="mjy-follow__fallback">
-			<a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-followup&id=1">
-				بازکردن این پیگیری در یک صفحهٔ جدا
-			</a>
-		</p>
-	</div>
-					</div>
-				</div>
-			</dialog>
-								<dialog class="mjy-modal" id="mjy-call-2" data-mjy="call-modal" aria-labelledby="mjy-call-title-2">
+									<dialog class="mjy-modal" id="mjy-call-2" data-mjy="call-modal" aria-labelledby="mjy-call-title-2">
 				<div class="mjy-modal__panel">
 					<header class="mjy-modal__head">
 						<h2 id="mjy-call-title-2" class="mjy-modal__title">
@@ -2185,6 +2266,117 @@ body {
 
 			<p class="mjy-follow__fallback">
 			<a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-followup&id=3">
+				بازکردن این پیگیری در یک صفحهٔ جدا
+			</a>
+		</p>
+	</div>
+					</div>
+				</div>
+			</dialog>
+								<dialog class="mjy-modal" id="mjy-call-1" data-mjy="call-modal" aria-labelledby="mjy-call-title-1">
+				<div class="mjy-modal__panel">
+					<header class="mjy-modal__head">
+						<h2 id="mjy-call-title-1" class="mjy-modal__title">
+							پیگیری تلفنی — مشتری بی‌نام						</h2>
+						<button type="button" class="mjy-modal__x" data-mjy="call-close" aria-label="بستن">&times;</button>
+					</header>
+					<div class="mjy-modal__body">
+												<div class="mjy-follow" data-mjy="follow" data-stage="1">
+
+	<div class="mjy-follow__who">
+		<div>
+			<strong class="mjy-follow__name">
+				بدون نام			</strong>
+							<a class="mjy-follow__phone" dir="ltr" href="tel:09121234567">
+					09121234567				</a>
+					</div>
+		<span class="mjy-follow__badge is-open">
+			در انتظار اولین تماس		</span>
+	</div>
+
+	
+	<h3 class="mjy-follow__title">تاریخچهٔ تماس‌ها</h3>
+
+			<p class="mjy-follow__empty">هنوز تماسی برای این مشتری ثبت نشده است. نتیجهٔ تماس اول را انتخاب کنید.</p>
+	
+	<form method="post" action="https://shop.test/wp-admin/admin-post.php" class="mjy-follow__form" data-mjy="follow-form">
+		<input type="hidden" name="_wpnonce" value="stub-nonce" />		<input type="hidden" name="action" value="mojoodyar_call" />
+		<input type="hidden" name="id" value="1" />
+		<input type="hidden" name="return" value="" />
+
+					<fieldset class="mjy-follow__outcomes">
+				<legend>نتیجهٔ تماس اول</legend>
+									<label class="mjy-outcome">
+						<input type="radio" name="outcome" value="answered" required />
+						<span>پاسخ داد</span>
+					</label>
+									<label class="mjy-outcome">
+						<input type="radio" name="outcome" value="no_answer" required />
+						<span>پاسخ نداد</span>
+					</label>
+									<label class="mjy-outcome">
+						<input type="radio" name="outcome" value="busy" required />
+						<span>مشغول بود</span>
+					</label>
+									<label class="mjy-outcome">
+						<input type="radio" name="outcome" value="callback" required />
+						<span>بعداً تماس بگیرم</span>
+					</label>
+									<label class="mjy-outcome">
+						<input type="radio" name="outcome" value="ordered" required />
+						<span>سفارش داد</span>
+					</label>
+									<label class="mjy-outcome">
+						<input type="radio" name="outcome" value="wrong_number" required />
+						<span>شماره اشتباه بود</span>
+					</label>
+									<label class="mjy-outcome">
+						<input type="radio" name="outcome" value="unsubscribed" required />
+						<span>درخواست لغو کرد</span>
+					</label>
+							</fieldset>
+
+			<p class="mjy-follow__field">
+				<label for="mjy-note-1">توضیح این تماس (اختیاری)</label>
+				<textarea
+					id="mjy-note-1"
+					name="note"
+					rows="3"
+					maxlength="500"
+					placeholder="مثلاً: گفت تا آخر هفته تصمیم می‌گیرد"
+					data-mjy="note"
+				></textarea>
+				<span class="mjy-follow__counter" data-mjy="counter">۰ / ۵۰۰</span>
+			</p>
+
+			<div class="mjy-follow__actions">
+				<button type="submit" name="call_action" value="attempt" class="mjy-btn mjy-btn--primary" data-mjy="follow-save">
+					ثبت تماس اول				</button>
+				<button type="submit" name="call_action" value="close" class="mjy-btn mjy-btn--danger" data-mjy="follow-close" formnovalidate>
+					خاتمهٔ پیگیری
+				</button>
+			</div>
+
+			<p class="mjy-follow__field mjy-follow__reason">
+				<label for="mjy-reason-1">دلیل خاتمه (برای دکمهٔ «خاتمهٔ پیگیری»)</label>
+				<select id="mjy-reason-1" name="close_reason">
+					<option value="">— انتخاب کنید —</option>
+											<option value="ordered">سفارش داد</option>
+											<option value="wrong_number">شماره اشتباه</option>
+											<option value="unsubscribed">درخواست لغو</option>
+											<option value="unreachable">دیگر پاسخ نمی‌دهد</option>
+											<option value="duplicate">ردیف تکراری</option>
+											<option value="other">سایر</option>
+									</select>
+			</p>
+
+			<p class="mjy-follow__hint">
+				نتیجه‌های «سفارش داد»، «شماره اشتباه بود» و «درخواست لغو کرد» پیگیری را خودکار می‌بندند.
+			</p>
+			</form>
+
+			<p class="mjy-follow__fallback">
+			<a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-followup&id=1">
 				بازکردن این پیگیری در یک صفحهٔ جدا
 			</a>
 		</p>

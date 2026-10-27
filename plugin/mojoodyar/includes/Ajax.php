@@ -42,6 +42,14 @@ final class Ajax {
 	 */
 	public function subscribe() {
 		if ( ! function_exists( 'check_ajax_referer' ) || ! check_ajax_referer( self::ACTION, 'nonce', false ) ) {
+			// Log it. A stale nonce (page cached for longer than 24 hours, a
+			// security plugin stripping the field, or a form rendered before an
+			// update) is the one rejection a visitor cannot see explained: the
+			// browser shows "refresh the page", the waitlist stays empty, and
+			// without this line the admin has no evidence the request arrived at
+			// all. The report screen reads these rows.
+			Logger::log( 'security', 'subscribe_rejected', 'bad_nonce', Consent::ip_hash() );
+
 			wp_send_json_compat(
 				array(
 					'ok'      => false,

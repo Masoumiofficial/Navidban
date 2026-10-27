@@ -18,6 +18,7 @@ use Mojoodyar\Logger;
 use Mojoodyar\Notifier;
 use Mojoodyar\Queue;
 use Mojoodyar\Settings;
+use Mojoodyar\Stats;
 use Mojoodyar\StockWatcher;
 use Mojoodyar\Support\Csv;
 use Mojoodyar\Support\Jalali;
@@ -57,6 +58,7 @@ final class Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_post_mojoodyar_export', array( $this, 'export_csv' ) );
+		add_action( 'admin_post_mojoodyar_export_stats', array( $this, 'export_stats_csv' ) );
 		add_action( 'admin_post_mojoodyar_tool', array( $this, 'handle_tool' ) );
 		add_action( 'admin_post_mojoodyar_bulk', array( $this, 'handle_bulk' ) );
 		add_action( 'admin_post_mojoodyar_call', array( $this, 'handle_call' ) );
@@ -94,6 +96,7 @@ final class Admin {
 		);
 
 		add_submenu_page( self::SLUG, 'داشبورد', 'داشبورد', Capabilities::MANAGE, self::SLUG, array( $this, 'render_dashboard' ) );
+		add_submenu_page( self::SLUG, 'آمار', 'آمار', Capabilities::MANAGE, self::SLUG . '-stats', array( $this, 'render_stats' ) );
 		add_submenu_page( self::SLUG, 'لیست انتظارها', 'لیست انتظارها', Capabilities::MANAGE, self::SLUG . '-waitlists', array( $this, 'render_waitlists' ) );
 		add_submenu_page( self::SLUG, 'تنظیمات', 'تنظیمات', Capabilities::MANAGE, self::SLUG . '-settings', array( $this, 'render_settings' ) );
 		add_submenu_page( self::SLUG, 'ابزارها', 'ابزارها', Capabilities::MANAGE, self::SLUG . '-tools', array( $this, 'render_tools' ) );
@@ -407,6 +410,109 @@ final class Admin {
 	}
 
 	/**
+	 * Render the statistics screen.
+	 *
+	 * @return void
+	 */
+	public function render_stats() {
+		$this->guard();
+
+		$range = Stats::current_range();
+
+		$this->view(
+			'stats',
+			array(
+				'report' => Stats::report( $range ),
+				'range'  => $range,
+			)
+		);
+	}
+
+	/**
+	 * Download the same report as CSV (one flat sheet, UTF-8 BOM).
+	 *
+	 * @return void
+	 */
+	public function export_stats_csv() {
+		$this->guard();
+
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field_compat( wp_unslash_compat( $_GET['_wpnonce'] ) ), 'mojoodyar_export_stats' ) ) {
+			wp_die_compat( 'درخواست معتبر نیست.' );
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- verified above.
+		$range = Stats::normalize_range( isset( $_GET['range'] ) ? (int) $_GET['range'] : Stats::DEFAULT_RANGE );
+		// phpcs:enable
+
+		$report = Stats::report( $range );
+
+		nocache_headers_compat();
+		header( 'Content-Type: text/csv; charset=UTF-8' );
+		header( 'Content-Disposition: attachment; filename="mojoodyar-stats-' . (int) $range . 'd-' . gmdate( 'Ymd-His' ) . '.csv"' );
+
+		echo Csv::bom(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		$out = fopen( 'php://output', 'w' );
+
+		fputcsv( $out, array( 'بخش', 'شاخص', 'مقدار' ) );
+
+		$rows = array(
+			array( 'بازه', 'روز', (string) $range ),
+			array( 'ثبت‌ها', 'ثبت تازه', (string) $report['summary']['total'] ),
+			array( 'ثبت‌ها', 'در انتظار تأیید', (string) $report['summary']['pending'] ),
+			array( 'ثبت‌ها', 'تأییدشده', (string) $report['summary']['confirmed'] ),
+			array( 'ثبت‌ها', 'اعلان‌شده', (string) $report['summary']['notified'] ),
+			array( 'ثبت‌ها', 'لغو اشتراک', (string) $report['summary']['unsubscribed'] ),
+			array( 'ثبت‌ها', 'منقضی', (string) $report['summary']['expired'] ),
+			array( 'ثبت‌ها', 'درصد تأیید', (string) $report['summary']['confirm_rate'] ),
+			array( 'صف', 'ارسال‌شده در بازه', (string) $report['summary']['sent'] ),
+			array( 'صف', 'ناموفق در بازه', (string) $report['summary']['failed'] ),
+			array( 'کانال', 'پیامک', (string) ( isset( $report['channels']['sms'] ) ? $report['channels']['sms'] : 0 ) ),
+			array( 'کانال', 'ایمیل', (string) ( isset( $report['channels']['email'] ) ? $report['channels']['email'] : 0 ) ),
+		);
+
+		foreach ( $report['signups']['values'] as $index => $value ) {
+			$rows[] = array(
+				'ثبت روزانه',
+				(string) $report['signups']['keys'][ $index ],
+				(string) (int) $value,
+			);
+		}
+
+		foreach ( $report['notified']['values'] as $index => $value ) {
+			$rows[] = array(
+				'اعلان روزانه',
+				(string) $report['notified']['keys'][ $index ],
+				(string) (int) $value,
+			);
+		}
+
+		foreach ( $report['products'] as $product ) {
+			$rows[] = array(
+				'محصول',
+				(string) $product['name'],
+				(string) (int) $product['total'],
+			);
+		}
+
+		foreach ( $report['rejections'] as $rejection ) {
+			$rows[] = array(
+				'ردشده',
+				(string) $rejection['label'],
+				(string) (int) $rejection['count'],
+			);
+		}
+
+		foreach ( $rows as $row ) {
+			// CSV keeps Latin digits on purpose so spreadsheets keep the values numeric.
+			fputcsv( $out, Csv::row( $row ) );
+		}
+
+		fclose( $out );
+		exit;
+	}
+
+	/**
 	 * Render the waitlist screen.
 	 *
 	 * @return void
@@ -530,6 +636,7 @@ final class Admin {
 	private function open_screen( $active, $title, $subtitle ) {
 		$tabs = array(
 			'dashboard' => array( 'داشبورد', self::SLUG ),
+			'stats'     => array( 'آمار', self::SLUG . '-stats' ),
 			'waitlists' => array( 'لیست انتظارها', self::SLUG . '-waitlists' ),
 			'settings'  => array( 'تنظیمات', self::SLUG . '-settings' ),
 			'tools'     => array( 'ابزارها', self::SLUG . '-tools' ),
@@ -1074,6 +1181,21 @@ final class Admin {
  */
 function esc_url_compat( $value ) {
 	return function_exists( 'esc_url' ) ? (string) esc_url( $value ) : htmlspecialchars( (string) $value, ENT_QUOTES, 'UTF-8' );
+}
+
+/**
+ * wp_nonce_url() fallback (the harness has no nonce plumbing).
+ *
+ * @param string $action_url Target URL.
+ * @param string $action     Nonce action.
+ * @return string
+ */
+function wp_nonce_url_compat( $action_url, $action ) {
+	if ( function_exists( 'wp_nonce_url' ) ) {
+		return (string) wp_nonce_url( $action_url, $action );
+	}
+
+	return (string) $action_url . '&_wpnonce=stub-nonce';
 }
 
 /**

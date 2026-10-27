@@ -71,6 +71,11 @@ final class Rest {
 		}
 
 		if ( '' === $nonce || ! function_exists( 'wp_verify_nonce' ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			// Same reason as the AJAX path: an expired session must leave a
+			// trace, otherwise a form that never reaches Subscribe::handle()
+			// looks identical to a form nobody filled in.
+			Logger::log( 'security', 'subscribe_rejected', 'rest_nonce', Consent::ip_hash() );
+
 			if ( class_exists( '\WP_Error' ) ) {
 				return new \WP_Error( 'mojoodyar_nonce', 'نشست شما منقضی شده است؛ صفحه را دوباره بارگذاری کنید.', array( 'status' => 403 ) );
 			}

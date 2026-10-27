@@ -125,7 +125,7 @@ foreach ( (array) $GLOBALS['mjy_admin_menu'] as $item ) {
 MjyAdmin::ok( in_array( 'mojoodyar', $slugs, true ), 'منوی اصلی ثبت شد', implode( ',', $slugs ) );
 MjyAdmin::ok( count( $GLOBALS['mjy_admin_menu'] ) >= 6, 'پنج زیرمنو + منوی اصلی', count( $GLOBALS['mjy_admin_menu'] ) );
 
-foreach ( array( 'mojoodyar-waitlists', 'mojoodyar-settings', 'mojoodyar-tools', 'mojoodyar-help' ) as $slug ) {
+foreach ( array( 'mojoodyar-stats', 'mojoodyar-waitlists', 'mojoodyar-settings', 'mojoodyar-tools', 'mojoodyar-help' ) as $slug ) {
 	MjyAdmin::ok( in_array( $slug, $slugs, true ), 'زیرمنو موجود است: ' . $slug, implode( ',', $slugs ) );
 }
 
@@ -178,6 +178,7 @@ MjyAdmin::group( 'رندر صفحات' );
 
 $screens = array(
 	'dashboard' => array( 'render_dashboard', 'داشبورد' ),
+	'stats'     => array( 'render_stats', 'آمار' ),
 	'waitlists' => array( 'render_waitlists', 'لیست انتظار' ),
 	'settings'  => array( 'render_settings', 'تنظیمات' ),
 	'tools'     => array( 'render_tools', 'ابزار' ),
@@ -201,6 +202,42 @@ foreach ( $screens as $key => $config ) {
 /* -------------------------------------------------------------------------
  * Shell: app bar + tab strip
  * ---------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------
+ * Statistics screen
+ * ---------------------------------------------------------------------- */
+MjyAdmin::group( 'صفحهٔ آمار' );
+
+$stats_html = $rendered['stats'];
+
+MjyAdmin::ok( false !== strpos( $stats_html, 'آمار' ), 'عنوان صفحهٔ آمار رندر می‌شود' );
+MjyAdmin::ok( false !== strpos( $stats_html, 'range=7' ) && false !== strpos( $stats_html, 'range=90' ), 'بازه‌های ۷ و ۹۰ روز قابل انتخاب‌اند' );
+MjyAdmin::ok( false !== strpos( $stats_html, 'mojoodyar-stats&range=30' ), 'پیوند بازه بدون پارامتر اضافه ساخته می‌شود' );
+MjyAdmin::ok( false !== strpos( $stats_html, 'admin-post.php?action=mojoodyar_export_stats' ), 'دکمهٔ خروجی CSV آمار هست' );
+MjyAdmin::ok( false !== strpos( $stats_html, '_wpnonce=' ), 'خروجی CSV با nonce محافظت می‌شود' );
+
+// A chart with no data must say so in words, not render an empty grid.
+MjyAdmin::ok(
+	false !== strpos( $stats_html, 'هیچ ثبت تازه‌ای نبوده است' ) || false !== strpos( $stats_html, 'mjy-chart' ),
+	'نمودار یا پیام «داده‌ای نیست» رندر می‌شود'
+);
+MjyAdmin::ok( false === strpos( $stats_html, 'NAN' ) && false === strpos( $stats_html, 'INF' ), 'هیچ عدد نامعتبری در صفحه نیست' );
+MjyAdmin::ok( false === strpos( $stats_html, 'nan' ), 'حروف کوچک nan هم در صفحه نیست' );
+
+// The rejection panel is the reason this screen exists: without it an admin
+// sees an empty waitlist and no explanation.
+MjyAdmin::ok( false !== strpos( $stats_html, 'ثبت‌های ردشده' ), 'پنل «ثبت‌های ردشده» رندر می‌شود' );
+MjyAdmin::ok( false !== strpos( $stats_html, 'سلامت صف ارسال' ), 'پنل سلامت صف رندر می‌شود' );
+MjyAdmin::ok( false !== strpos( $stats_html, 'کانال اعلان' ), 'تفکیک کانال رندر می‌شود' );
+
+// No external asset may be pulled into an admin screen.
+MjyAdmin::ok( false === strpos( $stats_html, 'cdn.' ) && false === strpos( $stats_html, 'googleapis' ), 'صفحه هیچ منبع بیرونی صدا نمی‌زند' );
+MjyAdmin::ok( false === strpos( $stats_html, '<canvas' ) && false === strpos( $stats_html, 'chart.js' ) && false === strpos( $stats_html, 'Chart(' ), 'نمودار با HTML/CSS است، نه کتابخانهٔ خارجی' );
+MjyAdmin::ok( false !== strpos( $stats_html, 'mjy-chart' ) || false !== strpos( $stats_html, 'هیچ' ), 'ساختار نمودار (میله‌های div) در HTML هست' );
+
+// The escape hatch the report offers must point at the tool that explains a
+// specific product, not at a dead end.
+MjyAdmin::ok( false !== strpos( $stats_html, 'dir="rtl"' ), 'صفحهٔ آمار راست‌به‌چپ است' );
+
 MjyAdmin::group( 'پوستهٔ شیشه‌ای' );
 
 MjyAdmin::ok( false !== strpos( $rendered['dashboard'], 'mjy-hero' ), 'نوار بالای صفحه رندر می‌شود' );
