@@ -1170,6 +1170,40 @@ NvbInt::ok( empty( $uncalled_row['called_at'] ), 'تیک تماس برداشته
 NvbInt::same( 0, (int) $uncalled_row['called_by'], 'ثبت‌کننده هم پاک شد' );
 NvbInt::same( 0, (int) WaitlistRepository::counts()['called'], 'شمارنده به صفر برگشت' );
 
+// 7. The admin-ajax fallback must carry the name too.
+//    Regression: this path mapped product_id/channel/email/phone but not
+//    `name`, so every visitor who reached the fallback (REST blocked by a
+//    security plugin, or a network error) got "invalid_name" for a name they
+//    had just typed. The two paths must stay in sync.
+$ajax_output = '';
+$GLOBALS['nvb_options']['navidban_settings'] = Settings::defaults();
+Settings::flush_cache();
+nvb_reset_rate_limit();
+$previous_post = $_POST;
+$_POST         = array(
+	'nonce'      => wp_create_nonce( \Navidban\Ajax::ACTION ),
+	'product_id' => 70,
+	'channel'    => 'email',
+	'email'      => 'ajax@example.com',
+	'name'       => 'زهرا کریمی',
+	'consent'    => 1,
+);
+ob_start();
+( new \Navidban\Ajax() )->subscribe();
+$ajax_output = (string) ob_get_clean();
+$_POST       = $previous_post;
+
+$ajax_body = json_decode( $ajax_output, true );
+NvbInt::ok( is_array( $ajax_body ), 'پاسخ مسیر اَجَکس JSON معتبر است' );
+NvbInt::ok( ! empty( $ajax_body['ok'] ), 'مسیر اَجَکس نام تایپ‌شده را رد نمی‌کند' );
+NvbInt::same( 'زهرا کریمی', (string) $GLOBALS['wpdb']->get_var( 'SELECT full_name FROM ' . WaitlistRepository::table() . " WHERE email = 'ajax@example.com'" ), 'نام در مسیر اَجَکس هم ذخیره می‌شود' );
+
+// The two entry points must accept exactly the same field list.
+$rest_source = (string) file_get_contents( NAVIDBAN_DIR . 'includes/Rest.php' );
+$ajax_source = (string) file_get_contents( NAVIDBAN_DIR . 'includes/Ajax.php' );
+NvbInt::ok( false !== strpos( $ajax_source, "'name'" ), 'Ajax::subscribe نام را می‌خواند' );
+NvbInt::ok( false !== strpos( $rest_source, 'get_json_params' ), 'REST مسیر بدنهٔ JSON را می‌خواند (بدون فیلتر args)' );
+
 // A row that does not exist must not blow up.
 NvbInt::ok( false !== \Navidban\WaitlistRepository::set_called( 999999, true, 1 ), 'به‌روزرسانی ردیف ناموجود خطا نمی‌دهد' );
 

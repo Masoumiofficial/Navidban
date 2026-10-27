@@ -9,7 +9,7 @@
 |---|---|---|
 | آزمون واحد روی PHP 8.3 | ✅ ۲۹۲/۲۹۲ | `tests/results.json` |
 | آزمون واحد روی PHP 7.4 | ✅ ۲۷۸/۲۷۸ | `tests/results-php74.json` |
-| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۸۸/۱۸۸ | `tests/integration-results.json` |
+| آزمون یکپارچه روی PHP 8.3 | ✅ ۱۹۳/۱۹۳ | `tests/integration-results.json` |
 | آزمون یکپارچه روی PHP 7.4 | ✅ ۱۶۶/۱۶۶ | `tests/integration-results-php74.json` |
 | رندر پنل مدیریت (۵ صفحه) روی PHP 8.3 | ✅ ۱۰۵/۱۰۵ | `tests/admin-render-results.json` |
 | رندر پنل مدیریت (۵ صفحه) روی PHP 7.4 | ✅ ۹۱/۹۱ | `tests/admin-render-results-php74.json` |

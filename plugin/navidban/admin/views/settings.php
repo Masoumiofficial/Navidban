@@ -196,6 +196,11 @@ $nvb_secret = function ( $key ) use ( $settings ) {
 					<th scope="row"><label for="nvb-sms-body">متن پیامک</label></th>
 					<td>
 						<textarea id="nvb-sms-body" class="large-text" rows="3" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_template]"><?php echo esc_textarea( (string) $settings['sms_template'] ); ?></textarea>
+						<p class="description">
+							متغیرهای متن آزاد: <code>{customer_name}</code> نام مشتری، <code>{product_name}</code> نام محصول،
+							<code>{product_url}</code> نشانی صفحه، <code>{site_name}</code> نام فروشگاه.
+							اگر نام مشتری ثبت نشده باشد، جای آن «همراه گرامی» می‌آید.
+						</p>
 						<p class="description">پیوند لغو اشتراک در هر پیام اجباری است؛ آن را حذف نکنید. هر ۷۰ کاراکتر یک پیامک حساب می‌شود.</p>
 					</td>
 				</tr>

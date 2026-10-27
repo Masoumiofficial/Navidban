@@ -3,7 +3,7 @@
  * Plugin Name:       نویدبان | لیست انتظار و اعلان بازگشت موجودی
  * Plugin URI:        https://github.com/Masoumiofficial/Navidban
  * Description:       لیست انتظار و اعلان بازگشت موجودی برای ووکامرس. فقط در صفحهٔ محصولِ ناموجود بارگذاری می‌شود. بدون IonCube، بدون Composer، بدون تماس اجباری با سرور بیرونی.
- * Version:           1.0.9
+ * Version:           1.0.10
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            اتحاد وردپرس
@@ -20,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NAVIDBAN_VERSION', '1.0.9' );
+define( 'NAVIDBAN_VERSION', '1.0.10' );
 define( 'NAVIDBAN_DB_VERSION', '2' );
 define( 'NAVIDBAN_FILE', __FILE__ );
 define( 'NAVIDBAN_DIR', plugin_dir_path( __FILE__ ) );

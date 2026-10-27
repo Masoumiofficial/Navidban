@@ -53,10 +53,15 @@ final class Ajax {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified above.
+		// This list must carry every field Subscribe::handle() reads. When it did
+		// not carry `name`, the fallback path silently sent an empty name and a
+		// mandatory-name store answered "invalid_name" for a name the visitor had
+		// just typed. tests/integration.php now guards that.
 		$input = array(
 			'product_id'   => isset( $_POST['product_id'] ) ? (int) $_POST['product_id'] : 0,
 			'variation_id' => isset( $_POST['variation_id'] ) ? (int) $_POST['variation_id'] : 0,
 			'channel'      => isset( $_POST['channel'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['channel'] ) ) : 'email',
+			'name'         => isset( $_POST['name'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['name'] ) ) : '',
 			'email'        => isset( $_POST['email'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['email'] ) ) : '',
 			'phone'        => isset( $_POST['phone'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['phone'] ) ) : '',
 			'consent'      => isset( $_POST['consent'] ) ? (int) $_POST['consent'] : 0,

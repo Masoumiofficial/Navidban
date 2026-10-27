@@ -25,7 +25,7 @@ python3 tools/verify-release.py --build     # ۲۲ بررسی، باید ۰ خط
 ```bash
 # با PHP نصب‌شده
 php tests/run.php            # ۲۹۲ assertion
-php tests/integration.php    # ۱۸۸ assertion
+php tests/integration.php    # ۱۹۳ assertion
 php tests/admin-render.php   # ۱۰۵ assertion (رندر واقعی پنل)
 php tests/load.php           # ۱۰٬۰۰۰ مشترک
 
@@ -34,7 +34,7 @@ npm install --no-save @php-wasm/node @php-wasm/universal
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php
 ```
 
-نتیجهٔ آخر: **۲۹۲/۲۹۲**، **۱۸۸/۱۸۸** و **۱۰۵/۱۰۵** روی PHP **8.3.33** و **7.4.33**.
+نتیجهٔ آخر: **۲۹۲/۲۹۲**، **۱۹۳/۱۹۳** و **۱۰۵/۱۰۵** روی PHP **8.3.33** و **7.4.33**.
 جزئیات: `plugin/navidban/docs/TEST-REPORT.md`.
 
 ## مستندات

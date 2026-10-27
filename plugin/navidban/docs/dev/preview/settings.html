@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نویدبان 1.0.9 — تنظیمات</title>
+<title>نویدبان 1.0.10 — تنظیمات</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1377,11 +1377,11 @@ body {
 </head>
 <body>
 <p class="nvb-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.9.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.10.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۹</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
+<div class="wrap nvb-wrap" dir="rtl"><header class="nvb-hero"><span class="nvb-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="nvb-hero__text"><h1 class="nvb-hero__title">تنظیمات نویدبان<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="nvb-hero__meta"><span class="nvb-chip">نسخهٔ ۱.۰.۱۰</span><span class="nvb-chip nvb-chip--accent">اتحاد وردپرس</span></div></header><nav class="nvb-tabs-wrap" aria-label="بخش‌های نویدبان"><ul class="nvb-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=navidban">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=navidban-help">راهنما</a></li></ul></nav>
 	
 	<form method="post" action="options.php">
 		<input type="hidden" name="option_page" value="navidban_settings_group" />
@@ -1542,6 +1542,11 @@ body {
 					<th scope="row"><label for="nvb-sms-body">متن پیامک</label></th>
 					<td>
 						<textarea id="nvb-sms-body" class="large-text" rows="3" name="navidban_settings[sms_template]">{product_name} موجود شد: {product_url} | لغو: {unsubscribe_url}</textarea>
+						<p class="description">
+							متغیرهای متن آزاد: <code>{customer_name}</code> نام مشتری، <code>{product_name}</code> نام محصول،
+							<code>{product_url}</code> نشانی صفحه، <code>{site_name}</code> نام فروشگاه.
+							اگر نام مشتری ثبت نشده باشد، جای آن «همراه گرامی» می‌آید.
+						</p>
 						<p class="description">پیوند لغو اشتراک در هر پیام اجباری است؛ آن را حذف نکنید. هر ۷۰ کاراکتر یک پیامک حساب می‌شود.</p>
 					</td>
 				</tr>
@@ -1670,7 +1675,7 @@ body {
 					<th scope="row">متغیرهای این افزونه</th>
 					<td>
 						<ul class="nvb-pattern-vars">
-															<li><code>{0}</code> نام مشتری (اگر ناشناس باشد: «مشتری»)</li>
+															<li><code>{0}</code> نام مشتری (اگر نامی ثبت نشده باشد: «همراه گرامی»)</li>
 															<li><code>{1}</code> نام محصول</li>
 															<li><code>{2}</code> نشانی صفحهٔ محصول</li>
 															<li><code>{3}</code> قیمت محصول</li>

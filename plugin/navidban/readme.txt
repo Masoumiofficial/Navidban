@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,12 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 8. صفحهٔ خطای فرم
 
 == Changelog ==
+
+= 1.0.10 =
+اصلاح باگ: در مسیر پشتیبان اَجَکس، نام و نام خانوادگیِ تایپ‌شده دور ریخته
+می‌شد و مشتری پاسخ «نام و نام خانوادگی را کامل بنویسید» می‌گرفت. حالا نام در
+هر دو مسیر (REST و اَجَکس) خوانده می‌شود. راهنمای متغیر نام در پیامک هم به
+تنظیمات اضافه شد.
 
 = 1.0.9 =
 گرفتن نام و نام خانوادگی در فرم «خبرم کن»، استفاده از همان نام در پیامک و
