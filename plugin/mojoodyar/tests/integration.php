@@ -1229,6 +1229,32 @@ $GLOBALS['mjy_http_calls']    = array();
 $GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"88","RetStatus":1,"StrRetStatus":"Ok"}' );
 MjyInt::same( true, $sms->send( '09121234567', '', 'x', $shop_full ), 'با سقف ۶۰ کاراکتر همان پیام ارسال می‌شود' );
 
+// Site mode: the store address with no trailing slash. Always fits the budget,
+// and always lands the buyer on the home page instead of the product.
+Settings::update( array( 'sms_link_mode' => 'site', 'sms_max_value_length' => 25, 'sms_short_domain' => '' ) );
+$site_link = \Mojoodyar\Notifier::site_link();
+MjyInt::same( 'https://shop.test', $site_link, 'نشانی سایت بدون اسلش پایانی است' );
+MjyInt::same( $site_link, \Mojoodyar\Notifier::link_for( 12, 0, 'sms' ), 'حالت «نشانی سایت» همان را برمی‌گرداند' );
+MjyInt::ok( \Mojoodyar\Support\Text::length( $site_link ) <= 25, 'نشانی سایت زیر سقف ۲۵ است' );
+MjyInt::ok( false === strpos( $site_link, '?p=' ) && false === strpos( $site_link, '/product/' ), 'نشانی سایت نه شناسهٔ محصول دارد نه مسیر آن' );
+
+$GLOBALS['mjy_http_calls']    = array();
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"55","RetStatus":1,"StrRetStatus":"Ok"}' );
+$site_context = $shop_context;
+$site_context['context']['sms_product_url'] = $site_link;
+MjyInt::same( true, $sms->send( '09121234567', '', 'x', $site_context ), 'با نشانی سایت، الگوی سه‌متغیره ارسال می‌شود' );
+MjyInt::same( 'مریم احمدی;کفش دویدن نایک پگاسوس;https://shop.test', $GLOBALS['mjy_http_calls'][0][1]['body']['text'], 'مقدار سوم نشانی سایت است' );
+
+// A fixed link belongs in the approved pattern as literal text, where no length
+// rule applies at all. That is the only way to have both a link and no risk.
+$literal_template = '{0} عزیز، {1} دوباره موجود شد. مشاهده: shop.test';
+MjyInt::same( array(), \Mojoodyar\Logic\SmsPattern::overlong( $literal_template, $site_context['context'] ), 'نشانی به‌صورت متن ثابت هیچ محدودیت طولی ندارد' );
+MjyInt::same(
+	'مریم احمدی;کفش دویدن نایک پگاسوس',
+	\Mojoodyar\Logic\SmsPattern::payload( $literal_template, $site_context['context'] ),
+	'پیام با لینک ثابت، دو مقدار می‌فرستد'
+);
+
 Settings::update( array( 'sms_link_mode' => 'off', 'sms_max_value_length' => 25, 'sms_short_domain' => '' ) );
 MjyInt::same( '', \Mojoodyar\Notifier::link_for( 12, 0, 'sms' ), 'حالت «بدون نشانی» پیوند نمی‌سازد' );
 MjyInt::ok( '' !== \Mojoodyar\Notifier::link_for( 12, 0, 'email' ), 'ایمیل همیشه نشانی کامل می‌گیرد' );

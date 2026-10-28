@@ -1076,6 +1076,12 @@
 	line-height: 1.9;
 }
 
+/* A warning inside the pattern help: amber edge, same glass body. */
+.mjy-pattern-help--warn {
+	border-color: rgba(242, 169, 59, 0.45);
+	background: linear-gradient(180deg, rgba(255, 248, 236, 0.85), rgba(255, 255, 255, 0.55));
+}
+
 .mjy-pattern-help p:last-child {
 	margin-bottom: 0;
 }

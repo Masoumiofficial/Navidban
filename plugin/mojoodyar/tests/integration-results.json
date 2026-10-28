@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.7.1",
+    "plugin_version": "2.8.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-28T10:06:27+00:00",
-    "assertions": 430,
+    "generated_at": "2026-10-28T10:15:23+00:00",
+    "assertions": 438,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -59,7 +59,7 @@
             "failures": 0
         },
         "نشانی کوتاه و سقف متغیر": {
-            "assertions": 13,
+            "assertions": 21,
             "failures": 0
         },
         "پیام متوقف‌شده (ایراد تنظیمات)": {

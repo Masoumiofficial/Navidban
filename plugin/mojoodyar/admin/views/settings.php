@@ -332,6 +332,7 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 			$mjy_sample_context['product_url']     = $mjy_full_link;
 			$mjy_sample_context['sms_product_url'] = 'off' === (string) $settings['sms_link_mode'] ? '' : $mjy_short_link;
 			$mjy_value_limit                       = \Mojoodyar\Logic\SmsPattern::limit();
+			$mjy_site_link                         = (string) \Mojoodyar\Notifier::site_link();
 			?>
 
 			<h3>متن الگو (برای خطوط خدماتی)</h3>
@@ -365,20 +366,36 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 					<th scope="row"><label for="mjy-link-mode">نشانی محصول در پیامک</label></th>
 					<td>
 						<select id="mjy-link-mode" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_link_mode]">
-							<?php foreach ( array( 'short' => 'نشانی کوتاه (پیشنهادی)', 'full' => 'نشانی کامل محصول', 'off' => 'بدون نشانی' ) as $mjy_mode => $mjy_mode_label ) : ?>
+							<?php foreach ( array( 'short' => 'نشانی کوتاه محصول (پیشنهادی)', 'site' => 'نشانی اصلی سایت', 'full' => 'نشانی کامل محصول', 'off' => 'بدون نشانی' ) as $mjy_mode => $mjy_mode_label ) : ?>
 								<option value="<?php echo esc_attr( $mjy_mode ); ?>" <?php selected( (string) $settings['sms_link_mode'], $mjy_mode ); ?>>
 									<?php echo esc_html( $mjy_mode_label ); ?>
 								</option>
 							<?php endforeach; ?>
 						</select>
 						<p class="description">
-							نشانی کوتاه، فرم خود وردپرس است: <code dir="ltr"><?php echo esc_html( $mjy_short_link ); ?></code>
-							(<strong><?php echo esc_html( Persian::number( \Mojoodyar\Support\Text::length( $mjy_short_link ) ) ); ?></strong> کاراکتر) —
-							در حالی که نشانی کامل
-							<code dir="ltr"><?php echo esc_html( $mjy_full_link ); ?></code>
-							<strong><?php echo esc_html( Persian::number( \Mojoodyar\Support\Text::length( $mjy_full_link ) ) ); ?></strong> کاراکتر است.
-							هیچ سرویس بیرونی در کار نیست؛ پیوند روی همین سایت ساخته می‌شود.
+							<span class="mjy-link-compare">
+								نشانی کوتاه محصول:
+								<code dir="ltr"><?php echo esc_html( $mjy_short_link ); ?></code>
+								<strong><?php echo esc_html( Persian::number( \Mojoodyar\Support\Text::length( $mjy_short_link ) ) ); ?></strong> کاراکتر ·
+								نشانی کامل:
+								<code dir="ltr"><?php echo esc_html( $mjy_full_link ); ?></code>
+								<strong><?php echo esc_html( Persian::number( \Mojoodyar\Support\Text::length( $mjy_full_link ) ) ); ?></strong> کاراکتر ·
+								نشانی اصلی سایت:
+								<code dir="ltr"><?php echo esc_html( $mjy_site_link ); ?></code>
+								<strong><?php echo esc_html( Persian::number( \Mojoodyar\Support\Text::length( $mjy_site_link ) ) ); ?></strong> کاراکتر
+							</span>
+							هیچ سرویس بیرونی در کار نیست؛ همهٔ این پیوندها روی همین سایت ساخته می‌شوند.
 						</p>
+						<div class="mjy-pattern-help mjy-pattern-help--warn">
+							<p>
+								<strong>«نشانی اصلی سایت» همیشه در سقف جا می‌شود، ولی خریدار را به صفحهٔ اصلی می‌برد نه به همان محصول</strong>
+								— مشتری باید خودش کالا را پیدا کند و نرخ تبدیل پایین می‌آید. اگر این را انتخاب می‌کنید،
+								بهتر است همین نشانی را به‌صورت <em>متن ثابت</em> داخل الگوی پنل پیامک بگذارید
+								(مثلاً «… موجود شد — <?php echo esc_html( (string) parse_url( $mjy_site_link, PHP_URL_HOST ) ); ?>»)
+								و <code>{2}</code> را از الگو بردارید: آن‌وقت هیچ محدودیت طولی روی لینک وجود ندارد،
+								چون دیگر متغیر نیست.
+							</p>
+						</div>
 					</td>
 				</tr>
 				<tr>

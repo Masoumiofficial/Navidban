@@ -269,7 +269,7 @@ final class Admin {
 			$out['generic_method'] = strtoupper( $input['generic_method'] );
 		}
 
-		if ( isset( $input['sms_link_mode'] ) && in_array( $input['sms_link_mode'], array( 'off', 'short', 'full' ), true ) ) {
+		if ( isset( $input['sms_link_mode'] ) && in_array( $input['sms_link_mode'], array( 'off', 'short', 'site', 'full' ), true ) ) {
 			$out['sms_link_mode'] = $input['sms_link_mode'];
 		}
 

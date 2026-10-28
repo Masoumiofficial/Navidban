@@ -272,6 +272,27 @@ final class Notifier {
 	}
 
 	/**
+	 * The store's own address, shortest useful form: no trailing slash.
+	 *
+	 * Sending the home page instead of the product page is a real choice with a
+	 * real cost - the buyer lands somewhere and has to find the product - but it
+	 * has one virtue: it is ~20 characters, so it always fits the per-variable
+	 * budget, for every product, on every domain. This exists so that choice is
+	 * explicit in the settings instead of being achieved by a hack.
+	 *
+	 * @return string
+	 */
+	public static function site_link() {
+		$home = function_exists( 'home_url' ) ? (string) home_url( '/' ) : '';
+
+		if ( '' === $home ) {
+			return '';
+		}
+
+		return rtrim( $home, '/' );
+	}
+
+	/**
 	 * The link that goes into a message, honouring the configured link mode.
 	 *
 	 * @param int    $product_id   Product ID.
@@ -284,6 +305,10 @@ final class Notifier {
 
 		if ( 'off' === $mode ) {
 			return '';
+		}
+
+		if ( 'site' === $mode ) {
+			return self::site_link();
 		}
 
 		if ( 'short' === $mode ) {

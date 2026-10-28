@@ -374,7 +374,9 @@ MjyAdmin::ok( false !== strpos( $settings_html, 'طول هر مقدار' ), 'ط�
 MjyAdmin::ok( false !== strpos( $settings_html, 'name="mojoodyar_settings[sms_link_mode]"' ), 'انتخاب حالت نشانی محصول در پیامک هست' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'name="mojoodyar_settings[sms_short_domain]"' ), 'فیلد دامنهٔ کوتاه هست' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'name="mojoodyar_settings[sms_max_value_length]"' ), 'سقف کاراکتر هر متغیر قابل تنظیم است' );
-MjyAdmin::ok( false !== strpos( $settings_html, 'نشانی کوتاه (پیشنهادی)' ), 'گزینهٔ نشانی کوتاه پیشنهاد می‌شود' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'نشانی کوتاه محصول (پیشنهادی)' ), 'گزینهٔ نشانی کوتاه پیشنهاد می‌شود' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'value="site"' ), 'گزینهٔ «نشانی اصلی سایت» هست' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'به صفحهٔ اصلی می‌برد نه به همان محصول' ), 'هزینهٔ انتخاب نشانی سایت توضیح داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, '?p=12' ), 'طول واقعی نشانی کوتاه در صفحه نوشته می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'mjy-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تأیید می‌گیرد' );
 MjyAdmin::ok( false === strpos( $settings_html, 'mjy-pattern-findings' ), 'برای الگوی پیش‌فرض هیچ ایرادی رندر نمی‌شود' );

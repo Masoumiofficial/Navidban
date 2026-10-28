@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.7.1 — تنظیمات</title>
+<title>موجودیار 2.8.0 — تنظیمات</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1108,6 +1108,12 @@ body {
 	line-height: 1.9;
 }
 
+/* A warning inside the pattern help: amber edge, same glass body. */
+.mjy-pattern-help--warn {
+	border-color: rgba(242, 169, 59, 0.45);
+	background: linear-gradient(180deg, rgba(255, 248, 236, 0.85), rgba(255, 255, 255, 0.55));
+}
+
 .mjy-pattern-help p:last-child {
 	margin-bottom: 0;
 }
@@ -2188,11 +2194,11 @@ body {
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.7.1.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.8.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">تنظیمات موجودیار<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۷.۱</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">تنظیمات موجودیار<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۸.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
 	
 	<form method="post" action="options.php">
 		<input type="hidden" name="option_page" value="mojoodyar_settings_group" />
@@ -2502,20 +2508,38 @@ body {
 					<td>
 						<select id="mjy-link-mode" name="mojoodyar_settings[sms_link_mode]">
 															<option value="short"  selected="selected">
-									نشانی کوتاه (پیشنهادی)								</option>
+									نشانی کوتاه محصول (پیشنهادی)								</option>
+															<option value="site" >
+									نشانی اصلی سایت								</option>
 															<option value="full" >
 									نشانی کامل محصول								</option>
 															<option value="off" >
 									بدون نشانی								</option>
 													</select>
 						<p class="description">
-							نشانی کوتاه، فرم خود وردپرس است: <code dir="ltr">https://shop.test/?p=12</code>
-							(<strong>۲۳</strong> کاراکتر) —
-							در حالی که نشانی کامل
-							<code dir="ltr">https://shop.test/product/12/</code>
-							<strong>۲۹</strong> کاراکتر است.
-							هیچ سرویس بیرونی در کار نیست؛ پیوند روی همین سایت ساخته می‌شود.
+							<span class="mjy-link-compare">
+								نشانی کوتاه محصول:
+								<code dir="ltr">https://shop.test/?p=12</code>
+								<strong>۲۳</strong> کاراکتر ·
+								نشانی کامل:
+								<code dir="ltr">https://shop.test/product/12/</code>
+								<strong>۲۹</strong> کاراکتر ·
+								نشانی اصلی سایت:
+								<code dir="ltr">https://shop.test</code>
+								<strong>۱۷</strong> کاراکتر
+							</span>
+							هیچ سرویس بیرونی در کار نیست؛ همهٔ این پیوندها روی همین سایت ساخته می‌شوند.
 						</p>
+						<div class="mjy-pattern-help mjy-pattern-help--warn">
+							<p>
+								<strong>«نشانی اصلی سایت» همیشه در سقف جا می‌شود، ولی خریدار را به صفحهٔ اصلی می‌برد نه به همان محصول</strong>
+								— مشتری باید خودش کالا را پیدا کند و نرخ تبدیل پایین می‌آید. اگر این را انتخاب می‌کنید،
+								بهتر است همین نشانی را به‌صورت <em>متن ثابت</em> داخل الگوی پنل پیامک بگذارید
+								(مثلاً «… موجود شد — shop.test»)
+								و <code>{2}</code> را از الگو بردارید: آن‌وقت هیچ محدودیت طولی روی لینک وجود ندارد،
+								چون دیگر متغیر نیست.
+							</p>
+						</div>
 					</td>
 				</tr>
 				<tr>
