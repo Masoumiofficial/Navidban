@@ -904,6 +904,63 @@ MjyTest::ok( '' !== LogExplain::advice( 'subscribe_rejected', 'bad_nonce' ), 'ب
 MjyTest::ok( '' !== LogExplain::advice( 'delivery_failed', 'sms|http' ), 'برای خطای ارسال راهنما هست' );
 MjyTest::same( '', LogExplain::advice( 'sent', 'sms|restock' ), 'رویداد موفق راهنمای بی‌مورد ندارد' );
 
+// Regressions taken from a real shop's log screen. Each of these read wrong on
+// screen before 2.5.0 and the admin could not tell a healthy run from a broken
+// one.
+$reconcile = LogExplain::detail( 'reconcile', 'scanned=8|transitions=0|queued=0' );
+MjyTest::ok( false === strpos( $reconcile, 'ناموفق' ), 'صفرِ شمارنده «ناموفق» خوانده نمی‌شود (گذار موجودی: ۰)' );
+MjyTest::ok( false !== strpos( $reconcile, '۸' ), 'شمارنده با رقم فارسی نوشته می‌شود' );
+MjyTest::ok( false !== strpos( $reconcile, 'گذار موجودی: ۰' ), 'گذار موجودی صفر است، نه ناموفق' );
+
+$queue_run = LogExplain::detail( 'queue_run', 'sent=0|failed=3' );
+MjyTest::ok( false !== strpos( $queue_run, 'ارسال‌شده: ۰' ), 'ارسال‌شده صفر عدد است، نه ناموفق' );
+MjyTest::ok( false !== strpos( $queue_run, 'ناموفق: ۳' ), 'تعداد ناموفق درست خوانده می‌شود' );
+
+// ok= is the only key where 0/1 mean failure/success.
+MjyTest::same( 'ناموفق', LogExplain::value( '0', 'ok' ), 'ok=0 ناموفق است' );
+MjyTest::same( 'موفق', LogExplain::value( '1', 'ok' ), 'ok=1 موفق است' );
+MjyTest::same( '0', LogExplain::value( '0', 'transitions' ), 'صفر برای شمارنده صفر می‌ماند' );
+
+// The delivery row: channel, state and the gateway's own sentence.
+$delivery = LogExplain::detail( 'delivery_failed', 'sms|failed|attempt=3|err=خطا در شمارهٔ فرستنده' );
+MjyTest::ok( false !== strpos( $delivery, 'کانال: پیامک' ), 'کانال پیامک درست خوانده می‌شود' );
+MjyTest::ok( false !== strpos( $delivery, 'ناموفق (تلاش‌ها تمام شد)' ), 'وضعیت failed توضیح داده می‌شود' );
+MjyTest::ok( false !== strpos( $delivery, 'خطای درگاه:' ), 'متن خطای درگاه در لاگ دیده می‌شود' );
+MjyTest::ok( false !== strpos( $delivery, 'خطا در شمارهٔ فرستنده' ), 'خودِ پیام درگاه می‌آید، نه فقط کد' );
+MjyTest::ok( false !== strpos( $delivery, 'تلاش شمارهٔ ۳' ), 'شمارهٔ تلاش می‌آید' );
+MjyTest::ok( false === strpos( $delivery, 'دلیل: sms' ), 'برچسب «دلیل» برای کانال تکرار نمی‌شود' );
+
+$retry = LogExplain::detail( 'delivery_failed', 'sms|queued|attempt=1|err=timeout' );
+MjyTest::ok( false !== strpos( $retry, 'در صف' ), 'وضعیت queued یعنی «در صف»، نه خطای نهایی' );
+
+// Panel tool rows used to render the raw key as a reason.
+MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'run_reconcile' ), 'اجرای پایش موجودی' ), 'ابزار «اجرای پایش» فارسی است' );
+MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'flush_queue' ), 'آزادکردن قفل صف' ), 'ابزار «آزادکردن قفل» فارسی است' );
+MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'clear_logs' ), 'پاک کردن لاگ' ), 'ابزار «پاک کردن لاگ» فارسی است' );
+MjyTest::ok( false !== strpos( LogExplain::tool( 'nope' ), 'ناشناخته' ), 'ابزار ناشناخته پنهان نمی‌شود' );
+
+// Free-text redaction: the gateway quotes the recipient back in its errors.
+MjyTest::same( 'شماره 09********* مسدود است', \Mojoodyar\Support\Masking::free_text( 'شماره 09121234567 مسدود است' ), 'شمارهٔ موبایل در متن خطا پوشانده می‌شود' );
+MjyTest::same( 'ایمیل ***@*** نامعتبر', \Mojoodyar\Support\Masking::free_text( 'ایمیل ali@example.com نامعتبر' ), 'ایمیل در متن خطا پوشانده می‌شود' );
+MjyTest::ok( false === strpos( \Mojoodyar\Support\Masking::free_text( '+989121234567 رد شد' ), '9121234567' ), 'شمارهٔ با پیش‌شمارهٔ کشور هم پوشانده می‌شود' );
+MjyTest::ok( false !== strpos( \Mojoodyar\Support\Masking::free_text( 'رمز عبور درگاه اشتباه است' ), 'رمز عبور' ), 'متن غیرشخصی دست‌نخورده می‌ماند' );
+MjyTest::ok( strlen( \Mojoodyar\Support\Masking::free_text( str_repeat( 'ا', 400 ), 60 ) ) < 500, 'متن طولانی بریده می‌شود' );
+
+// The reason a non-2xx answer carries: a code alone is not a diagnosis.
+$plain = \Mojoodyar\Channels\Http::failure_message( 400, 'خط الگو تأیید نشده است' );
+MjyTest::ok( false !== strpos( $plain, '400' ), 'کد پاسخ در متن خطا هست' );
+MjyTest::ok( false !== strpos( $plain, 'خط الگو' ), 'متن پاسخ درگاه هم می‌آید' );
+
+$json_fail = \Mojoodyar\Channels\Http::failure_message( 401, '{"status":401,"message":"توکن منقضی شده است"}' );
+MjyTest::ok( false !== strpos( $json_fail, 'توکن منقضی' ), 'پیام داخل JSON استخراج می‌شود' );
+
+$html_fail = \Mojoodyar\Channels\Http::failure_message( 500, '<html><body><h1>Server Error</h1></body></html>' );
+MjyTest::ok( false === strpos( $html_fail, '<h1>' ), 'تگ HTML در متن خطا نمی‌ماند' );
+MjyTest::ok( false !== strpos( $html_fail, 'Server Error' ), 'متن داخل HTML نگه داشته می‌شود' );
+
+MjyTest::same( 'کد پاسخ درگاه: 502', \Mojoodyar\Channels\Http::failure_message( 502, '' ), 'پاسخ خالی فقط کد را می‌دهد' );
+MjyTest::ok( false === strpos( \Mojoodyar\Channels\Http::failure_message( 400, 'شماره 09121234567 مسدود' ), '09121234567' ), 'شمارهٔ مشتری در متن خطای HTTP نمی‌آید' );
+
 /* -------------------------------------------------------------------------
  * Report
  * ---------------------------------------------------------------------- */

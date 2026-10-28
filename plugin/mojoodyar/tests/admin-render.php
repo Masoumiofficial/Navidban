@@ -274,6 +274,9 @@ MjyAdmin::ok( false !== strpos( $dashboard_html, 'آخرین رویدادهای�
 MjyAdmin::ok( false !== strpos( $stats_html, 'id="mjy-rejections"' ), 'پنل ردشده‌ها لنگر (anchor) دارد' );
 MjyAdmin::ok( false !== strpos( $stats_html, 'admin.php?page=mojoodyar-logs' ), 'صفحهٔ آمار به گزارش رویدادها پیوند دارد' );
 
+// Retrying failed messages is a tool in the panel, next to emptying the queue.
+MjyAdmin::ok( false !== strpos( $rendered['tools'], 'name="tool" value="retry_failed"' ), 'ابزار «تلاش دوباره برای پیام‌های ناموفق» در صفحهٔ ابزارها هست' );
+
 MjyAdmin::group( 'پوستهٔ شیشه‌ای' );
 
 MjyAdmin::ok( false !== strpos( $rendered['dashboard'], 'mjy-hero' ), 'نوار بالای صفحه رندر می‌شود' );

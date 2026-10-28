@@ -54,6 +54,39 @@ final class Masking {
 	}
 
 	/**
+	 * Redact contact data inside a free-text string (an error message).
+	 *
+	 * Gateways quote the recipient back in their error text, so a raw message
+	 * cannot go into the log as-is: `شماره 09121234567 مسدود است` would put a
+	 * customer's mobile number in a table the admin exports to CSV. This masks
+	 * mobile-like digit runs and any e-mail address, and leaves the rest of the
+	 * sentence intact - the reason is what makes the log useful.
+	 *
+	 * @param string $text   Free text.
+	 * @param int    $length Maximum length to keep (characters).
+	 * @return string
+	 */
+	public static function free_text( $text, $length = 160 ) {
+		$text = (string) $text;
+
+		// 09xxxxxxxxx / +989xxxxxxxxx / 9xxxxxxxxx inside a sentence.
+		$text = (string) preg_replace( '/(\+?98|0)?9\d{9}/', '09*********', $text );
+
+		// E-mail addresses.
+		$text = (string) preg_replace( '/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/', '***@***', $text );
+
+		// Collapse whitespace so one log row stays one line.
+		$text = (string) preg_replace( '/\s+/u', ' ', $text );
+		$text = trim( $text );
+
+		if ( $length > 0 && \Mojoodyar\Support\Text::length( $text ) > $length ) {
+			$text = \Mojoodyar\Support\Text::substring( $text, 0, $length ) . '…';
+		}
+
+		return $text;
+	}
+
+	/**
 	 * Hash an IP address with the site salt. Raw IPs are never stored.
 	 *
 	 * @param string $ip   IP address.

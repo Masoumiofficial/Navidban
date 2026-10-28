@@ -61,6 +61,15 @@ if ( $mjy_notice ) {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
 			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
 			<input type="hidden" name="action" value="mojoodyar_tool" />
+			<input type="hidden" name="tool" value="retry_failed" />
+			<h3>تلاش دوباره برای پیام‌های ناموفق</h3>
+			<p>پیام‌هایی که پس از سه تلاش رها شده‌اند دوباره در صف می‌روند. اگر علت درگاه برطرف شده، اینجا شروع کنید.</p>
+			<button class="button">تلاش دوباره</button>
+		</form>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
+			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
+			<input type="hidden" name="action" value="mojoodyar_tool" />
 			<input type="hidden" name="tool" value="empty_queue" />
 			<h3>تخلیهٔ صف</h3>
 			<p>همهٔ پیام‌های در انتظار، ناموفق و ردشده حذف می‌شوند. رکوردهای لیست انتظار دست‌نخورده می‌مانند.</p>

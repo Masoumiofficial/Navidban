@@ -308,7 +308,19 @@ final class Queue {
 			array( '%d' )
 		);
 
-		Logger::log( 'warning', 'delivery_failed', (string) $row['channel'] . '|' . $status );
+		// The status alone ("failed") tells the admin nothing: the gateway's own
+		// sentence is the only thing that says *why*. It used to be written to
+		// last_error and nowhere else, so the log screen showed three identical
+		// "delivery failed" rows with no reason - and the shopkeeper had to open
+		// the database to find out that, say, the sender line was rejected.
+		// The message is redacted first: gateways quote the recipient back.
+		Logger::log(
+			'warning',
+			'delivery_failed',
+			(string) $row['channel'] . '|' . $status
+				. '|attempt=' . (int) $attempts
+				. '|err=' . \Mojoodyar\Support\Masking::free_text( (string) $message, 150 )
+		);
 
 		return false;
 	}
@@ -334,6 +346,61 @@ final class Queue {
 			array( '%s', '%s', '%s' ),
 			array( '%d' )
 		);
+	}
+
+	/**
+	 * Put every permanently failed row back in the queue.
+	 *
+	 * A row reaches status='failed' after the retry policy is exhausted, and
+	 * nothing ever tries it again: the message is lost silently even though the
+	 * reason may have been transient (gateway timeout, expired token, a
+	 * provider outage at 3am). The admin needs a way to say "try once more now
+	 * that I fixed the gateway". Attempts are reset so a fresh set of retries
+	 * is available, and the unique payload key still prevents duplicates.
+	 *
+	 * @param int $limit Safety cap.
+	 * @return int Rows requeued.
+	 */
+	public static function retry_failed( $limit = 200 ) {
+		global $wpdb;
+
+		$table = self::table();
+		$limit = max( 1, (int) $limit );
+
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE status = 'failed' ORDER BY id ASC LIMIT %d",
+				$limit
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$count = 0;
+
+		foreach ( (array) $ids as $id ) {
+			$updated = $wpdb->update(
+				$table,
+				array(
+					'status'      => 'queued',
+					'attempts'    => 0,
+					'next_run_at' => gmdate( 'Y-m-d H:i:s' ),
+					'last_error'  => null,
+					'locked_at'   => null,
+				),
+				array( 'id' => (int) $id ),
+				array( '%s', '%d', '%s', '%s', '%s' ),
+				array( '%d' )
+			);
+
+			if ( false !== $updated && (int) $updated > 0 ) {
+				$count++;
+			}
+		}
+
+		if ( $count > 0 ) {
+			Logger::log( 'info', 'queue_retry', 'requeued=' . $count );
+		}
+
+		return $count;
 	}
 
 	/**

@@ -971,6 +971,13 @@ final class Admin {
 				$message = sprintf( 'پاک‌سازی انجام شد: %s ردیف قدیمی‌تر از %s روز حذف شد.', Persian::number( $deleted ), Persian::number( $days ) );
 				break;
 
+			case 'retry_failed':
+				$requeued = Queue::retry_failed();
+				$message  = $requeued > 0
+					? sprintf( '%s پیام ناموفق دوباره در صف گذاشته شد. برای ارسال، «پردازش صف» را بزنید یا منتظر کرون بمانید.', Persian::number( $requeued ) )
+					: 'هیچ پیام ناموفقی برای تلاش دوباره نبود.';
+				break;
+
 			case 'clear_logs':
 				$removed = Logs::clear();
 				$message = sprintf( 'همهٔ لاگ‌ها پاک شد (%s ردیف).', Persian::number( $removed ) );

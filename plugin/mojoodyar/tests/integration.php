@@ -1648,6 +1648,91 @@ MjyInt::same( 0, (int) Logs::summary()['total'], 'بعد از پاک کردن ش
 
 mjy_reset_rate_limit();
 
+MjyInt::group( 'پیام ناموفق و تلاش دوباره' );
+
+mjy_reset_state();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) );
+mjy_reset_rate_limit();
+
+Settings::update( array( 'sms_enabled' => true, 'sms_gateway' => 'generic', 'generic_url' => 'https://sms.example/send', 'generic_token' => 'tok' ) );
+Settings::flush_cache();
+
+$row = WaitlistRepository::create(
+	array(
+		'product_id' => 160,
+		'channel'    => 'sms',
+		'phone'      => '09121234567',
+		'full_name'  => 'نگار موسوی',
+		'status'     => 'confirmed',
+	)
+);
+MjyInt::ok( $row['ok'], 'ردیف مشترک ساخته شد' );
+
+Queue::enqueue( (int) $row['id'], 'sms', 'restock:20261028:retry001', array( 'product_id' => 160 ) );
+$queue_id = (int) $GLOBALS['wpdb']->get_var( 'SELECT MAX(id) FROM ' . Queue::table() );
+MjyInt::ok( $queue_id > 0, 'پیام در صف گذاشته شد' );
+
+// A gateway that answers with a Persian error, quoting the recipient back.
+$GLOBALS['mjy_http_response'] = array(
+	'response' => array( 'code' => 400 ),
+	'body'     => 'شماره 09121234567 مسدود است',
+);
+$GLOBALS['mjy_http_calls'] = array();
+
+Queue::release_lock();
+for ( $i = 0; $i < 3; $i++ ) {
+	// Reset the schedule so each attempt runs now instead of after a backoff.
+	$GLOBALS['wpdb']->query(
+		'UPDATE ' . Queue::table() . " SET next_run_at = '" . gmdate( 'Y-m-d H:i:s' ) . "' WHERE id = " . (int) $queue_id
+	);
+	Queue::process( 5 );
+}
+
+$failed_row = $GLOBALS['wpdb']->get_row( 'SELECT * FROM ' . Queue::table() . ' WHERE id = ' . (int) $queue_id, ARRAY_A );
+MjyInt::same( 'failed', (string) $failed_row['status'], 'پس از سه تلاش، ردیف «ناموفق» می‌شود' );
+MjyInt::ok( false !== strpos( (string) $failed_row['last_error'], 'مسدود' ), 'متن خطای درگاه در last_error ذخیره می‌شود' );
+
+$fail_logs = $GLOBALS['wpdb']->get_results(
+	'SELECT * FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) . " WHERE event = 'delivery_failed' ORDER BY id ASC",
+	ARRAY_A
+);
+MjyInt::ok( count( $fail_logs ) >= 1, 'خطای ارسال در لاگ ثبت می‌شود' );
+
+$fail_context = (string) $fail_logs[0]['context'];
+MjyInt::ok( false !== strpos( $fail_context, 'err=' ), 'لاگ شامل متن خطای درگاه است' );
+MjyInt::ok( false !== strpos( $fail_context, 'attempt=' ), 'لاگ شمارهٔ تلاش را دارد' );
+MjyInt::ok( false === strpos( $fail_context, '09121234567' ), 'شمارهٔ مشتری در لاگ نیامده است' );
+MjyInt::ok( false !== strpos( $fail_context, 'مسدود' ), 'دلیل خطا در لاگ هست' );
+
+// What the admin actually reads on screen for that row.
+$explained = \Mojoodyar\Logic\LogExplain::detail( 'delivery_failed', $fail_context );
+MjyInt::ok( false !== strpos( $explained, 'خطای درگاه:' ), 'متن فارسی، خطای درگاه را نشان می‌دهد' );
+MjyInt::ok( false === strpos( $explained, 'دلیل: sms' ), 'برچسب اشتباه «دلیل» روی کانال نیست' );
+
+// The tool the panel now offers.
+MjyInt::same( 1, Queue::retry_failed(), 'ابزار تلاش دوباره یک ردیف را برمی‌گرداند' );
+
+$retried = $GLOBALS['wpdb']->get_row( 'SELECT * FROM ' . Queue::table() . ' WHERE id = ' . (int) $queue_id, ARRAY_A );
+MjyInt::same( 'queued', (string) $retried['status'], 'ردیف دوباره در صف است' );
+MjyInt::same( 0, (int) $retried['attempts'], 'شمارندهٔ تلاش صفر شده است' );
+MjyInt::ok( empty( $retried['last_error'] ), 'خطای قبلی پاک شده است' );
+
+MjyInt::same( 0, Queue::retry_failed(), 'وقتی پیام ناموفقی نیست، ابزار صفر برمی‌گرداند' );
+
+// And it goes out once the gateway is healthy again.
+$GLOBALS['mjy_http_response'] = array(
+	'response' => array( 'code' => 200 ),
+	'body'     => '{"ok":true}',
+);
+Queue::release_lock();
+$sent_again = Queue::process( 5 );
+MjyInt::same( 1, (int) $sent_again['sent'], 'پیام پس از اصلاح درگاه ارسال می‌شود' );
+
+Settings::update( array( 'sms_enabled' => false, 'sms_gateway' => 'melipayamak' ) );
+Settings::flush_cache();
+
 MjyInt::group( 'پیگیری تلفنی مرحله‌ای' );
 
 $GLOBALS['mjy_options']['mojoodyar_settings'] = Settings::defaults();

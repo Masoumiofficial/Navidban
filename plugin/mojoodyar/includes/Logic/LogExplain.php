@@ -16,6 +16,8 @@
 
 namespace Mojoodyar\Logic;
 
+use Mojoodyar\Support\Persian;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -96,13 +98,64 @@ final class LogExplain {
 		'unmanaged'    => 'نامشخص (موجودی مدیریت نمی‌شود)',
 		'yes'          => 'بله',
 		'no'           => 'خیر',
-		'1'            => 'موفق',
-		'0'            => 'ناموفق',
 		'confirmed'    => 'تأیید شد',
 		'already'      => 'از قبل انجام شده بود',
 		'expired'      => 'منقضی',
 		'unsubscribed' => 'لغو شد',
 		'invalid'      => 'نامعتبر',
+		// Queue row states. "failed" here means the plugin gave up after it ran
+		// out of retries - not that the shop owner did something wrong.
+		'queued'       => 'در صف',
+		'processing'   => 'در حال ارسال',
+		'sent'         => 'ارسال شد',
+		'failed'       => 'ناموفق (تلاش‌ها تمام شد)',
+		'skipped'      => 'رد شد',
+	);
+
+	/**
+	 * Values that only mean something for one specific key.
+	 *
+	 * 0 and 1 are "ناموفق/موفق" when the key is ok=, and plain counts when the
+	 * key is transitions= or queued=. Translating them globally printed
+	 * "گذار موجودی: ناموفق" for transitions=0, which read as a failure that
+	 * never happened.
+	 *
+	 * @var array<string,array<string,string>>
+	 */
+	const KEYED_VALUES = array(
+		'ok' => array(
+			'1' => 'موفق',
+			'0' => 'ناموفق',
+		),
+	);
+
+	/**
+	 * Keys whose value is a plain count, so it can be shown in Persian digits.
+	 *
+	 * Identifiers (product, id, code) deliberately stay Latin: they are copied
+	 * into SQL and support tickets, where Persian digits are useless.
+	 *
+	 * @var string[]
+	 */
+	const COUNT_KEYS = array( 'scanned', 'transitions', 'queued', 'sent', 'failed', 'count', 'units', 'attempt' );
+
+	/**
+	 * Tool keys, as used by the "ابزار" buttons in the panel.
+	 *
+	 * @var array<string,string>
+	 */
+	const TOOLS = array(
+		'run_reconcile'      => 'اجرای پایش موجودی',
+		'rebuild_snapshots'  => 'بازسازی تصویر موجودی',
+		'process_queue'      => 'پردازش صف',
+		'flush_queue'        => 'آزادکردن قفل صف',
+		'empty_queue'        => 'پاک‌کردن صف',
+		'retry_failed'       => 'تلاش دوباره برای پیام‌های ناموفق',
+		'prune'              => 'پاک‌سازی ردیف‌های قدیمی',
+		'test_email'         => 'ارسال ایمیل آزمایشی',
+		'test_sms'           => 'ارسال پیامک آزمایشی',
+		'clear_logs'         => 'پاک کردن لاگ‌ها',
+		'rebuild_tables'     => 'بازسازی جدول‌ها',
 	);
 
 	/**
@@ -121,6 +174,18 @@ final class LogExplain {
 		// public_confirm / public_unsubscribe are built with a prefix elsewhere;
 		// anything genuinely unknown is shown as-is, never hidden.
 		return '' === $event ? 'رویداد بدون نام' : 'رویداد ثبت‌نشده (' . $event . ')';
+	}
+
+	/**
+	 * Persian name of a panel tool.
+	 *
+	 * @param string $tool Tool key.
+	 * @return string
+	 */
+	public static function tool( $tool ) {
+		$tool = (string) $tool;
+
+		return isset( self::TOOLS[ $tool ] ) ? self::TOOLS[ $tool ] : 'ابزار ناشناخته (' . $tool . ')';
 	}
 
 	/**
@@ -217,20 +282,83 @@ final class LogExplain {
 	 * @return string
 	 */
 	public static function detail( $event, $context ) {
-		$event = (string) $event;
-		$parts = self::parse( $context );
+		$event   = (string) $event;
+		$context = trim( (string) $context );
 
-		if ( empty( $parts ) ) {
+		if ( '' === $context ) {
 			return self::event( $event ) . ' — بدون جزئیات.';
+		}
+
+		// Two events carry a fixed, positional shape that a generic key=value
+		// reading would mangle. Both are handled before the generic path.
+		if ( 'delivery_failed' === $event ) {
+			return self::delivery_detail( $context );
+		}
+
+		if ( 'admin_tool' === $event ) {
+			// The context of this event is a bare tool key.
+			$tool = trim( explode( '|', $context )[0] );
+
+			return 'ابزار: ' . self::tool( $tool );
 		}
 
 		$pieces = array();
 
-		foreach ( $parts as $part ) {
+		foreach ( self::parse( $context ) as $part ) {
 			$pieces[] = self::piece( $part, $event );
 		}
 
-		return implode( '، ', array_filter( $pieces ) );
+		$pieces = array_filter( $pieces );
+
+		return empty( $pieces ) ? self::event( $event ) . ' — بدون جزئیات.' : implode( '، ', $pieces );
+	}
+
+	/**
+	 * Explain a failed delivery: `sms|failed|attempt=3|err=...`.
+	 *
+	 * The shape is positional (channel, then queue state) plus optional
+	 * key=value extras, so it cannot go through parse() without turning the
+	 * first two tokens into "کد".
+	 *
+	 * @param string $context Context.
+	 * @return string
+	 */
+	private static function delivery_detail( $context ) {
+		$tokens  = explode( '|', trim( $context ) );
+		$channel = isset( $tokens[0] ) ? trim( $tokens[0] ) : '';
+		$state   = isset( $tokens[1] ) ? trim( $tokens[1] ) : '';
+
+		$pieces = array();
+
+		if ( '' !== $channel ) {
+			$pieces[] = 'کانال: ' . self::value( $channel );
+		}
+
+		if ( '' !== $state ) {
+			$pieces[] = 'وضعیت ردیف: ' . self::value( $state );
+		}
+
+		for ( $i = 2; $i < count( $tokens ); $i++ ) {
+			$token = trim( (string) $tokens[ $i ] );
+
+			if ( '' === $token ) {
+				continue;
+			}
+
+			if ( 0 === strpos( $token, 'err=' ) ) {
+				$pieces[] = 'خطای درگاه: ' . substr( $token, 4 );
+				continue;
+			}
+
+			if ( 0 === strpos( $token, 'attempt=' ) ) {
+				$pieces[] = 'تلاش شمارهٔ ' . Persian::number( (int) substr( $token, 8 ) );
+				continue;
+			}
+
+			$pieces[] = $token;
+		}
+
+		return implode( ' — ', $pieces );
 	}
 
 	/**
@@ -265,12 +393,13 @@ final class LogExplain {
 			return 'دلیل: ' . self::reason( $value, $event );
 		}
 
-		// `sms|restock`: the first two bare tokens of a delivery row.
-		if ( 'delivery_failed' === $event && 'code' === $key ) {
-			return self::value( $value );
+		$text = self::value( $value, $key );
+
+		if ( in_array( $key, self::COUNT_KEYS, true ) && preg_match( '/^\d+$/', $text ) ) {
+			$text = Persian::number( (int) $text );
 		}
 
-		return $part['label'] . ': ' . self::value( $value );
+		return $part['label'] . ': ' . $text;
 	}
 
 	/**
@@ -279,8 +408,13 @@ final class LogExplain {
 	 * @param string $value Value.
 	 * @return string
 	 */
-	public static function value( $value ) {
+	public static function value( $value, $key = '' ) {
 		$value = (string) $value;
+		$key   = (string) $key;
+
+		if ( '' !== $key && isset( self::KEYED_VALUES[ $key ][ $value ] ) ) {
+			return self::KEYED_VALUES[ $key ][ $value ];
+		}
 
 		return isset( self::VALUES[ $value ] ) ? self::VALUES[ $value ] : $value;
 	}

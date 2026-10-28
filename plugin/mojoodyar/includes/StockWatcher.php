@@ -394,7 +394,14 @@ final class StockWatcher {
 			Logger::log( 'info', 'snapshot_seeded', 'scanned=' . $scanned );
 		}
 
-		Logger::log( 'info', 'reconcile', 'scanned=' . $scanned . '|transitions=' . $transitions . '|queued=' . $queued );
+		// A reconcile that found nothing is the normal case every five minutes;
+		// logging it turned the log screen into five pages of noise that buried
+		// the one row that mattered. The dashboard already shows the last run
+		// time, which is what answers "is the cron alive?" - so only a run that
+		// actually moved something is worth a row here.
+		if ( $transitions > 0 || $queued > 0 ) {
+			Logger::log( 'info', 'reconcile', 'scanned=' . $scanned . '|transitions=' . $transitions . '|queued=' . $queued );
+		}
 
 		return array(
 			'transitions' => $transitions,

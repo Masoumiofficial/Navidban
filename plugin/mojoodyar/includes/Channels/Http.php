@@ -36,7 +36,7 @@ final class Http {
 			'sslverify'   => true,
 			'headers'     => $headers,
 			'body'        => $body,
-			'user-agent'  => 'Mojoodyar/' . ( defined( 'MOJODYAR_VERSION' ) ? MOJODYAR_VERSION : '2.4.0' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
+			'user-agent'  => 'Mojoodyar/' . ( defined( 'MOJODYAR_VERSION' ) ? MOJODYAR_VERSION : '2.5.0' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
 		);
 
 		if ( 'json' === $format && ! isset( $args['headers']['Content-Type'] ) ) {
@@ -69,12 +69,62 @@ final class Http {
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		$raw  = (string) wp_remote_retrieve_body( $response );
 
+		$ok = $code >= 200 && $code < 300;
+
 		return array(
-			'ok'      => $code >= 200 && $code < 300,
+			'ok'      => $ok,
 			'code'    => $code,
 			'body'    => $raw,
-			'message' => $code >= 200 && $code < 300 ? '' : 'کد پاسخ درگاه: ' . $code,
+			'message' => $ok ? '' : self::failure_message( $code, $raw ),
 		);
+	}
+
+	/**
+	 * Build the human reason for a non-2xx answer.
+	 *
+	 * The status code alone ("کد پاسخ درگاه: 400") is what the admin used to
+	 * see in the log, and it says nothing: a 400 from an Iranian gateway is
+	 * almost always a sentence in the body - wrong sender line, expired token,
+	 * unapproved pattern. Dropping the body meant the log said "delivery
+	 * failed" three times with no reason at all.
+	 *
+	 * The excerpt is stripped of markup, redacted (gateways quote the recipient
+	 * back) and cut short, because this string ends up in a 255-character
+	 * column and on screen.
+	 *
+	 * @param int    $code Status code.
+	 * @param string $raw  Response body.
+	 * @return string
+	 */
+	public static function failure_message( $code, $raw ) {
+		$message = 'کد پاسخ درگاه: ' . (int) $code;
+
+		$detail = trim( (string) $raw );
+
+		if ( '' === $detail ) {
+			return $message;
+		}
+
+		// JSON bodies are more useful decoded to their message field.
+		$decoded = json_decode( $detail, true );
+
+		if ( is_array( $decoded ) ) {
+			foreach ( array( 'message', 'Message', 'error', 'Error', 'StrRetStatus', 'status' ) as $key ) {
+				if ( isset( $decoded[ $key ] ) && is_scalar( $decoded[ $key ] ) && '' !== trim( (string) $decoded[ $key ] ) ) {
+					$detail = trim( (string) $decoded[ $key ] );
+					break;
+				}
+			}
+		}
+
+		$detail = trim( (string) preg_replace( '/\s+/u', ' ', strip_tags( $detail ) ) );
+		$detail = \Mojoodyar\Support\Masking::free_text( $detail, 120 );
+
+		if ( '' === $detail ) {
+			return $message;
+		}
+
+		return $message . ' — ' . $detail;
 	}
 
 	/**
