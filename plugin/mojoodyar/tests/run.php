@@ -42,6 +42,7 @@ use Mojoodyar\Support\Text;
 use Mojoodyar\Logic\FairSending;
 use Mojoodyar\Logic\Reconcile;
 use Mojoodyar\Logic\QueuePolicy;
+use Mojoodyar\Logic\LogExplain;
 use Mojoodyar\Logic\StatsMath;
 use Mojoodyar\Logic\Template;
 use Mojoodyar\Logic\HttpGuard;
@@ -820,6 +821,88 @@ MjyTest::same( 1, StatsMath::label_step( 7 ), 'a week labels every day' );
 MjyTest::same( 3, StatsMath::label_step( 30 ), 'a month labels every third day' );
 MjyTest::same( 7, StatsMath::label_step( 90 ), 'a quarter labels once a week' );
 MjyTest::same( 1, StatsMath::label_step( 0 ), 'a zero-length period does not divide by zero' );
+
+/* -------------------------------------------------------------------------
+ * Log translation (the Persian column of the log screen)
+ * ---------------------------------------------------------------------- */
+MjyTest::group( 'ترجمهٔ لاگ' );
+
+// Every event key the plugin can write must have a Persian title. The list is
+// duplicated here on purpose: silently adding a logger line without a
+// translation should fail a test, not ship a raw key to the panel.
+$known_events = array(
+	'subscribe_ok',
+	'subscribe_duplicate',
+	'subscribe_failed',
+	'subscribe_rejected',
+	'sent',
+	'delivery_failed',
+	'queue_run',
+	'restock_queued',
+	'restock_no_units',
+	'reconcile',
+	'snapshot_seeded',
+	'admin_tool',
+	'admin_bulk',
+	'admin_call',
+	'public_confirm',
+	'public_unsubscribe',
+);
+
+$missing = array();
+foreach ( $known_events as $event_key ) {
+	$title = LogExplain::event( $event_key );
+	if ( '' === $title || false !== strpos( $title, 'ثبت‌نشده' ) ) {
+		$missing[] = $event_key;
+	}
+}
+
+MjyTest::same( array(), $missing, 'همهٔ رویدادهای شناخته‌شده عنوان فارسی دارند' );
+MjyTest::ok( false !== strpos( LogExplain::event( 'make_me_a_sandwich' ), 'ثبت‌نشده' ), 'رویداد ناشناخته پنهان نمی‌شود' );
+MjyTest::same( 'رویداد بدون نام', LogExplain::event( '' ), 'رویداد خالی هم برچسب دارد' );
+
+MjyTest::same( 'اطلاع', LogExplain::level( 'info' ), 'سطح info فارسی است' );
+MjyTest::same( 'هشدار', LogExplain::level( 'warning' ), 'سطح warning فارسی است' );
+MjyTest::same( 'خطا', LogExplain::level( 'error' ), 'سطح error فارسی است' );
+MjyTest::same( 'امنیتی', LogExplain::level( 'security' ), 'سطح security فارسی است' );
+MjyTest::same( 'other', LogExplain::level( 'other' ), 'سطح ناشناخته دور ریخته نمی‌شود' );
+
+MjyTest::ok( LogExplain::is_problem( 'security' ), 'رویداد امنیتی مشکل است' );
+MjyTest::ok( LogExplain::is_problem( 'error' ), 'خطا مشکل است' );
+MjyTest::ok( ! LogExplain::is_problem( 'info' ), 'اطلاع مشکل نیست' );
+
+$parsed = LogExplain::parse( 'product=501|channel=sms' );
+MjyTest::same( 2, count( $parsed ), 'دو بخش لاگ جدا می‌شود' );
+MjyTest::same( 'محصول', $parsed[0]['label'], 'کلید product فارسی می‌شود' );
+MjyTest::same( '501', $parsed[0]['value'], 'مقدار دست‌نخورده می‌ماند' );
+MjyTest::same( 'کانال', $parsed[1]['label'], 'کلید channel فارسی می‌شود' );
+
+MjyTest::same( array(), LogExplain::parse( '' ), 'لاگ بدون متن، بدون بخش است' );
+
+$pair = LogExplain::parse( '502:7|units=3|queued=2' );
+MjyTest::same( '502:7', $pair[0]['value'], 'جفت محصول:تنوع خوانده می‌شود' );
+
+$detail = LogExplain::detail( 'restock_queued', '501:0|units=2|queued=2' );
+MjyTest::ok( false !== strpos( $detail, 'محصول #501' ), 'جزئیات، شناسهٔ محصول را می‌نویسد' );
+MjyTest::ok( false === strpos( $detail, 'تنوع' ), 'برای محصول ساده تنوع چاپ نمی‌شود' );
+MjyTest::ok( false !== strpos( $detail, 'تعداد واحد' ), 'جزئیات، برچسب تعداد واحد را دارد' );
+
+$variation = LogExplain::detail( 'restock_queued', '502:7|units=1' );
+MjyTest::ok( false !== strpos( $variation, 'تنوع #7' ), 'برای تنوع، شناسهٔ تنوع چاپ می‌شود' );
+
+$rejection = LogExplain::detail( 'subscribe_rejected', 'bad_nonce' );
+MjyTest::ok( false !== strpos( $rejection, 'کد امنیتی' ), 'کد bad_nonce به فارسی توضیح داده می‌شود' );
+
+$dup = LogExplain::detail( 'subscribe_rejected', 'duplicate' );
+MjyTest::ok( false !== strpos( $dup, 'قبلاً' ), 'کد duplicate به فارسی توضیح داده می‌شود' );
+
+MjyTest::ok( false !== strpos( LogExplain::reason( 'reason=email', 'subscribe_failed' ), 'ایمیل' ), 'شکل reason=... هم خوانده می‌شود' );
+MjyTest::same( 'کد بی‌نام', LogExplain::reason( 'کد بی‌نام' ), 'کد ناشناخته دور ریخته نمی‌شود' );
+MjyTest::same( 'بدون دلیل ثبت‌شده', LogExplain::reason( '' ), 'کد خالی برچسب دارد' );
+
+MjyTest::ok( '' !== LogExplain::advice( 'subscribe_rejected', 'bad_nonce' ), 'برای جدی‌ترین خطا راهنمای اقدام هست' );
+MjyTest::ok( '' !== LogExplain::advice( 'delivery_failed', 'sms|http' ), 'برای خطای ارسال راهنما هست' );
+MjyTest::same( '', LogExplain::advice( 'sent', 'sms|restock' ), 'رویداد موفق راهنمای بی‌مورد ندارد' );
 
 /* -------------------------------------------------------------------------
  * Report

@@ -7,6 +7,8 @@
  * @var int   $last_run   Last reconcile timestamp.
  * @var array $tables     Table engines.
  * @var array $conversion Conversion stats.
+ * @var array $problems   Newest warnings/errors/security events.
+ * @var array $log_counts Log counters.
  *
  * @package Mojoodyar
  */
@@ -66,6 +68,39 @@ $mjy_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $
 		</table>
 
 	</div>
+	<div class="mjy-panel<?php echo empty( $problems ) ? '' : ' mjy-panel--warn'; ?>">
+		<h2>آخرین رویدادهایی که باید ببینید</h2>
+
+		<?php if ( empty( $problems ) ) : ?>
+			<p class="mjy-muted">
+				هیچ هشدار، خطا یا درخواست ردشده‌ای ثبت نشده است. این خوب است — و یعنی
+				اگر مشتری می‌گوید «ثبت نشد»، درخواستش به افزونه نرسیده است.
+			</p>
+		<?php else : ?>
+			<ul class="mjy-events">
+				<?php foreach ( $problems as $problem ) : ?>
+					<li class="mjy-events__item mjy-events__item--<?php echo esc_attr( (string) $problem['level'] ); ?>">
+						<span class="mjy-events__level"><?php echo esc_html( \Mojoodyar\Logic\LogExplain::level( (string) $problem['level'] ) ); ?></span>
+						<span class="mjy-events__text">
+							<strong><?php echo esc_html( \Mojoodyar\Logic\LogExplain::event( (string) $problem['event'] ) ); ?></strong>
+							<em><?php echo esc_html( \Mojoodyar\Logic\LogExplain::detail( (string) $problem['event'], (string) $problem['context'] ) ); ?></em>
+						</span>
+						<span class="mjy-events__time"><?php echo esc_html( Jalali::format( (string) $problem['created_at'], 'Y/m/d H:i' ) ); ?></span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+
+		<p class="mjy-log__more">
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=mojoodyar-logs' ) ); ?>">گزارش کامل رویدادها</a>
+			<?php if ( (int) $log_counts['security'] > 0 ) : ?>
+				<a class="button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=mojoodyar-logs&level=security' ) ); ?>">
+					<?php echo esc_html( Persian::number( $log_counts['security'] ) ); ?> درخواست ردشده
+				</a>
+			<?php endif; ?>
+		</p>
+	</div>
+
 	<div class="mjy-panel">
 		<h2>پایش تطبیقی</h2>
 		<p>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.2.0 — لیست انتظارها</title>
+<title>موجودیار 2.3.0 — لیست انتظارها</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1869,15 +1869,250 @@ body {
 	}
 }
 
+/* -------------------------------------------------------------------------
+ * Log screen
+ *
+ * Each row shows the readable sentence first and keeps the raw log one click
+ * away. The side stripe carries the severity, so a wall of rows can be
+ * scanned without reading a single word.
+ * ---------------------------------------------------------------------- */
+
+.mjy-log {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0 0 18px;
+}
+
+.mjy-log__row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 12px;
+	align-items: start;
+	padding: 14px 16px 14px 18px;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	border-inline-start: 4px solid var(--mjy-primary);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(16px) saturate(1.3);
+	backdrop-filter: blur(16px) saturate(1.3);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-log__row--warning {
+	border-inline-start-color: var(--mjy-accent);
+}
+
+.mjy-log__row--error,
+.mjy-log__row--security {
+	border-inline-start-color: #c0463b;
+}
+
+.mjy-log__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.mjy-log__level {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	background: rgba(14, 92, 85, 0.1);
+	color: var(--mjy-primary);
+}
+
+.mjy-log__level--warning {
+	background: rgba(242, 169, 59, 0.18);
+	color: #8a5a10;
+}
+
+.mjy-log__level--error,
+.mjy-log__level--security {
+	background: rgba(192, 70, 59, 0.12);
+	color: #a3372e;
+}
+
+.mjy-log__title {
+	font-size: 13.5px;
+	font-weight: 700;
+	color: var(--mjy-ink);
+}
+
+.mjy-log__time {
+	margin-inline-start: auto;
+	font-size: 11.5px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+.mjy-log__detail {
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.9;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-log__advice {
+	margin: 6px 0 0;
+	font-size: 12px;
+	line-height: 1.9;
+	color: #8a5a10;
+	background: rgba(242, 169, 59, 0.12);
+	border-radius: 10px;
+	padding: 7px 10px;
+}
+
+.mjy-log__raw {
+	font-size: 11.5px;
+	min-width: 120px;
+}
+
+.mjy-log__raw details {
+	border: 1px solid rgba(20, 36, 31, 0.1);
+	border-radius: 10px;
+	padding: 6px 10px;
+	background: rgba(255, 255, 255, 0.6);
+}
+
+.mjy-log__raw summary {
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-log__raw dl {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 2px 10px;
+	margin: 8px 0 0;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 11px;
+}
+
+.mjy-log__raw dt {
+	color: #7d8a86;
+}
+
+.mjy-log__raw dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+	color: var(--mjy-ink);
+}
+
+.mjy-log__pager {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 20px;
+}
+
+.mjy-log__more {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 12px 0 0;
+}
+
+.mjy-quicklinks {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: -6px 0 18px;
+	font-size: 12.5px;
+	color: var(--mjy-ink-soft);
+}
+
+/* Dashboard event list: the same language as the log screen, in five lines. */
+.mjy-events {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 6px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mjy-events__item {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 10px;
+	align-items: start;
+	padding: 9px 12px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.62);
+	border: 1px solid rgba(255, 255, 255, 0.8);
+	border-inline-start: 3px solid var(--mjy-accent);
+}
+
+.mjy-events__item--error,
+.mjy-events__item--security {
+	border-inline-start-color: #c0463b;
+}
+
+.mjy-events__level {
+	font-size: 10.5px;
+	font-weight: 700;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: rgba(14, 92, 85, 0.1);
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-events__text strong {
+	display: block;
+	font-size: 12.5px;
+}
+
+.mjy-events__text em {
+	display: block;
+	margin-top: 2px;
+	font-size: 11.5px;
+	font-style: normal;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-events__time {
+	font-size: 11px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+@media (max-width: 782px) {
+	.mjy-log__row {
+		grid-template-columns: 1fr;
+	}
+
+	.mjy-log__time {
+		margin-inline-start: 0;
+		width: 100%;
+	}
+
+	.mjy-events__item {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+
+	.mjy-events__time {
+		grid-column: 2;
+	}
+}
+
 </style>
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.2.0.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.3.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">لیست انتظارها<small>همهٔ درخواست‌ها، با فیلتر و خروجی CSV</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۲.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists" aria-current="page">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">لیست انتظارها<small>همهٔ درخواست‌ها، با فیلتر و خروجی CSV</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۳.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists" aria-current="page">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
 	
 	<form method="get" class="mjy-filters">
 		<input type="hidden" name="page" value="mojoodyar-waitlists" />
@@ -1982,7 +2217,7 @@ body {
 						<td>
 							m***@example.com						</td>
 						<td>اعلان‌شده</td>
-						<td>۵ آبان ۱۴۰۵</td>
+						<td>۶ آبان ۱۴۰۵</td>
 						<td>
 																												<a
 								class="mjy-call__open "
@@ -1993,8 +2228,8 @@ body {
 								پیگیری تلفنی
 							</a>
 													</td>
+						<td>۶ آبان ۱۴۰۵</td>
 						<td>۵ آبان ۱۴۰۵</td>
-						<td>۴ آبان ۱۴۰۵</td>
 					</tr>
 									<tr>
 						<th scope="row" class="check-column">
@@ -2010,7 +2245,7 @@ body {
 						<td>
 							r***@example.com						</td>
 						<td>تأییدشده</td>
-						<td>۵ آبان ۱۴۰۵</td>
+						<td>۶ آبان ۱۴۰۵</td>
 						<td>
 																												<a
 								class="mjy-call__open "
@@ -2021,7 +2256,7 @@ body {
 								پیگیری تلفنی
 							</a>
 													</td>
-						<td>۵ آبان ۱۴۰۵</td>
+						<td>۶ آبان ۱۴۰۵</td>
 						<td>—</td>
 					</tr>
 									<tr>
@@ -2038,7 +2273,7 @@ body {
 						<td>
 							0912***4567						</td>
 						<td>تأییدشده</td>
-						<td>۳ آبان ۱۴۰۵</td>
+						<td>۴ آبان ۱۴۰۵</td>
 						<td>
 																												<a
 								class="mjy-call__open "
@@ -2049,7 +2284,7 @@ body {
 								پیگیری تلفنی
 							</a>
 													</td>
-						<td>۵ آبان ۱۴۰۵</td>
+						<td>۶ آبان ۱۴۰۵</td>
 						<td>—</td>
 					</tr>
 										</tbody>

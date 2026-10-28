@@ -125,7 +125,7 @@ foreach ( (array) $GLOBALS['mjy_admin_menu'] as $item ) {
 MjyAdmin::ok( in_array( 'mojoodyar', $slugs, true ), 'منوی اصلی ثبت شد', implode( ',', $slugs ) );
 MjyAdmin::ok( count( $GLOBALS['mjy_admin_menu'] ) >= 6, 'پنج زیرمنو + منوی اصلی', count( $GLOBALS['mjy_admin_menu'] ) );
 
-foreach ( array( 'mojoodyar-stats', 'mojoodyar-waitlists', 'mojoodyar-settings', 'mojoodyar-tools', 'mojoodyar-help' ) as $slug ) {
+foreach ( array( 'mojoodyar-stats', 'mojoodyar-logs', 'mojoodyar-waitlists', 'mojoodyar-settings', 'mojoodyar-tools', 'mojoodyar-help' ) as $slug ) {
 	MjyAdmin::ok( in_array( $slug, $slugs, true ), 'زیرمنو موجود است: ' . $slug, implode( ',', $slugs ) );
 }
 
@@ -179,6 +179,7 @@ MjyAdmin::group( 'رندر صفحات' );
 $screens = array(
 	'dashboard' => array( 'render_dashboard', 'داشبورد' ),
 	'stats'     => array( 'render_stats', 'آمار' ),
+	'logs'      => array( 'render_logs', 'گزارش رویدادها' ),
 	'waitlists' => array( 'render_waitlists', 'لیست انتظار' ),
 	'settings'  => array( 'render_settings', 'تنظیمات' ),
 	'tools'     => array( 'render_tools', 'ابزار' ),
@@ -237,6 +238,41 @@ MjyAdmin::ok( false !== strpos( $stats_html, 'mjy-chart' ) || false !== strpos( 
 // The escape hatch the report offers must point at the tool that explains a
 // specific product, not at a dead end.
 MjyAdmin::ok( false !== strpos( $stats_html, 'dir="rtl"' ), 'صفحهٔ آمار راست‌به‌چپ است' );
+
+/* -------------------------------------------------------------------------
+ * Log screen
+ * ---------------------------------------------------------------------- */
+MjyAdmin::group( 'گزارش رویدادها' );
+
+$logs_html = $rendered['logs'];
+
+\Mojoodyar\Logger::log( 'security', 'subscribe_rejected', 'bad_nonce', str_repeat( 'b', 64 ) );
+\Mojoodyar\Logger::log( 'warning', 'delivery_failed', 'sms|http', '' );
+$logs_html = mjy_render( array( $admin, 'render_logs' ) );
+
+MjyAdmin::ok( false !== strpos( $logs_html, 'گزارش رویدادها' ), 'عنوان صفحه رندر می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'کد امنیتی فرم منقضی شده' ), 'لاگ امنیتی به فارسی توضیح داده می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'ارسال پیام ناموفق بود' ), 'خطای ارسال به فارسی توضیح داده می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'لاگ اصلی' ), 'لاگ اصلی (متن خام) هم روی صفحه هست' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'bad_nonce' ), 'کد خام رویداد در بخش لاگ اصلی دیده می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'دلیل: ' ), 'دلیل فارسی ثبت شده است' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'کش صفحه را' ), 'راهنمای اقدام برای خطای امنیتی نمایش داده می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'name="level"' ) && false !== strpos( $logs_html, 'name="event"' ), 'فیلتر سطح و رویداد هست' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'name="s"' ), 'جست‌وجو در متن لاگ هست' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'admin-post.php?action=mojoodyar_export_logs' ), 'خروجی CSV لاگ هست' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'name="tool" value="clear_logs"' ), 'دکمهٔ پاک کردن لاگ‌ها با nonce هست' );
+MjyAdmin::ok( false !== strpos( $logs_html, '_wpnonce' ), 'فرم پاک کردن nonce دارد' );
+MjyAdmin::ok( false === strpos( $logs_html, 'Undefined' ), 'صفحه بدون notice رندر می‌شود' );
+
+// The dashboard must point at the log screen: that is how the panel is found.
+$dashboard_html = $rendered['dashboard'];
+MjyAdmin::ok( false !== strpos( $dashboard_html, 'admin.php?page=mojoodyar-logs' ), 'داشبورد به گزارش رویدادها پیوند دارد' );
+MjyAdmin::ok( false !== strpos( $dashboard_html, 'آخرین رویدادهایی که باید ببینید' ), 'پنل رویدادهای تازه در داشبورد هست' );
+
+// The report screen must link to the same place, and its rejection panel must
+// have an anchor so a link can land on it.
+MjyAdmin::ok( false !== strpos( $stats_html, 'id="mjy-rejections"' ), 'پنل ردشده‌ها لنگر (anchor) دارد' );
+MjyAdmin::ok( false !== strpos( $stats_html, 'admin.php?page=mojoodyar-logs' ), 'صفحهٔ آمار به گزارش رویدادها پیوند دارد' );
 
 MjyAdmin::group( 'پوستهٔ شیشه‌ای' );
 

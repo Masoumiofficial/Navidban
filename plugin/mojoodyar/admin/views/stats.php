@@ -73,6 +73,12 @@ $mjy_day_label = static function ( $key ) {
 		<a class="button mjy-range-export" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=mojoodyar_export_stats&range=' . (int) $range ), 'mojoodyar_export_stats' ) ); ?>">خروجی CSV آمار</a>
 	</div>
 
+	<p class="mjy-quicklinks">
+		<span>اگر فرم را پر می‌کنید و ردیفی در لیست انتظار ساخته نمی‌شود:</span>
+		<a class="button button-secondary" href="#mjy-rejections">ثبت‌های ردشده — همین صفحه</a>
+		<a class="button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=mojoodyar-logs&level=security' ) ); ?>">گزارش کامل رویدادها</a>
+	</p>
+
 	<div class="mjy-grid">
 		<div class="mjy-card">
 			<span class="mjy-card__label">ثبت تازه در این بازه</span>
@@ -253,8 +259,8 @@ $mjy_day_label = static function ( $key ) {
 			<?php endif; ?>
 		</div>
 
-		<div class="mjy-panel mjy-panel--warn">
-			<h2>ثبت‌های ردشده</h2>
+		<div class="mjy-panel mjy-panel--warn" id="mjy-rejections">
+			<h2>ثبت‌های ردشده — چرا فرم ردیف نمی‌سازد</h2>
 
 			<?php if ( empty( $report['rejections'] ) ) : ?>
 				<p class="mjy-muted">
@@ -274,6 +280,11 @@ $mjy_day_label = static function ( $key ) {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
+				<p class="mjy-log__more">
+					<a class="button button-secondary" href="<?php echo esc_url( admin_url( 'admin.php?page=mojoodyar-logs&level=security' ) ); ?>">
+						دیدن هر ردیف با تاریخ، متن لاگ و هش IP
+					</a>
+				</p>
 			<?php endif; ?>
 		</div>
 	</div>

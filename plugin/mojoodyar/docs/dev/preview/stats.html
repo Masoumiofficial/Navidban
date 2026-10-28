@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.2.0 — stats</title>
+<title>موجودیار 2.3.0 — stats</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -1869,15 +1869,250 @@ body {
 	}
 }
 
+/* -------------------------------------------------------------------------
+ * Log screen
+ *
+ * Each row shows the readable sentence first and keeps the raw log one click
+ * away. The side stripe carries the severity, so a wall of rows can be
+ * scanned without reading a single word.
+ * ---------------------------------------------------------------------- */
+
+.mjy-log {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0 0 18px;
+}
+
+.mjy-log__row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 12px;
+	align-items: start;
+	padding: 14px 16px 14px 18px;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	border-inline-start: 4px solid var(--mjy-primary);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(16px) saturate(1.3);
+	backdrop-filter: blur(16px) saturate(1.3);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-log__row--warning {
+	border-inline-start-color: var(--mjy-accent);
+}
+
+.mjy-log__row--error,
+.mjy-log__row--security {
+	border-inline-start-color: #c0463b;
+}
+
+.mjy-log__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.mjy-log__level {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	background: rgba(14, 92, 85, 0.1);
+	color: var(--mjy-primary);
+}
+
+.mjy-log__level--warning {
+	background: rgba(242, 169, 59, 0.18);
+	color: #8a5a10;
+}
+
+.mjy-log__level--error,
+.mjy-log__level--security {
+	background: rgba(192, 70, 59, 0.12);
+	color: #a3372e;
+}
+
+.mjy-log__title {
+	font-size: 13.5px;
+	font-weight: 700;
+	color: var(--mjy-ink);
+}
+
+.mjy-log__time {
+	margin-inline-start: auto;
+	font-size: 11.5px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+.mjy-log__detail {
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.9;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-log__advice {
+	margin: 6px 0 0;
+	font-size: 12px;
+	line-height: 1.9;
+	color: #8a5a10;
+	background: rgba(242, 169, 59, 0.12);
+	border-radius: 10px;
+	padding: 7px 10px;
+}
+
+.mjy-log__raw {
+	font-size: 11.5px;
+	min-width: 120px;
+}
+
+.mjy-log__raw details {
+	border: 1px solid rgba(20, 36, 31, 0.1);
+	border-radius: 10px;
+	padding: 6px 10px;
+	background: rgba(255, 255, 255, 0.6);
+}
+
+.mjy-log__raw summary {
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-log__raw dl {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 2px 10px;
+	margin: 8px 0 0;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 11px;
+}
+
+.mjy-log__raw dt {
+	color: #7d8a86;
+}
+
+.mjy-log__raw dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+	color: var(--mjy-ink);
+}
+
+.mjy-log__pager {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 20px;
+}
+
+.mjy-log__more {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 12px 0 0;
+}
+
+.mjy-quicklinks {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: -6px 0 18px;
+	font-size: 12.5px;
+	color: var(--mjy-ink-soft);
+}
+
+/* Dashboard event list: the same language as the log screen, in five lines. */
+.mjy-events {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 6px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mjy-events__item {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 10px;
+	align-items: start;
+	padding: 9px 12px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.62);
+	border: 1px solid rgba(255, 255, 255, 0.8);
+	border-inline-start: 3px solid var(--mjy-accent);
+}
+
+.mjy-events__item--error,
+.mjy-events__item--security {
+	border-inline-start-color: #c0463b;
+}
+
+.mjy-events__level {
+	font-size: 10.5px;
+	font-weight: 700;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: rgba(14, 92, 85, 0.1);
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-events__text strong {
+	display: block;
+	font-size: 12.5px;
+}
+
+.mjy-events__text em {
+	display: block;
+	margin-top: 2px;
+	font-size: 11.5px;
+	font-style: normal;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-events__time {
+	font-size: 11px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+@media (max-width: 782px) {
+	.mjy-log__row {
+		grid-template-columns: 1fr;
+	}
+
+	.mjy-log__time {
+		margin-inline-start: 0;
+		width: 100%;
+	}
+
+	.mjy-events__item {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+
+	.mjy-events__time {
+		grid-column: 2;
+	}
+}
+
 </style>
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.2.0.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.3.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — آمار<small>آنچه در بازهٔ انتخابی گذشته است، با عدد</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۲.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats" aria-current="page">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — آمار<small>آنچه در بازهٔ انتخابی گذشته است، با عدد</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۳.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats" aria-current="page">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
 	<div class="mjy-ranges no-print">
 					<a
 				class="mjy-range"
@@ -1894,6 +2129,12 @@ body {
 		
 		<a class="button mjy-range-export" href="https://shop.test/wp-admin/admin-post.php?action=mojoodyar_export_stats&range=30&_wpnonce=stub-nonce">خروجی CSV آمار</a>
 	</div>
+
+	<p class="mjy-quicklinks">
+		<span>اگر فرم را پر می‌کنید و ردیفی در لیست انتظار ساخته نمی‌شود:</span>
+		<a class="button button-secondary" href="#mjy-rejections">ثبت‌های ردشده — همین صفحه</a>
+		<a class="button button-secondary" href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs&level=security">گزارش کامل رویدادها</a>
+	</p>
 
 	<div class="mjy-grid">
 		<div class="mjy-card">
@@ -1924,17 +2165,11 @@ body {
 		<h2>ثبت درخواست در هر روز</h2>
 
 					<div class="mjy-chart" role="img" aria-label="نمودار ثبت درخواست در هر روز">
-									<div class="mjy-chart__col" title="۶ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۶ مهر</em>
-											</div>
 									<div class="mjy-chart__col" title="۷ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۷ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۸ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -1946,13 +2181,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۹ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۱۰ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۱۰ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۱۱ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -1964,13 +2199,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۱۲ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۱۳ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۱۳ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۱۴ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -1982,13 +2217,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۱۵ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۱۶ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۱۶ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۱۷ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -2000,13 +2235,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۱۸ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۱۹ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۱۹ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۲۰ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -2018,13 +2253,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۲۱ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۲۲ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۲۲ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۲۳ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -2036,13 +2271,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۲۴ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۲۵ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۲۵ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۲۶ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -2054,13 +2289,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۲۷ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۲۸ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۲۸ مهر</em>
 											</div>
 									<div class="mjy-chart__col" title="۲۹ مهر — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -2072,200 +2307,13 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۳۰ مهر</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۱ آبان — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲ آبان — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۳ آبان — ۱">
-						<div class="mjy-chart__bar" style="height:50%">
-							<span class="mjy-chart__value">۱</span>
-						</div>
-													<em class="mjy-chart__label">۳ آبان</em>
-											</div>
-									<div class="mjy-chart__col" title="۴ آبان — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۵ آبان — ۲">
-						<div class="mjy-chart__bar" style="height:100%">
-							<span class="mjy-chart__value">۲</span>
-						</div>
-													<em class="mjy-chart__label">۵ آبان</em>
-											</div>
-							</div>
-			</div>
-
-	<div class="mjy-panel">
-		<h2>اعلان در هر روز</h2>
-
-					<div class="mjy-chart mjy-chart--alt" role="img" aria-label="نمودار اعلان در هر روز">
-									<div class="mjy-chart__col" title="۶ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۶ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۷ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۸ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۹ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۹ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۰ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۱ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۲ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۱۲ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۳ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۴ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۵ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۱۵ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۶ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۷ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۸ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۱۸ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۱۹ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۰ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۱ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۲۱ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۲ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۳ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۴ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۲۴ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۵ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۶ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۷ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۲۷ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۸ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۲۹ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
-											</div>
-									<div class="mjy-chart__col" title="۳۰ مهر — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label">۳۰ مهر</em>
-											</div>
-									<div class="mjy-chart__col" title="۱ آبان — ۰">
-						<div class="mjy-chart__bar" style="height:0%">
-							<span class="mjy-chart__value"></span>
-						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۱ آبان</em>
 											</div>
 									<div class="mjy-chart__col" title="۲ آبان — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
@@ -2277,19 +2325,212 @@ body {
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۳ آبان</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
 											</div>
 									<div class="mjy-chart__col" title="۴ آبان — ۱">
-						<div class="mjy-chart__bar" style="height:100%">
+						<div class="mjy-chart__bar" style="height:50%">
 							<span class="mjy-chart__value">۱</span>
 						</div>
-													<em class="mjy-chart__label is-empty">&nbsp;</em>
+													<em class="mjy-chart__label">۴ آبان</em>
 											</div>
 									<div class="mjy-chart__col" title="۵ آبان — ۰">
 						<div class="mjy-chart__bar" style="height:0%">
 							<span class="mjy-chart__value"></span>
 						</div>
-													<em class="mjy-chart__label">۵ آبان</em>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۶ آبان — ۲">
+						<div class="mjy-chart__bar" style="height:100%">
+							<span class="mjy-chart__value">۲</span>
+						</div>
+													<em class="mjy-chart__label">۶ آبان</em>
+											</div>
+							</div>
+			</div>
+
+	<div class="mjy-panel">
+		<h2>اعلان در هر روز</h2>
+
+					<div class="mjy-chart mjy-chart--alt" role="img" aria-label="نمودار اعلان در هر روز">
+									<div class="mjy-chart__col" title="۷ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۷ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۸ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۹ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۰ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۱۰ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۱ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۲ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۳ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۱۳ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۴ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۵ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۶ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۱۶ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۷ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۸ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱۹ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۱۹ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۰ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۱ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۲ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۲۲ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۳ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۴ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۵ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۲۵ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۶ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۷ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۸ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۲۸ مهر</em>
+											</div>
+									<div class="mjy-chart__col" title="۲۹ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۳۰ مهر — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۱ آبان — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۱ آبان</em>
+											</div>
+									<div class="mjy-chart__col" title="۲ آبان — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۳ آبان — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۴ آبان — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۴ آبان</em>
+											</div>
+									<div class="mjy-chart__col" title="۵ آبان — ۱">
+						<div class="mjy-chart__bar" style="height:100%">
+							<span class="mjy-chart__value">۱</span>
+						</div>
+													<em class="mjy-chart__label is-empty">&nbsp;</em>
+											</div>
+									<div class="mjy-chart__col" title="۶ آبان — ۰">
+						<div class="mjy-chart__bar" style="height:0%">
+							<span class="mjy-chart__value"></span>
+						</div>
+													<em class="mjy-chart__label">۶ آبان</em>
 											</div>
 							</div>
 			</div>
@@ -2378,18 +2619,27 @@ body {
 							<p class="mjy-muted">در این بازه تماسی ثبت نشده است.</p>
 					</div>
 
-		<div class="mjy-panel mjy-panel--warn">
-			<h2>ثبت‌های ردشده</h2>
+		<div class="mjy-panel mjy-panel--warn" id="mjy-rejections">
+			<h2>ثبت‌های ردشده — چرا فرم ردیف نمی‌سازد</h2>
 
 							<p class="mjy-muted">این درخواست‌ها هیچ ردیفی در لیست انتظار نمی‌سازند — دقیقاً همان چیزی که به‌نظر می‌رسد «ثبت نشده است».</p>
 				<table class="widefat striped mjy-table">
 					<tbody>
+													<tr>
+								<th>کد امنیتی فرم منقضی شده بود (صفحه را از کش دوباره بارگذاری کنید)</th>
+								<td>۱</td>
+							</tr>
 													<tr>
 								<th>همین مخاطب قبلاً برای همین محصول ثبت شده است</th>
 								<td>۱</td>
 							</tr>
 											</tbody>
 				</table>
+				<p class="mjy-log__more">
+					<a class="button button-secondary" href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs&level=security">
+						دیدن هر ردیف با تاریخ، متن لاگ و هش IP
+					</a>
+				</p>
 					</div>
 	</div>
 

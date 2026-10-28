@@ -23,7 +23,9 @@ use Mojoodyar\Consent;
 use Mojoodyar\Database;
 use Mojoodyar\Frontend;
 use Mojoodyar\Logger;
+use Mojoodyar\Logic\LogExplain;
 use Mojoodyar\Logic\StatsMath;
+use Mojoodyar\Logs;
 use Mojoodyar\Notifier;
 use Mojoodyar\Queue;
 use Mojoodyar\Settings;
@@ -1564,6 +1566,87 @@ $third_row = WaitlistRepository::get( $existing_id );
 MjyInt::same( 'confirmed', (string) $third_row['status'], 'ردیف فعال دست‌نخورده می‌ماند' );
 
 Settings::update( array( 'double_opt_in' => false ) );
+
+MjyInt::group( 'گزارش رویدادها' );
+
+mjy_reset_state();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) );
+
+$old_stamp = gmdate( 'Y-m-d H:i:s', time() - ( 10 * 86400 ) );
+$old_id    = $GLOBALS['wpdb']->insert(
+	\Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ),
+	array(
+		'level'      => 'info',
+		'event'      => 'queue_run',
+		'context'    => 'sent=3|failed=0',
+		'ip_hash'    => '',
+		'created_at' => $old_stamp,
+	)
+);
+
+Logger::log( 'security', 'subscribe_rejected', 'bad_nonce', str_repeat( 'f', 64 ) );
+Logger::log( 'security', 'subscribe_rejected', 'duplicate', str_repeat( 'f', 64 ) );
+Logger::log( 'warning', 'delivery_failed', 'sms|http', '' );
+Logger::log( 'info', 'subscribe_ok', 'product=501|channel=sms', str_repeat( 'f', 64 ) );
+Logger::log( 'error', 'subscribe_failed', 'reason=email', '' );
+
+$all = Logs::query( array() );
+MjyInt::same( 6, (int) $all['total'], 'همهٔ ردیف‌ها شمرده می‌شوند' );
+MjyInt::same( 6, count( $all['rows'] ), 'همهٔ ردیف‌ها برگردانده می‌شوند' );
+MjyInt::same( 'subscribe_failed', (string) $all['rows'][0]['event'], 'جدیدترین ردیف اول است' );
+
+$security = Logs::query( array( 'level' => 'security' ) );
+MjyInt::same( 2, (int) $security['total'], 'فیلتر سطح امنیتی دو ردیف می‌دهد' );
+MjyInt::same( 'security', (string) $security['rows'][0]['level'], 'ردیف برگشتی سطح درست دارد' );
+
+MjyInt::same( 1, (int) Logs::query( array( 'event' => 'delivery_failed' ) )['total'], 'فیلتر رویداد یک ردیف می‌دهد' );
+MjyInt::same( 2, (int) Logs::query( array( 'event' => 'subscribe_rejected' ) )['total'], 'فیلتر رویداد ردشده دو ردیف می‌دهد' );
+
+// Search must be a literal substring, not a LIKE pattern.
+MjyInt::same( 1, (int) Logs::query( array( 'search' => 'bad_nonce' ) )['total'], 'جست‌وجو در متن لاگ کار می‌کند' );
+MjyInt::same( 1, (int) Logs::query( array( 'search' => '501' ) )['total'], 'جست‌وجوی عددی (شناسهٔ محصول) کار می‌کند' );
+MjyInt::same( 0, (int) Logs::query( array( 'search' => '%' ) )['total'], 'درصد در جست‌وجو به‌عنوان الگوی LIKE تفسیر نمی‌شود' );
+MjyInt::same( 0, (int) Logs::query( array( 'search' => 'هیچ‌چیز' ) )['total'], 'جست‌وجوی بی‌نتیجه صفر می‌دهد' );
+
+MjyInt::same( 2, (int) Logs::query( array( 'level' => 'security', 'days' => 7 ) )['total'], 'بازهٔ ۷ روز ردیف‌های تازه را نگه می‌دارد' );
+MjyInt::same( 0, (int) Logs::query( array( 'event' => 'queue_run', 'days' => 7 ) )['total'], 'ردیف ۱۰ روز پیش در بازهٔ ۷ روز نمی‌آید' );
+MjyInt::same( 1, (int) Logs::query( array( 'event' => 'queue_run' ) )['total'], 'همان ردیف بدون فیلتر بازه دیده می‌شود' );
+
+// Paging: 6 rows, 2 per page = 3 pages.
+$paged = Logs::query( array( 'per_page' => 2, 'page' => 2 ) );
+MjyInt::same( 3, (int) $paged['pages'], 'صفحه‌بندی سه صفحه می‌سازد' );
+MjyInt::same( 2, count( $paged['rows'] ), 'هر صفحه دو ردیف دارد' );
+MjyInt::same( 6, (int) $paged['total'], 'کل در حالت صفحه‌بندی درست است' );
+
+$summary = Logs::summary();
+MjyInt::same( 6, (int) $summary['total'], 'کارت کل درست است' );
+MjyInt::same( 4, (int) $summary['problems'], 'هشدار (۱) + خطا (۱) + امنیتی (۲) = ۴' );
+MjyInt::same( 2, (int) $summary['security'], 'دوی امنیتی شمرده می‌شود' );
+MjyInt::same( 1, (int) $summary['errors'], 'یک خطا شمرده می‌شود' );
+MjyInt::same( 5, (int) $summary['today'], 'پنج ردیف در ۲۴ ساعت گذشته' );
+
+$events_present = Logs::events_present();
+MjyInt::same( 5, count( $events_present ), 'پنج رویداد متفاوت در فهرست فیلتر است' );
+MjyInt::ok( false !== strpos( (string) $events_present[0]['label'], 'رد' ) || (int) $events_present[0]['count'] >= 1, 'پرتکرارترین رویداد اول است' );
+MjyInt::same( array(), Logs::untranslated_events(), 'همهٔ رویدادهای موجود ترجمهٔ فارسی دارند' );
+
+$newest = Logs::recent_problems( 3 );
+MjyInt::same( 3, count( $newest ), 'پنل داشبورد سه ردیف مشکل می‌گیرد' );
+MjyInt::ok( ! in_array( 'info', array_column( $newest, 'level' ), true ), 'پنل داشبورد ردیف اطلاع را نشان نمی‌دهد' );
+
+// The dashboard list and the log screen must describe a row identically.
+$first = $newest[0];
+MjyInt::ok(
+	false !== strpos( LogExplain::detail( (string) $first['event'], (string) $first['context'] ), 'کد امنیتی' )
+	|| false !== strpos( LogExplain::detail( (string) $first['event'], (string) $first['context'] ), 'دلیل' ),
+	'توضیح فارسی ردیف از همان دیکشنری می‌آید'
+);
+
+// Cleanup is explicit and total.
+MjyInt::same( 6, Logs::clear(), 'پاک کردن لاگ‌ها همهٔ ردیف‌ها را حذف می‌کند' );
+MjyInt::same( 0, (int) Logs::summary()['total'], 'بعد از پاک کردن شمارنده صفر است' );
+
+mjy_reset_rate_limit();
 
 MjyInt::group( 'پیگیری تلفنی مرحله‌ای' );
 

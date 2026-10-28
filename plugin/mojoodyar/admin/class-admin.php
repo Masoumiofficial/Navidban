@@ -15,6 +15,8 @@ use Mojoodyar\Capabilities;
 use Mojoodyar\Consent;
 use Mojoodyar\Database;
 use Mojoodyar\Logger;
+use Mojoodyar\Logic\LogExplain;
+use Mojoodyar\Logs;
 use Mojoodyar\Notifier;
 use Mojoodyar\Queue;
 use Mojoodyar\Settings;
@@ -59,6 +61,7 @@ final class Admin {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_post_mojoodyar_export', array( $this, 'export_csv' ) );
 		add_action( 'admin_post_mojoodyar_export_stats', array( $this, 'export_stats_csv' ) );
+		add_action( 'admin_post_mojoodyar_export_logs', array( $this, 'export_logs_csv' ) );
 		add_action( 'admin_post_mojoodyar_tool', array( $this, 'handle_tool' ) );
 		add_action( 'admin_post_mojoodyar_bulk', array( $this, 'handle_bulk' ) );
 		add_action( 'admin_post_mojoodyar_call', array( $this, 'handle_call' ) );
@@ -97,6 +100,7 @@ final class Admin {
 
 		add_submenu_page( self::SLUG, 'داشبورد', 'داشبورد', Capabilities::MANAGE, self::SLUG, array( $this, 'render_dashboard' ) );
 		add_submenu_page( self::SLUG, 'آمار', 'آمار', Capabilities::MANAGE, self::SLUG . '-stats', array( $this, 'render_stats' ) );
+		add_submenu_page( self::SLUG, 'گزارش رویدادها', 'گزارش رویدادها', Capabilities::MANAGE, self::SLUG . '-logs', array( $this, 'render_logs' ) );
 		add_submenu_page( self::SLUG, 'لیست انتظارها', 'لیست انتظارها', Capabilities::MANAGE, self::SLUG . '-waitlists', array( $this, 'render_waitlists' ) );
 		add_submenu_page( self::SLUG, 'تنظیمات', 'تنظیمات', Capabilities::MANAGE, self::SLUG . '-settings', array( $this, 'render_settings' ) );
 		add_submenu_page( self::SLUG, 'ابزارها', 'ابزارها', Capabilities::MANAGE, self::SLUG . '-tools', array( $this, 'render_tools' ) );
@@ -345,6 +349,8 @@ final class Admin {
 			'last_run'   => $last_run,
 			'tables'     => $tables,
 			'conversion' => $conversion,
+			'problems'   => Logs::recent_problems( 5 ),
+			'log_counts' => Logs::summary(),
 		);
 
 		$this->view( 'dashboard', $data );
@@ -513,6 +519,123 @@ final class Admin {
 	}
 
 	/**
+	 * Read the log filters from the request, validated against what the screen offers.
+	 *
+	 * @return array
+	 */
+	private function log_filters() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only filters.
+		$level  = isset( $_GET['level'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['level'] ) ) : '';
+		$event  = isset( $_GET['event'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['event'] ) ) : '';
+		$search = isset( $_GET['s'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['s'] ) ) : '';
+		$days   = isset( $_GET['days'] ) ? (int) $_GET['days'] : 0;
+		$page   = isset( $_GET['paged'] ) ? max( 1, (int) $_GET['paged'] ) : 1;
+		// phpcs:enable
+
+		$level = in_array( $level, Logs::FILTER_LEVELS, true ) ? $level : '';
+		$days  = in_array( $days, Logs::RANGES, true ) ? $days : 0;
+
+		return array(
+			'level'  => $level,
+			'event'  => $event,
+			'search' => $search,
+			'days'   => $days,
+			'page'   => $page,
+		);
+	}
+
+	/**
+	 * Render the log screen.
+	 *
+	 * @return void
+	 */
+	public function render_logs() {
+		$this->guard();
+
+		$filters = $this->log_filters();
+
+		$result = Logs::query(
+			array(
+				'level'  => $filters['level'],
+				'event'  => $filters['event'],
+				'search' => $filters['search'],
+				'days'   => $filters['days'],
+				'page'   => $filters['page'],
+			)
+		);
+
+		$this->view(
+			'logs',
+			array(
+				'summary' => Logs::summary(),
+				'result'  => $result,
+				'events'  => Logs::events_present(),
+				'filters' => $filters,
+			)
+		);
+	}
+
+	/**
+	 * Download the filtered log as CSV.
+	 *
+	 * Two columns carry the Persian explanation and the raw context so a support
+	 * engineer can read the file without the admin panel.
+	 *
+	 * @return void
+	 */
+	public function export_logs_csv() {
+		$this->guard();
+
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field_compat( wp_unslash_compat( $_GET['_wpnonce'] ) ), 'mojoodyar_export_logs' ) ) {
+			wp_die_compat( 'درخواست معتبر نیست.' );
+		}
+
+		$filters = $this->log_filters();
+
+		$result = Logs::query(
+			array(
+				'level'    => $filters['level'],
+				'event'    => $filters['event'],
+				'search'   => $filters['search'],
+				'days'     => $filters['days'],
+				'page'     => 1,
+				'per_page' => 500,
+			)
+		);
+
+		nocache_headers_compat();
+		header( 'Content-Type: text/csv; charset=UTF-8' );
+		header( 'Content-Disposition: attachment; filename="mojoodyar-logs-' . gmdate( 'Ymd-His' ) . '.csv"' );
+
+		echo Csv::bom(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		$out = fopen( 'php://output', 'w' );
+
+		fputcsv( $out, array( 'شناسه', 'تاریخ (میلادی)', 'تاریخ (شمسی)', 'سطح', 'رویداد', 'توضیح فارسی', 'متن لاگ (context)', 'هش IP' ) );
+
+		foreach ( $result['rows'] as $row ) {
+			fputcsv(
+				$out,
+				Csv::row(
+					array(
+						(string) (int) $row['id'],
+						(string) $row['created_at'],
+						Jalali::format( (string) $row['created_at'], 'Y/m/d H:i' ),
+						LogExplain::level( (string) $row['level'] ),
+						(string) $row['event'],
+						LogExplain::detail( (string) $row['event'], (string) $row['context'] ),
+						(string) $row['context'],
+						(string) $row['ip_hash'],
+					)
+				)
+			);
+		}
+
+		fclose( $out );
+		exit;
+	}
+
+	/**
 	 * Render the waitlist screen.
 	 *
 	 * @return void
@@ -637,6 +760,7 @@ final class Admin {
 		$tabs = array(
 			'dashboard' => array( 'داشبورد', self::SLUG ),
 			'stats'     => array( 'آمار', self::SLUG . '-stats' ),
+			'logs'      => array( 'گزارش رویدادها', self::SLUG . '-logs' ),
 			'waitlists' => array( 'لیست انتظارها', self::SLUG . '-waitlists' ),
 			'settings'  => array( 'تنظیمات', self::SLUG . '-settings' ),
 			'tools'     => array( 'ابزارها', self::SLUG . '-tools' ),
@@ -845,6 +969,11 @@ final class Admin {
 				$deleted = WaitlistRepository::prune( $days );
 				Logger::prune( 90 );
 				$message = sprintf( 'پاک‌سازی انجام شد: %s ردیف قدیمی‌تر از %s روز حذف شد.', Persian::number( $deleted ), Persian::number( $days ) );
+				break;
+
+			case 'clear_logs':
+				$removed = Logs::clear();
+				$message = sprintf( 'همهٔ لاگ‌ها پاک شد (%s ردیف).', Persian::number( $removed ) );
 				break;
 
 			case 'test_email':

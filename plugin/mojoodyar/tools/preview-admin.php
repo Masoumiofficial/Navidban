@@ -61,11 +61,16 @@ $GLOBALS['wpdb']->query(
 	'UPDATE ' . WaitlistRepository::table() . " SET status = 'notified', notified_at = '" . gmdate( 'Y-m-d H:i:s', time() - 86400 ) . "' WHERE id = 2"
 );
 \Mojoodyar\Logger::log( 'security', 'subscribe_rejected', 'duplicate', str_repeat( 'a', 64 ) );
+\Mojoodyar\Logger::log( 'security', 'subscribe_rejected', 'bad_nonce', str_repeat( 'b', 64 ) );
+\Mojoodyar\Logger::log( 'warning', 'delivery_failed', 'sms|http', '' );
+\Mojoodyar\Logger::log( 'info', 'restock_queued', '501:0|units=2|queued=2' );
+\Mojoodyar\Logger::log( 'info', 'sent', 'sms|restock' );
 
 $admin   = new Admin();
 $screens = array(
 	'dashboard' => 'render_dashboard',
 	'stats'     => 'render_stats',
+	'logs'      => 'render_logs',
 	'waitlists' => 'render_waitlists',
 	'settings'  => 'render_settings',
 	'tools'     => 'render_tools',

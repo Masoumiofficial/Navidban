@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 8. صفحهٔ خطای فرم
 
 == Changelog ==
+
+= 2.4.0 =
+بخش تازهٔ «گزارش رویدادها»: همهٔ رخدادهای افزونه با توضیح فارسی، کنارِ لاگ
+اصلی (کد خام و متن context) — با فیلتر سطح/رویداد/بازه، جست‌وجو، خروجی CSV،
+شمارندهٔ هشدارها و دکمهٔ پاک کردن. برای هر خطای مهم یک راهنمای اقدام هم
+نوشته شده. پنل «ثبت‌های ردشده» از دل صفحهٔ آمار به این بخش وصل شد و از
+داشبورد و بالای صفحهٔ آمار هم لینک دارد، چون پیدا کردنش سخت بود.
 
 = 2.3.0 =
 بخش تازهٔ «آمار»: گزارش ۷/۳۰/۹۰ روزه با نمودار ثبت و اعلان روزانه، تفکیک

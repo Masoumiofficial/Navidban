@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.3.0",
+    "plugin_version": "2.4.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-27T19:38:26+00:00",
-    "assertions": 317,
+    "generated_at": "2026-10-28T06:14:29+00:00",
+    "assertions": 347,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -76,6 +76,10 @@
         },
         "ثبت دوبارهٔ همان مشتری": {
             "assertions": 12,
+            "failures": 0
+        },
+        "گزارش رویدادها": {
+            "assertions": 30,
             "failures": 0
         },
         "پیگیری تلفنی مرحله‌ای": {
