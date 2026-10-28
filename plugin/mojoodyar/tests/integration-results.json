@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.6.3",
+    "plugin_version": "2.7.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-28T09:51:20+00:00",
-    "assertions": 405,
+    "generated_at": "2026-10-28T09:57:52+00:00",
+    "assertions": 418,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -56,6 +56,10 @@
         },
         "الگوی ملی‌پیامک (bodyId)": {
             "assertions": 37,
+            "failures": 0
+        },
+        "نشانی کوتاه و سقف متغیر": {
+            "assertions": 13,
             "failures": 0
         },
         "نام مشتری و پیگیری تماس": {

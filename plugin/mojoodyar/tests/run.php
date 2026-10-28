@@ -750,6 +750,41 @@ MjyTest::ok( (int) $too_long[0]['length'] > 40, 'طول واقعی مقدار م
 MjyTest::same( array(), SmsPattern::overlong( '{0} عزیز، {1} موجود شد — اتحاد وردپرس', $real_context ), 'الگوی بدون نشانی هیچ مقدار بی‌درمانی ندارد' );
 MjyTest::same( 'https://etebahwp.com/product/nike-air-zoom-pegasus-41', SmsPattern::raw( 2, $real_context ), 'raw() مقدار را دست‌نخورده برمی‌گرداند' );
 
+// The per-variable budget is configurable (it is a setting; the default 25 is a
+// conservative guess, not a published rule). These assertions pass the limit
+// explicitly, so they stay pure; the settings wiring is covered in
+// tests/integration.php.
+MjyTest::same( 25, SmsPattern::MAX_VALUE_LENGTH, 'سقف پیش‌فرض ۲۵ است' );
+MjyTest::same( 'کفش دویدن نایک کفش…', SmsPattern::clip( str_repeat( 'کفش دویدن نایک ', 4 ), 25 ), 'برش روی مرز کلمه با سقف دلخواه' );
+MjyTest::ok( false === strpos( SmsPattern::clip( str_repeat( 'کفش دویدن نایک ', 4 ), 25 ), 'نای ' ), 'برش وسط کلمه نمی‌افتد' );
+MjyTest::same( 40, \Mojoodyar\Support\Text::length( SmsPattern::clip( str_repeat( 'ا', 60 ), 40 ) ), 'سقف ۴۰ رعایت می‌شود' );
+MjyTest::same(
+	array(),
+	SmsPattern::overlong( '{0} عزیز، {1} آمد — فروشگاه', array( 'customer_name' => 'مریم', 'product_name' => str_repeat( 'ب', 30 ) ), 40 ),
+	'با سقف ۴۰، نام ۳۰ کاراکتری مشکلی ندارد'
+);
+
+// The real reported case with a short link: the third value now fits.
+$life = array(
+	'customer_name'   => 'مریم احمدی',
+	'product_name'    => 'کفش دویدن نایک پگاسوس',
+	'product_url'     => 'https://etebahwp.com/product/nike-air-zoom-pegasus-41',
+	'sms_product_url' => 'https://etd.ir/?p=1234',
+	'site_name'       => 'اتحاد وردپرس',
+);
+$life_template = '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} اتحاد وردپرس';
+MjyTest::same( array(), SmsPattern::overlong( $life_template, $life ), 'با نشانی کوتاه هیچ مقداری بلند نیست' );
+MjyTest::same(
+	'مریم احمدی;کفش دویدن نایک پگاسوس;https://etd.ir/?p=1234',
+	SmsPattern::payload( $life_template, $life ),
+	'سه مقدار با نشانی کوتاه فرستاده می‌شود'
+);
+
+// Without the short link the same template is refused - what happened in the shop.
+$life_full = $life;
+unset( $life_full['sms_product_url'] );
+MjyTest::same( 1, count( SmsPattern::overlong( $life_template, $life_full ) ), 'بدون نشانی کوتاه همان الگو رد می‌شود' );
+
 MjyTest::same(
 	'values=2,lengths=4,9',
 	SmsPattern::shape( '{0} عزیز، {1} آمد — فروشگاه', array( 'customer_name' => 'مریم', 'product_name' => 'کفش دویدن' ) ),

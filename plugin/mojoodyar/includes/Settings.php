@@ -108,6 +108,17 @@ final class Settings {
 			// Positional pattern text, as approved on the gateway panel. Empty
 			// means "use the suggested template" (SmsPattern::default_template).
 			'sms_pattern_template'  => '',
+			// What goes into {2}/{product_url} of an SMS. 'short' uses the
+			// WordPress query form (?p=ID) so the value fits the operator's
+			// per-variable budget; the full permalink is 40-60 characters and is
+			// the usual reason a pattern send comes back as InvalidData.
+			'sms_link_mode'         => 'short',
+			// Optional short domain that points at this store, e.g. etd.ir.
+			// Nothing is registered anywhere: the link is built locally.
+			'sms_short_domain'      => '',
+			// Per-variable character budget. The default is conservative; the
+			// shop should set whatever its own operator accepts.
+			'sms_max_value_length'  => 25,
 			'ippanel_token'         => '',
 			'ippanel_from'          => '',
 			'ippanel_pattern'       => '',

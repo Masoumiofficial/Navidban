@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Mojoodyar\Logic\Template;
+use Mojoodyar\Support\Persian;
 use Mojoodyar\Settings;
 
 $mjy_secret = function ( $key ) use ( $settings ) {
@@ -316,12 +317,21 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 			$mjy_pattern_text   = \Mojoodyar\Logic\SmsPattern::resolve( $mjy_pattern_stored, (string) $settings['site_name'] );
 			$mjy_findings       = \Mojoodyar\Logic\SmsPattern::validate( $mjy_pattern_text, (string) $settings['site_name'] );
 			$mjy_sample_context = array(
-				'customer_name' => 'مریم',
-				'product_name'  => 'کفش دویدن نایک',
-				'product_url'   => 'https://example.com/p/12',
-				'price'         => '۲٬۴۵۰٬۰۰۰ تومان',
-				'site_name'     => (string) $settings['site_name'],
+				'customer_name'   => 'مریم',
+				'product_name'    => 'کفش دویدن نایک',
+				'product_url'     => 'https://example.com/product/nike-air-zoom-pegasus-41',
+				'sms_product_url' => '', // filled below from the real settings
+				'price'           => '۲٬۴۵۰٬۰۰۰ تومان',
+				'site_name'       => (string) $settings['site_name'],
 			);
+
+			// Real numbers, not an example domain: the admin is deciding here
+			// whether the link fits the operator's per-variable budget.
+			$mjy_full_link = (string) \Mojoodyar\Notifier::product_url( 12 );
+			$mjy_short_link = (string) \Mojoodyar\Notifier::product_short_url( 12 );
+			$mjy_sample_context['product_url']     = $mjy_full_link;
+			$mjy_sample_context['sms_product_url'] = 'off' === (string) $settings['sms_link_mode'] ? '' : $mjy_short_link;
+			$mjy_value_limit                       = \Mojoodyar\Logic\SmsPattern::limit();
 			?>
 
 			<h3>متن الگو (برای خطوط خدماتی)</h3>
@@ -352,6 +362,47 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 					</td>
 				</tr>
 				<tr>
+					<th scope="row"><label for="mjy-link-mode">نشانی محصول در پیامک</label></th>
+					<td>
+						<select id="mjy-link-mode" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_link_mode]">
+							<?php foreach ( array( 'short' => 'نشانی کوتاه (پیشنهادی)', 'full' => 'نشانی کامل محصول', 'off' => 'بدون نشانی' ) as $mjy_mode => $mjy_mode_label ) : ?>
+								<option value="<?php echo esc_attr( $mjy_mode ); ?>" <?php selected( (string) $settings['sms_link_mode'], $mjy_mode ); ?>>
+									<?php echo esc_html( $mjy_mode_label ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+						<p class="description">
+							نشانی کوتاه، فرم خود وردپرس است: <code dir="ltr"><?php echo esc_html( $mjy_short_link ); ?></code>
+							(<strong><?php echo esc_html( Persian::number( \Mojoodyar\Support\Text::length( $mjy_short_link ) ) ); ?></strong> کاراکتر) —
+							در حالی که نشانی کامل
+							<code dir="ltr"><?php echo esc_html( $mjy_full_link ); ?></code>
+							<strong><?php echo esc_html( Persian::number( \Mojoodyar\Support\Text::length( $mjy_full_link ) ) ); ?></strong> کاراکتر است.
+							هیچ سرویس بیرونی در کار نیست؛ پیوند روی همین سایت ساخته می‌شود.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mjy-short-domain">دامنهٔ کوتاه (اختیاری)</label></th>
+					<td>
+						<input id="mjy-short-domain" class="regular-text" dir="ltr" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_short_domain]" value="<?php echo esc_attr( (string) $settings['sms_short_domain'] ); ?>" placeholder="etd.ir" />
+						<p class="description">
+							اگر دامنهٔ کوتاهی دارید که به همین فروشگاه اشاره می‌کند، اینجا بگذارید تا نشانی
+							به <code dir="ltr">https://etd.ir/?p=12</code> تبدیل شود. خالی بماند، از دامنهٔ خود سایت استفاده می‌شود.
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mjy-value-limit">سقف کاراکتر هر متغیر</label></th>
+					<td>
+						<input id="mjy-value-limit" type="number" min="<?php echo (int) \Mojoodyar\Logic\SmsPattern::MIN_VALUE_LENGTH; ?>" max="<?php echo (int) \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LIMIT; ?>" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_max_value_length]" value="<?php echo esc_attr( (string) $settings['sms_max_value_length'] ); ?>" />
+						<p class="description">
+							مقدار پیش‌فرض ۲۵ است و <strong>تخمین محافظه‌کارانه</strong> است، نه قانون منتشرشدهٔ اپراتور.
+							عددی را بگذارید که اپراتور خودتان می‌پذیرد (تا ۷۰). نام مشتری و نام محصول خودکار تا همین
+							سقف کوتاه می‌شوند؛ مقدار بلندترِ کوتاه‌نشدنی (یعنی نشانی محصول) پیش از ارسال جلوی پیام را می‌گیرد.
+						</p>
+					</td>
+				</tr>
+				<tr>
 					<th scope="row">روش جای‌گذاری</th>
 					<td>
 						<div class="mjy-pattern-help">
@@ -371,8 +422,9 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 								<strong>۴.</strong> الگوهایی مثل «<code>{0} باتشکر</code>» یا «<code>{0} گوگل</code>»
 								تأیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
 							<p>
-								<strong>۴.۵.</strong> نشانی محصول (<code>{2}</code>) را در الگو نگذارید؛ طولش از سقف
-							اپراتور بیشتر است و پیام با <code>InvalidData</code> برمی‌گردد.
+								<strong>۴.۵.</strong> اگر <code>{2}</code> (نشانی محصول) در الگوست، حتماً «نشانی کوتاه» را
+							روشن بگذارید و اگر باز هم از سقف بیشتر بود، یا دامنهٔ کوتاه بگذارید یا <code>{2}</code> را
+							از الگو بردارید؛ وگرنه درگاه پیام را با <code>InvalidData</code> رد می‌کند.
 						</p>
 						<p class="description">
 							<strong>۵.</strong> هر مقدار حداکثر <strong><?php echo esc_html( \Mojoodyar\Support\Persian::number( \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH ) ); ?></strong>
@@ -396,15 +448,18 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 							<code dir="ltr"><?php echo esc_html( \Mojoodyar\Logic\SmsPattern::payload( $mjy_pattern_text, $mjy_sample_context ) ); ?></code>
 						</p>
 						<p class="description">
-							طول هر مقدار:
+							طول هر مقدار در همین سایت (اندازه‌گیری‌شده، نه نمونهٔ فرضی):
 							<?php foreach ( \Mojoodyar\Logic\SmsPattern::indexes( $mjy_pattern_text ) as $mjy_var_index ) : ?>
-								<?php $mjy_var_length = \Mojoodyar\Support\Text::length( \Mojoodyar\Logic\SmsPattern::raw( $mjy_var_index, $mjy_sample_context ) ); ?>
-								<code dir="ltr"><?php echo esc_html( '{' . $mjy_var_index . '}=' . $mjy_var_length ); ?></code>
+								<?php
+								$mjy_var_length = \Mojoodyar\Support\Text::length( \Mojoodyar\Logic\SmsPattern::raw( $mjy_var_index, $mjy_sample_context ) );
+								$mjy_var_over   = $mjy_var_length > $mjy_value_limit;
+								?>
+								<code dir="ltr"<?php echo $mjy_var_over ? ' class="mjy-over"' : ''; ?>><?php echo esc_html( '{' . $mjy_var_index . '}=' . $mjy_var_length ); ?></code>
 							<?php endforeach; ?>
 							— سقف مجاز
-							<code dir="ltr"><?php echo esc_html( (string) \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH ); ?></code>
-							کاراکتر. نشانی محصول را در الگو نگذارید: نشانی واقعی محصول معمولاً
-							۴۰ تا ۶۰ کاراکتر است و درگاه آن را با <code>InvalidData</code> رد می‌کند.
+							<code dir="ltr"><?php echo esc_html( (string) $mjy_value_limit ); ?></code>
+							کاراکتر.
+							اگر عددی سرخ شد، همان متغیر پیش از ارسال جلوی پیام را می‌گیرد.
 						</p>
 					</td>
 				</tr>

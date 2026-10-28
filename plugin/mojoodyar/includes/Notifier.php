@@ -167,6 +167,7 @@ final class Notifier {
 			'product_name'    => $product_name,
 			'variation_name'  => ( $variation_id > 0 ) ? $product_name : '',
 			'product_url'     => self::product_url( $product_id, $variation_id ),
+			'sms_product_url' => self::link_for( $product_id, $variation_id, 'sms' ),
 			'price'           => self::product_price( $product_id ),
 			'customer_name'   => self::customer_name(
 				(int) $waitlist['user_id'],
@@ -221,6 +222,77 @@ final class Notifier {
 	 * @param int $variation_id Variation ID.
 	 * @return string
 	 */
+	/**
+	 * Shortest link this site can produce for a product, without any service.
+	 *
+	 * `?p=1234` is WordPress's own query form: it resolves on any permalink
+	 * structure, needs no plugin and no HTTP call, and is roughly half the
+	 * length of a pretty permalink. A shop that owns a short domain can point
+	 * it at the store and set that domain here, which takes the link to ~22
+	 * characters - inside the per-variable budget of most Iranian operators.
+	 *
+	 * Nothing is fetched or registered anywhere: the constraint of this plugin
+	 * is that it never calls an external server, so no bit.ly-style service is
+	 * used and none is recommended.
+	 *
+	 * @param int $product_id   Product ID.
+	 * @param int $variation_id Variation ID (kept out of short links: the buyer
+	 *                          picks the variation on the page, and the query
+	 *                          argument alone costs 22 characters).
+	 * @return string
+	 */
+	public static function product_short_url( $product_id, $variation_id = 0 ) {
+		unset( $variation_id );
+
+		$product_id = (int) $product_id;
+
+		if ( $product_id <= 0 ) {
+			return '';
+		}
+
+		$base = trim( (string) Settings::get( 'sms_short_domain', '' ) );
+
+		if ( '' !== $base ) {
+			if ( 0 !== strpos( $base, 'http://' ) && 0 !== strpos( $base, 'https://' ) ) {
+				$base = 'https://' . $base;
+			}
+
+			return rtrim( $base, '/' ) . '/?p=' . $product_id;
+		}
+
+		// Same host, shortest path. home_url( '/' ) respects the install being in
+		// a subdirectory (e.g. /shop/), which a hardcoded '/' would break.
+		$home = function_exists( 'home_url' ) ? (string) home_url( '/' ) : '/';
+
+		if ( '' === $home ) {
+			$home = '/';
+		}
+
+		return rtrim( $home, '/' ) . '/?p=' . $product_id;
+	}
+
+	/**
+	 * The link that goes into a message, honouring the configured link mode.
+	 *
+	 * @param int    $product_id   Product ID.
+	 * @param int    $variation_id Variation ID.
+	 * @param string $channel      'sms' or 'email'.
+	 * @return string
+	 */
+	public static function link_for( $product_id, $variation_id, $channel = 'sms' ) {
+		$mode = 'sms' === $channel ? (string) Settings::get( 'sms_link_mode', 'short' ) : 'full';
+
+		if ( 'off' === $mode ) {
+			return '';
+		}
+
+		if ( 'short' === $mode ) {
+			return self::product_short_url( $product_id, $variation_id );
+		}
+
+		return self::product_url( $product_id, $variation_id );
+	}
+
 	public static function product_url( $product_id, $variation_id = 0 ) {
 		if ( function_exists( 'get_permalink' ) ) {
 			$url = (string) get_permalink( $product_id );

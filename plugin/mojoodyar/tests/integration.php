@@ -1148,6 +1148,94 @@ MjyInt::ok( false !== strpos( \Mojoodyar\Logic\LogExplain::advice( 'delivery_fai
 Settings::update( array( 'melipayamak_body_id' => '', 'sms_pattern_template' => '' ) );
 $GLOBALS['mjy_http_response'] = null;
 
+MjyInt::group( 'نشانی کوتاه و سقف متغیر' );
+
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) );
+
+Settings::update(
+	array(
+		'sms_enabled'           => true,
+		'sms_gateway'           => 'melipayamak',
+		'melipayamak_user'      => '09120000000',
+		'melipayamak_pass'      => 'secret',
+		'melipayamak_body_id'   => '568710',
+		'sms_pattern_template'  => '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} اتحاد وردپرس',
+		'sms_link_mode'         => 'short',
+		'sms_short_domain'      => '',
+		'sms_max_value_length'  => 25,
+		'site_name'             => 'اتحاد وردپرس',
+	)
+);
+
+// On the same host, ?p= is about half of a pretty permalink.
+$full_link  = \Mojoodyar\Notifier::product_url( 12 );
+$short_link = \Mojoodyar\Notifier::product_short_url( 12 );
+MjyInt::same( 'https://shop.test/?p=12', $short_link, 'نشانی کوتاه فرم ?p= روی همان دامنه است' );
+MjyInt::ok( \Mojoodyar\Support\Text::length( $short_link ) < \Mojoodyar\Support\Text::length( $full_link ), 'نشانی کوتاه از نشانی کامل کوتاه‌تر است' );
+
+$short_context = array(
+	'product_id'   => 12,
+	'variation_id' => 0,
+	'channel'      => 'sms',
+	'token'        => 'abc',
+	'full_name'    => 'مریم احمدی',
+	'user_id'      => 0,
+	'id'           => 1,
+	'stock_at_signup' => 0,
+);
+$built = \Mojoodyar\Notifier::build_context( $short_context );
+MjyInt::same( 'short', (string) Settings::get( 'sms_link_mode' ), 'حالت پیش‌فرض نشانی کوتاه است' );
+MjyInt::ok( false !== strpos( (string) $built['sms_product_url'], '?p=12' ), 'ساخت متن پیامک از نشانی کوتاه استفاده می‌کند' );
+MjyInt::ok( false === strpos( (string) $built['product_url'], '?p=' ), 'نشانی کامل برای ایمیل دست‌نخورده می‌ماند' );
+
+// A short domain makes the value fit even the conservative 25-character cap.
+Settings::update( array( 'sms_short_domain' => 'etd.ir' ) );
+MjyInt::same( 'https://etd.ir/?p=12', \Mojoodyar\Notifier::product_short_url( 12 ), 'دامنهٔ کوتاه جای دامنهٔ سایت را می‌گیرد' );
+
+// The exact shop case: 3 values, the URL is the long one. With the short link
+// the send goes through; with the full link it is blocked locally.
+Settings::update( array( 'sms_short_domain' => 'etd.ir', 'sms_max_value_length' => 25 ) );
+$sms          = new \Mojoodyar\Channels\SmsMelipayamak();
+$shop_context = array(
+	'context' => array(
+		'customer_name'   => 'مریم احمدی',
+		'product_name'    => 'کفش دویدن نایک پگاسوس',
+		'product_url'     => 'https://shop.test/product/nike-air-zoom-pegasus-41/',
+		'sms_product_url' => 'https://etd.ir/?p=12',
+		'site_name'       => 'اتحاد وردپرس',
+	),
+);
+
+$GLOBALS['mjy_http_calls']    = array();
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"77","RetStatus":1,"StrRetStatus":"Ok"}' );
+MjyInt::same( true, $sms->send( '09121234567', '', 'x', $shop_context ), 'با نشانی کوتاه، الگوی سه‌متغیره ارسال می‌شود' );
+MjyInt::same(
+	'مریم احمدی;کفش دویدن نایک پگاسوس;https://etd.ir/?p=12',
+	$GLOBALS['mjy_http_calls'][0][1]['body']['text'],
+	'مقدار سوم نشانی کوتاه است'
+);
+
+$GLOBALS['mjy_http_calls'] = array();
+$shop_full = $shop_context;
+unset( $shop_full['context']['sms_product_url'] );
+$blocked = $sms->send( '09121234567', '', 'x', $shop_full );
+MjyInt::ok( true !== $blocked, 'با نشانی کامل، ارسال پیش از تماس با درگاه متوقف می‌شود' );
+MjyInt::same( 0, count( $GLOBALS['mjy_http_calls'] ), 'و هیچ تماسی با درگاه انجام نمی‌شود' );
+
+// Raising the limit is the other legitimate answer: the shop knows its own operator.
+Settings::update( array( 'sms_max_value_length' => 60, 'sms_short_domain' => '' ) );
+$GLOBALS['mjy_http_calls']    = array();
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"88","RetStatus":1,"StrRetStatus":"Ok"}' );
+MjyInt::same( true, $sms->send( '09121234567', '', 'x', $shop_full ), 'با سقف ۶۰ کاراکتر همان پیام ارسال می‌شود' );
+
+Settings::update( array( 'sms_link_mode' => 'off', 'sms_max_value_length' => 25, 'sms_short_domain' => '' ) );
+MjyInt::same( '', \Mojoodyar\Notifier::link_for( 12, 0, 'sms' ), 'حالت «بدون نشانی» پیوند نمی‌سازد' );
+MjyInt::ok( '' !== \Mojoodyar\Notifier::link_for( 12, 0, 'email' ), 'ایمیل همیشه نشانی کامل می‌گیرد' );
+
+Settings::update( array( 'sms_link_mode' => 'short', 'melipayamak_body_id' => '', 'sms_pattern_template' => '' ) );
+$GLOBALS['mjy_http_response'] = null;
+
 MjyInt::group( 'نام مشتری و پیگیری تماس' );
 
 $GLOBALS['mjy_options']['mojoodyar_settings'] = Settings::defaults();

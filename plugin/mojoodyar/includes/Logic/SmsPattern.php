@@ -30,6 +30,7 @@
 
 namespace Mojoodyar\Logic;
 
+use Mojoodyar\Settings;
 use Mojoodyar\Support\Text;
 
 defined( 'ABSPATH' ) || exit;
@@ -55,6 +56,42 @@ final class SmsPattern {
 	const MAX_VALUE_LENGTH = 25;
 
 	/**
+	 * Allowed range for the configurable per-variable length.
+	 *
+	 * The default is a conservative figure, not a rule any operator publishes.
+	 * A shop that knows its own operator's limit can raise it in the settings
+	 * screen; below 15 nothing readable fits, above 70 the message itself stops
+	 * being a one-part SMS on most panel rules.
+	 *
+	 * @var int
+	 */
+	const MIN_VALUE_LENGTH = 15;
+
+	/**
+	 * @var int
+	 */
+	const MAX_VALUE_LIMIT = 70;
+
+	/**
+	 * The per-variable character budget actually in force.
+	 *
+	 * Reads the setting on every call - it is a cheap cached option read and it
+	 * keeps the value in one place instead of threading a parameter through
+	 * every caller.
+	 *
+	 * @return int
+	 */
+	public static function limit() {
+		$stored = (int) Settings::get( 'sms_max_value_length', self::MAX_VALUE_LENGTH );
+
+		if ( $stored < self::MIN_VALUE_LENGTH || $stored > self::MAX_VALUE_LIMIT ) {
+			return self::MAX_VALUE_LENGTH;
+		}
+
+		return $stored;
+	}
+
+	/**
 	 * Variable index => context key, in the canonical order shown in the panel.
 	 *
 	 * @var array<string,string>
@@ -75,7 +112,7 @@ final class SmsPattern {
 		return array(
 			'0' => 'نام مشتری (اگر نامی ثبت نشده باشد: «همراه گرامی»)',
 			'1' => 'نام محصول',
-			'2' => 'نشانی صفحهٔ محصول',
+			'2' => 'نشانی صفحهٔ محصول (با تنظیم «نشانی کوتاه» می‌تواند کوتاه‌تر شود)',
 			'3' => 'قیمت محصول',
 		);
 	}
@@ -177,6 +214,13 @@ final class SmsPattern {
 	public static function raw( $index, array $context ) {
 		$key = isset( self::VARIABLES[ (string) $index ] ) ? self::VARIABLES[ (string) $index ] : '';
 
+		// The SMS context carries 'sms_product_url', which is the short form when
+		// the shop chose one. Resolved before the isset() check, and falling back
+		// to 'product_url' keeps every existing caller and test working.
+		if ( 'product_url' === $key && isset( $context['sms_product_url'] ) && '' !== (string) $context['sms_product_url'] ) {
+			$key = 'sms_product_url';
+		}
+
 		if ( '' === $key || ! isset( $context[ $key ] ) ) {
 			return '';
 		}
@@ -210,7 +254,8 @@ final class SmsPattern {
 	 * @param int    $limit    Maximum characters per value.
 	 * @return array[] Each: index, label, length.
 	 */
-	public static function overlong( $template, array $context, $limit = self::MAX_VALUE_LENGTH ) {
+	public static function overlong( $template, array $context, $limit = 0 ) {
+		$limit = ( $limit > 0 ) ? (int) $limit : self::limit();
 		$labels = self::labels();
 		$out    = array();
 
@@ -242,10 +287,11 @@ final class SmsPattern {
 	 * "کفش دویدن نای…" reads like a bug.
 	 *
 	 * @param string $value Raw value.
-	 * @param int    $limit Maximum characters.
+	 * @param int    $limit Maximum characters; 0 means the configured limit.
 	 * @return string
 	 */
-	public static function clip( $value, $limit = self::MAX_VALUE_LENGTH ) {
+	public static function clip( $value, $limit = 0 ) {
+		$limit = ( $limit > 0 ) ? (int) $limit : self::limit();
 		$value = (string) $value;
 
 		if ( Text::length( $value ) <= $limit ) {

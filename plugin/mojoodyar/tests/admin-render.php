@@ -371,7 +371,11 @@ MjyAdmin::ok( false !== strpos( $settings_html, '{0}' ) && false !== strpos( $se
 MjyAdmin::ok( false !== strpos( $settings_html, 'متغیر در انتها' ), 'قاعدهٔ «متغیر در انتها» در راهنما آمده' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'نمونهٔ مقداری که افزونه برای همین متن می‌فرستد' ), 'نمونهٔ مقدارهای ارسالی نشان داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'طول هر مقدار' ), 'طول هر مقدار کنار نمونه نوشته می‌شود' );
-MjyAdmin::ok( false !== strpos( $settings_html, 'نشانی محصول را در الگو نگذارید' ), 'هشدار دربارهٔ نشانی محصول در الگو هست' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'name="mojoodyar_settings[sms_link_mode]"' ), 'انتخاب حالت نشانی محصول در پیامک هست' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'name="mojoodyar_settings[sms_short_domain]"' ), 'فیلد دامنهٔ کوتاه هست' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'name="mojoodyar_settings[sms_max_value_length]"' ), 'سقف کاراکتر هر متغیر قابل تنظیم است' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'نشانی کوتاه (پیشنهادی)' ), 'گزینهٔ نشانی کوتاه پیشنهاد می‌شود' );
+MjyAdmin::ok( false !== strpos( $settings_html, '?p=12' ), 'طول واقعی نشانی کوتاه در صفحه نوشته می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'mjy-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تأیید می‌گیرد' );
 MjyAdmin::ok( false === strpos( $settings_html, 'mjy-pattern-findings' ), 'برای الگوی پیش‌فرض هیچ ایرادی رندر نمی‌شود' );
 

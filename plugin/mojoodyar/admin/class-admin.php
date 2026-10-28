@@ -248,6 +248,7 @@ final class Admin {
 			'reconcile_interval'  => array( 5, 1440, 15 ),
 			'retention_days'      => array( 0, 3650, 180 ),
 			'cooldown_minutes'    => array( 0, 1440, 0 ),
+			'sms_max_value_length' => array( 15, 70, 25 ),
 		);
 
 		foreach ( $int_ranges as $key => $range ) {
@@ -266,6 +267,25 @@ final class Admin {
 
 		if ( isset( $input['generic_method'] ) && in_array( strtoupper( $input['generic_method'] ), array( 'POST', 'GET' ), true ) ) {
 			$out['generic_method'] = strtoupper( $input['generic_method'] );
+		}
+
+		if ( isset( $input['sms_link_mode'] ) && in_array( $input['sms_link_mode'], array( 'off', 'short', 'full' ), true ) ) {
+			$out['sms_link_mode'] = $input['sms_link_mode'];
+		}
+
+		if ( isset( $input['sms_short_domain'] ) ) {
+			$domain = strtolower( trim( (string) $input['sms_short_domain'] ) );
+			$domain = preg_replace( '#^https?://#', '', $domain );
+			$domain = rtrim( (string) $domain, '/' );
+
+			// A host only: no path, no query, no credentials in a link we build.
+			if ( '' === $domain ) {
+				$out['sms_short_domain'] = '';
+			} elseif ( preg_match( '/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(\/[a-z0-9._\/-]*)?$/', $domain ) ) {
+				$out['sms_short_domain'] = $domain;
+			} else {
+				add_settings_error( 'mojoodyar', 'sms_short_domain', 'دامنهٔ کوتاه معتبر نیست (نمونه: etd.ir)؛ مقدار قبلی نگه داشته شد.', 'error' );
+			}
 		}
 
 		if ( isset( $input['privacy_url'] ) ) {
