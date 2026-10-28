@@ -62,7 +62,8 @@ $GLOBALS['wpdb']->query(
 );
 \Mojoodyar\Logger::log( 'security', 'subscribe_rejected', 'duplicate', str_repeat( 'a', 64 ) );
 \Mojoodyar\Logger::log( 'security', 'subscribe_rejected', 'bad_nonce', str_repeat( 'b', 64 ) );
-\Mojoodyar\Logger::log( 'warning', 'delivery_failed', 'sms|http', '' );
+\Mojoodyar\Logger::log( 'warning', 'delivery_failed', 'sms|failed|attempt=3|err=شمارهٔ فرستنده تأیید نشده است' );
+\Mojoodyar\Logger::log( 'info', 'reconcile', 'scanned=8|transitions=0|queued=0' );
 \Mojoodyar\Logger::log( 'info', 'restock_queued', '501:0|units=2|queued=2' );
 \Mojoodyar\Logger::log( 'info', 'sent', 'sms|restock' );
 

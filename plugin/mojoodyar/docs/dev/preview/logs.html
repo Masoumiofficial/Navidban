@@ -2116,8 +2116,8 @@ body {
 	<div class="mjy-grid">
 		<div class="mjy-card">
 			<span class="mjy-card__label">کل رویدادها</span>
-			<strong class="mjy-card__value">۵</strong>
-			<span class="mjy-card__hint">۵ مورد در ۲۴ ساعت گذشته</span>
+			<strong class="mjy-card__value">۶</strong>
+			<span class="mjy-card__hint">۶ مورد در ۲۴ ساعت گذشته</span>
 		</div>
 		<div class="mjy-card">
 			<span class="mjy-card__label">هشدار و خطا</span>
@@ -2160,6 +2160,8 @@ body {
 						درخواست رد شد و ردیفی ساخته نشد (۲)					</option>
 									<option value="delivery_failed" >
 						ارسال پیام ناموفق بود (۱)					</option>
+									<option value="reconcile" >
+						پایش تطبیقی موجودی اجرا شد (۱)					</option>
 									<option value="restock_queued" >
 						اعلان بازگشت موجودی در صف گذاشته شد (۱)					</option>
 									<option value="sent" >
@@ -2189,7 +2191,7 @@ body {
 	</form>
 
 	<p class="mjy-muted">
-		۵ رویداد
+		۶ رویداد
 				· آدرس و ایمیل هرگز خام ذخیره نمی‌شوند؛ فقط هش IP و کلید رویداد.
 	</p>
 
@@ -2220,7 +2222,7 @@ body {
 								<dt>context</dt>
 								<dd dir="ltr">sms|restock</dd>
 								<dt>id</dt>
-								<dd dir="ltr">5</dd>
+								<dd dir="ltr">6</dd>
 															</dl>
 						</details>
 					</div>
@@ -2251,6 +2253,37 @@ body {
 								<dt>context</dt>
 								<dd dir="ltr">501:0|units=2|queued=2</dd>
 								<dt>id</dt>
+								<dd dir="ltr">5</dd>
+															</dl>
+						</details>
+					</div>
+				</article>
+											<article class="mjy-log__row mjy-log__row--info">
+					<div class="mjy-log__main">
+						<div class="mjy-log__head">
+							<span class="mjy-log__level mjy-log__level--info">
+								اطلاع							</span>
+							<strong class="mjy-log__title">پایش تطبیقی موجودی اجرا شد</strong>
+							<span class="mjy-log__time">
+								۶ آبان ۱۴۰۵								<span class="mjy-muted">· همین حالا</span>
+							</span>
+						</div>
+
+						<p class="mjy-log__detail">محصول بررسی‌شده: ۸، گذار موجودی: ۰، تعداد پیام در صف: ۰</p>
+
+											</div>
+
+					<div class="mjy-log__raw">
+						<details>
+							<summary>لاگ اصلی</summary>
+							<dl>
+								<dt>event</dt>
+								<dd dir="ltr">reconcile</dd>
+								<dt>level</dt>
+								<dd dir="ltr">info</dd>
+								<dt>context</dt>
+								<dd dir="ltr">scanned=8|transitions=0|queued=0</dd>
+								<dt>id</dt>
 								<dd dir="ltr">4</dd>
 															</dl>
 						</details>
@@ -2267,7 +2300,7 @@ body {
 							</span>
 						</div>
 
-						<p class="mjy-log__detail">کانال: پیامک — وضعیت ردیف: http</p>
+						<p class="mjy-log__detail">کانال: پیامک — وضعیت ردیف: ناموفق (تلاش‌ها تمام شد) — تلاش شمارهٔ ۳ — خطای درگاه: شمارهٔ فرستنده تأیید نشده است</p>
 
 													<p class="mjy-log__advice">
 								<span aria-hidden="true">↳</span>
@@ -2283,7 +2316,7 @@ body {
 								<dt>level</dt>
 								<dd dir="ltr">warning</dd>
 								<dt>context</dt>
-								<dd dir="ltr">sms|http</dd>
+								<dd dir="ltr">sms|failed|attempt=3|err=شمارهٔ فرستنده تأیید نشده است</dd>
 								<dt>id</dt>
 								<dd dir="ltr">3</dd>
 															</dl>
