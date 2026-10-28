@@ -269,6 +269,17 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 					<td><input id="mjy-batch" type="number" min="1" max="500" name="<?php echo esc_attr( Settings::OPTION ); ?>[queue_batch_size]" value="<?php echo esc_attr( (string) $settings['queue_batch_size'] ); ?>" /> <span class="description">پیش‌فرض ۵۰، سقف ۵۰۰.</span></td>
 				</tr>
 				<tr>
+					<th scope="row"><label for="mjy-attempts">حداکثر تلاش برای هر پیام</label></th>
+					<td>
+						<input id="mjy-attempts" type="number" min="1" max="5" name="<?php echo esc_attr( Settings::OPTION ); ?>[max_attempts]" value="<?php echo esc_attr( (string) $settings['max_attempts'] ); ?>" />
+						<span class="description">
+							پیش‌فرض ۳. اگر پیام ناموفق شد، با فاصلهٔ ۱۵ دقیقه، ۱ ساعت و ۶ ساعت دوباره تلاش می‌شود
+							و بعد از این تعداد، «ناموفق» می‌ماند. خطاهای تنظیماتی (طول مقدار، الگوی نامعتبر) از
+							این شمارش جدا هستند و تلاشی مصرف نمی‌کنند.
+						</span>
+					</td>
+				</tr>
+				<tr>
 					<th scope="row"><label for="mjy-rate">حداکثر ارسال در دقیقه</label></th>
 					<td><input id="mjy-rate" type="number" min="1" max="600" name="<?php echo esc_attr( Settings::OPTION ); ?>[queue_per_minute]" value="<?php echo esc_attr( (string) $settings['queue_per_minute'] ); ?>" /></td>
 				</tr>

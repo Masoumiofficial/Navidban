@@ -319,6 +319,59 @@ def audit_tree(root: str, report: Report) -> None:
         )
 
 
+def audit_settings_contract(root: str, report: Report) -> None:
+    """Every settings key must have a consumer.
+
+    A key that is saved and never read is worse than a missing feature: the
+    admin changes it, nothing happens, and the panel loses credibility. This
+    gate exists because four such keys survived several releases.
+    """
+    settings_path = os.path.join(root, "includes", "Settings.php")
+    if not os.path.exists(settings_path):
+        return
+
+    source = read_text(settings_path)
+    start = source.find("public static function defaults()")
+    end = source.find("/**", start + 10) if start != -1 else -1
+    block = source[start:end] if start != -1 and end != -1 else ""
+    keys = re.findall(r"'([a-z0-9_]+)'\s*=>", block)
+
+    parts = []
+    for base, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in ("tests", "docs", "tools", "languages", "assets")]
+        for name in files:
+            if not name.endswith(".php"):
+                continue
+            rel = os.path.relpath(os.path.join(base, name), root).replace(os.sep, "/")
+            if rel == "includes/Settings.php":
+                continue
+            parts.append(read_text(os.path.join(base, name)))
+
+    haystack = "\n".join(parts)
+    dead = [key for key in keys if f"'{key}'" not in haystack]
+
+    report.check(bool(keys), "کلیدهای تنظیمات خوانده شدند", str(len(keys)))
+    report.check(not dead, "هیچ گزینهٔ تنظیماتی بدون مصرف‌کننده نیست", ", ".join(dead[:8]))
+
+
+def audit_nonce_coverage(root: str, report: Report) -> None:
+    """Every admin-post handler must be reachable only through a nonce check."""
+    admin_path = os.path.join(root, "admin", "class-admin.php")
+    if not os.path.exists(admin_path):
+        return
+
+    source = read_text(admin_path)
+    handlers = re.findall(r"add_action\(\s*'admin_post_([a-z_]+)'", source)
+    nonces = source.count("check_admin_referer") + source.count("wp_verify_nonce")
+
+    report.check(len(handlers) > 0, "کنش‌گرهای admin-post شناسایی شدند", str(len(handlers)))
+    report.check(
+        nonces >= len(handlers),
+        "برای هر کنش admin-post یک بررسی nonce هست",
+        f"handlers={len(handlers)} nonce-checks={nonces}",
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--build", action="store_true", help="create the release zip first")
@@ -342,6 +395,8 @@ def main() -> int:
         report.info("ساخته شد", target)
 
     audit_tree(root, report)
+    audit_settings_contract(root, report)
+    audit_nonce_coverage(root, report)
     audit_zip(target if os.path.exists(target) else "", report, root)
 
     print(report.render())

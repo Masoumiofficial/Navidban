@@ -1262,6 +1262,26 @@ MjyInt::ok( '' !== \Mojoodyar\Notifier::link_for( 12, 0, 'email' ), 'ایمیل 
 Settings::update( array( 'sms_link_mode' => 'short', 'melipayamak_body_id' => '', 'sms_pattern_template' => '' ) );
 $GLOBALS['mjy_http_response'] = null;
 
+MjyInt::group( 'تعداد تلاش قابل تنظیم' );
+
+Settings::update( array( 'max_attempts' => 2 ) );
+Settings::flush_cache();
+MjyInt::same( 2, \Mojoodyar\Logic\QueuePolicy::max_attempts(), 'سقف تلاش از تنظیمات خوانده می‌شود' );
+MjyInt::same( 'queued', \Mojoodyar\Logic\QueuePolicy::status_after_failure( 1 ), 'با سقف ۲، تلاش اول هنوز در صف است' );
+MjyInt::same( 'failed', \Mojoodyar\Logic\QueuePolicy::status_after_failure( 2 ), 'و تلاش دوم «ناموفق» می‌شود' );
+
+Settings::update( array( 'max_attempts' => 5 ) );
+MjyInt::same( 'queued', \Mojoodyar\Logic\QueuePolicy::status_after_failure( 4 ), 'با سقف ۵، تلاش چهارم هم ادامه دارد' );
+
+// Out-of-range values are clamped, not trusted: a 0 would retry for ever and a
+// 99 would be indistinguishable from "never retry".
+Settings::update( array( 'max_attempts' => 0 ) );
+MjyInt::same( 1, \Mojoodyar\Logic\QueuePolicy::max_attempts(), 'مقدار صفر به ۱ محدود می‌شود' );
+Settings::update( array( 'max_attempts' => 99 ) );
+MjyInt::same( 5, \Mojoodyar\Logic\QueuePolicy::max_attempts(), 'مقدار بزرگ به ۵ محدود می‌شود' );
+Settings::update( array( 'max_attempts' => 3 ) );
+Settings::flush_cache();
+
 MjyInt::group( 'پیام متوقف‌شده (ایراد تنظیمات)' );
 
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );

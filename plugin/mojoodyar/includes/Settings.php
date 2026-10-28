@@ -85,7 +85,6 @@ final class Settings {
 
 			// Fair sending and repeat control.
 			'fair_sending'          => true,
-			'cooldown_minutes'      => 0,
 
 			// Queue.
 			'queue_batch_size'      => 50,
@@ -121,12 +120,10 @@ final class Settings {
 			'sms_max_value_length'  => 25,
 			'ippanel_token'         => '',
 			'ippanel_from'          => '',
-			'ippanel_pattern'       => '',
 			'kavenegar_api_key'     => '',
 			'kavenegar_sender'      => '',
 			'generic_url'           => '',
 			'generic_token'         => '',
-			'generic_method'        => 'POST',
 			'generic_payload'       => '{"to":"{to}","message":"{message}"}',
 
 			// Advanced.

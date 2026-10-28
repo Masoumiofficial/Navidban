@@ -247,7 +247,6 @@ final class Admin {
 			'max_attempts'        => array( 1, 3, 3 ),
 			'reconcile_interval'  => array( 5, 1440, 15 ),
 			'retention_days'      => array( 0, 3650, 180 ),
-			'cooldown_minutes'    => array( 0, 1440, 0 ),
 			'sms_max_value_length' => array( 15, 70, 25 ),
 		);
 
@@ -263,10 +262,6 @@ final class Admin {
 
 		if ( isset( $input['sms_gateway'] ) && in_array( $input['sms_gateway'], array( 'melipayamak', 'ippanel', 'kavenegar', 'generic' ), true ) ) {
 			$out['sms_gateway'] = $input['sms_gateway'];
-		}
-
-		if ( isset( $input['generic_method'] ) && in_array( strtoupper( $input['generic_method'] ), array( 'POST', 'GET' ), true ) ) {
-			$out['generic_method'] = strtoupper( $input['generic_method'] );
 		}
 
 		if ( isset( $input['sms_link_mode'] ) && in_array( $input['sms_link_mode'], array( 'off', 'short', 'site', 'full' ), true ) ) {
@@ -300,7 +295,6 @@ final class Admin {
 			'generic_token',
 			'generic_url',
 			'melipayamak_body_id',
-			'ippanel_pattern',
 		);
 
 		foreach ( $secret_fields as $key ) {

@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.8.0
+Stable tag: 2.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 8. صفحهٔ خطای فرم
 
 == Changelog ==
+
+= 2.8.1 =
+* تعداد تلاش برای هر پیام حالا واقعاً از تنظیمات خوانده می‌شود (۱ تا ۵) و در صفحهٔ تنظیمات دیده می‌شود؛ پیش‌تر این گزینه در کد تعریف شده بود ولی نادیده گرفته می‌شد.
+* سه گزینهٔ تنظیماتی که هیچ‌جا مصرف نمی‌شدند (`cooldown_minutes`، `ippanel_pattern`، `generic_method`) حذف شدند — بدنهٔ کد دیگر گزینهٔ تزئینی ندارد.
+* دو بازرسی تازه در `tools/verify-release.py`: «هیچ گزینهٔ تنظیماتی بدون مصرف‌کننده» و «برای هر کنش admin-post یک بررسی nonce هست».
 
 = 2.8.0 =
 * حالت تازهٔ «نشانی اصلی سایت» برای پیامک: کوتاه‌ترین گزینه (حدود ۲۰ کاراکتر) که همیشه زیر سقف جا می‌شود، ولی خریدار به صفحهٔ اصلی می‌رود نه به همان محصول.

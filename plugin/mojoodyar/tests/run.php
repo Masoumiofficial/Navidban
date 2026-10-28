@@ -901,6 +901,69 @@ MjyTest::same( 1, StatsMath::label_step( 0 ), 'a zero-length period does not div
 /* -------------------------------------------------------------------------
  * Log translation (the Persian column of the log screen)
  * ---------------------------------------------------------------------- */
+MjyTest::group( 'تنظیمات زنده (بدون گزینهٔ مرده)' );
+
+/**
+ * Every key that exists in Settings::defaults() must be read somewhere.
+ *
+ * A settings key that is saved, listed in the defaults and never read is worse
+ * than a missing feature: the admin changes it, nothing happens, and the whole
+ * panel stops being trustworthy. This audit found four such keys (max_attempts,
+ * cooldown_minutes, ippanel_pattern, generic_method) - one of them was wired
+ * up and the other three removed, rather than left as decoration.
+ */
+function mjy_plugin_files( $dir, array &$out = array() ) {
+	foreach ( (array) glob( $dir . '/*' ) as $path ) {
+		if ( is_dir( $path ) ) {
+			if ( false !== strpos( $path, '/tests' ) || false !== strpos( $path, '/docs' ) ) {
+				continue;
+			}
+
+			mjy_plugin_files( $path, $out );
+			continue;
+		}
+
+		if ( '.php' === substr( $path, -4 ) ) {
+			$out[] = $path;
+		}
+	}
+
+	return $out;
+}
+
+$mjy_root  = dirname( __DIR__ );
+$mjy_files = mjy_plugin_files( $mjy_root );
+MjyTest::ok( count( $mjy_files ) > 20, 'پویش فایل‌های افزونه انجام شد', count( $mjy_files ) );
+
+$mjy_settings_src = (string) file_get_contents( $mjy_root . '/includes/Settings.php' );
+$mjy_start        = strpos( $mjy_settings_src, 'public static function defaults()' );
+$mjy_block        = substr( $mjy_settings_src, $mjy_start, strpos( $mjy_settings_src, '/**', $mjy_start + 10 ) - $mjy_start );
+preg_match_all( "/'([a-z0-9_]+)'\s*=>/", $mjy_block, $mjy_keys );
+$mjy_keys = isset( $mjy_keys[1] ) ? $mjy_keys[1] : array();
+
+MjyTest::ok( count( $mjy_keys ) > 30, 'کلیدهای تنظیمات خوانده شدند', count( $mjy_keys ) );
+
+$mjy_all_src = '';
+foreach ( $mjy_files as $mjy_file ) {
+	if ( false !== strpos( $mjy_file, 'includes/Settings.php' ) ) {
+		continue;
+	}
+
+	$mjy_all_src .= (string) file_get_contents( $mjy_file );
+}
+
+$mjy_dead = array();
+foreach ( $mjy_keys as $mjy_key ) {
+	if ( false === strpos( $mjy_all_src, "'" . $mjy_key . "'" ) ) {
+		$mjy_dead[] = $mjy_key;
+	}
+}
+
+MjyTest::same( array(), $mjy_dead, 'هیچ گزینهٔ تنظیماتی بدون مصرف‌کننده نیست', implode( ', ', $mjy_dead ) );
+
+// The retry budget is now a real setting, not a constant pretending to be one.
+MjyTest::same( 3, \Mojoodyar\Logic\QueuePolicy::max_attempts(), 'تعداد تلاش پیش‌فرض ۳ است' );
+
 MjyTest::group( 'ترجمهٔ لاگ' );
 
 // Every event key the plugin can write must have a Persian title. The list is

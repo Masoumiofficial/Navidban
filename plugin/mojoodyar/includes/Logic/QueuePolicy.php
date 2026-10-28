@@ -22,11 +22,31 @@ final class QueuePolicy {
 	const BACKOFF_MINUTES = array( 15, 60, 360 );
 
 	/**
-	 * Maximum delivery attempts before an item is marked failed.
+	 * Default maximum delivery attempts before an item is marked failed.
+	 *
+	 * Used as the fallback of max_attempts(); the shop can change it in the
+	 * settings screen (1-5). Until 2.8.1 the setting existed and this constant
+	 * was the only thing read, so changing it did nothing - exactly the kind of
+	 * half-wired option that makes a panel untrustworthy.
 	 *
 	 * @var int
 	 */
 	const MAX_ATTEMPTS = 3;
+
+	/**
+	 * Delivery attempts actually configured.
+	 *
+	 * @return int 1-5.
+	 */
+	public static function max_attempts() {
+		$value = (int) \Mojoodyar\Settings::get( 'max_attempts', self::MAX_ATTEMPTS );
+
+		if ( $value < 1 ) {
+			return 1;
+		}
+
+		return ( $value > 5 ) ? 5 : $value;
+	}
 
 	/**
 	 * Seconds after which a processing lock is considered abandoned.
@@ -44,7 +64,7 @@ final class QueuePolicy {
 	public static function backoff_minutes( $attempts ) {
 		$attempts = (int) $attempts;
 
-		if ( $attempts >= self::MAX_ATTEMPTS ) {
+		if ( $attempts >= self::max_attempts() ) {
 			return 0;
 		}
 
@@ -67,7 +87,7 @@ final class QueuePolicy {
 	 * @return string "queued" or "failed".
 	 */
 	public static function status_after_failure( $attempts ) {
-		return ( (int) $attempts >= self::MAX_ATTEMPTS ) ? 'failed' : 'queued';
+		return ( (int) $attempts >= self::max_attempts() ) ? 'failed' : 'queued';
 	}
 
 	/**
