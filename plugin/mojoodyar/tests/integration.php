@@ -1236,6 +1236,82 @@ MjyInt::ok( '' !== \Mojoodyar\Notifier::link_for( 12, 0, 'email' ), 'ایمیل 
 Settings::update( array( 'sms_link_mode' => 'short', 'melipayamak_body_id' => '', 'sms_pattern_template' => '' ) );
 $GLOBALS['mjy_http_response'] = null;
 
+MjyInt::group( 'پیام متوقف‌شده (ایراد تنظیمات)' );
+
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) );
+mjy_reset_rate_limit();
+
+Settings::update(
+	array(
+		'sms_enabled'          => true,
+		'sms_gateway'          => 'melipayamak',
+		'melipayamak_user'     => '09120000000',
+		'melipayamak_pass'     => 'secret',
+		'melipayamak_body_id'  => '568710',
+		'sms_pattern_template' => '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} اتحاد وردپرس',
+		'sms_link_mode'        => 'short',
+		'sms_short_domain'     => '',
+		'sms_max_value_length' => 20,
+		'site_name'            => 'اتحاد وردپرس',
+	)
+);
+
+$blocked_row = WaitlistRepository::create(
+	array(
+		'product_id' => 180,
+		'channel'    => 'sms',
+		'phone'      => '09125550009',
+		'full_name'  => 'سارا کریمی',
+		'status'     => 'confirmed',
+	)
+);
+Queue::enqueue( (int) $blocked_row['id'], 'sms', 'restock:20261028:blocked01', array( 'product_id' => 180 ) );
+$blocked_id = (int) $GLOBALS['wpdb']->get_var( 'SELECT MAX(id) FROM ' . Queue::table() );
+
+$GLOBALS['mjy_http_calls'] = array();
+Queue::release_lock();
+$blocked_run = Queue::process( 10 );
+
+MjyInt::same( 0, (int) $blocked_run['sent'], 'پیام با مقدار بلند ارسال نمی‌شود' );
+MjyInt::same( 0, count( $GLOBALS['mjy_http_calls'] ), 'و هیچ تماسی با درگاه انجام نمی‌شود' );
+
+$blocked_row_db = $GLOBALS['wpdb']->get_row( 'SELECT * FROM ' . Queue::table() . ' WHERE id = ' . $blocked_id, ARRAY_A );
+MjyInt::same( 'blocked', (string) $blocked_row_db['status'], 'وضعیت ردیف «متوقف‌شده» است، نه «ناموفق»' );
+MjyInt::same( 0, (int) $blocked_row_db['attempts'], 'تلاش‌ها سوخته نمی‌شوند (این خطای پیام نیست)' );
+MjyInt::ok( false !== strpos( (string) $blocked_row_db['last_error'], 'کاراکتر' ), 'دلیل روی ردیف نوشته می‌شود' );
+
+$blocked_log = $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) . " WHERE event = 'queue_blocked'" );
+MjyInt::same( 1, (int) $blocked_log, 'رویداد «متوقف شد» یک بار در لاگ می‌آید' );
+
+// Running again must not spam the log: same row, same reason.
+Queue::release_lock();
+Queue::pull_forward();
+Queue::release_lock();
+Queue::process( 10 );
+$blocked_log_again = $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) . " WHERE event = 'queue_blocked'" );
+MjyInt::same( 1, (int) $blocked_log_again, 'اجرای دوباره لاگ را پر نمی‌کند' );
+
+$blocked_stats = Queue::stats();
+MjyInt::same( 1, (int) $blocked_stats['blocked'], 'شمارندهٔ «متوقف‌شده» در آمار صف هست' );
+
+$diagnosis_blocked = Queue::diagnose();
+MjyInt::same( 1, (int) $diagnosis_blocked['blocked'], 'تشخیص، پیام متوقف‌شده را نشان می‌دهد' );
+MjyInt::ok( false !== strpos( (string) $diagnosis_blocked['hint'], 'تنظیمات' ), 'و می‌گوید ایراد تنظیمات است' );
+
+// Fixing the setting is what releases it: retry requeues blocked rows too.
+Settings::update( array( 'sms_max_value_length' => 40, 'sms_short_domain' => 'etd.ir' ) );
+MjyInt::same( 1, Queue::retry_failed( 10 ), 'ابزار تلاش دوباره، ردیف متوقف‌شده را هم برمی‌گرداند' );
+
+$GLOBALS['mjy_http_calls']    = array();
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"99","RetStatus":1,"StrRetStatus":"Ok"}' );
+Queue::release_lock();
+$fixed_run = Queue::process( 10 );
+MjyInt::same( 1, (int) $fixed_run['sent'], 'پس از اصلاح تنظیمات، همان پیام ارسال می‌شود' );
+
+Settings::update( array( 'melipayamak_body_id' => '', 'sms_pattern_template' => '', 'sms_short_domain' => '', 'sms_max_value_length' => 25 ) );
+$GLOBALS['mjy_http_response'] = null;
+
 MjyInt::group( 'نام مشتری و پیگیری تماس' );
 
 $GLOBALS['mjy_options']['mojoodyar_settings'] = Settings::defaults();

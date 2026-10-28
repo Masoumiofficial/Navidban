@@ -958,6 +958,14 @@ final class Admin {
 
 		$text = isset( $reasons[ $skipped ] ) ? $reasons[ $skipped ] : '';
 
+		if ( (int) $diagnosis['blocked'] > 0 ) {
+			$text .= ' ' . sprintf(
+				'%s پیام هم به‌خاطر ایراد تنظیمات متوقف است (نه خطای درگاه)؛ %s',
+				Persian::number( (int) $diagnosis['blocked'] ),
+				$diagnosis['hint']
+			);
+		}
+
 		$text .= sprintf(
 			' (آمادهٔ ارسال: %s، زمان‌بندی‌شده: %s، در حال ارسال: %s، ناموفق: %s، ردشده: %s)',
 			Persian::number( (int) $diagnosis['ready'] ),
@@ -1082,6 +1090,10 @@ final class Admin {
 				break;
 
 			case 'test_email':
+			case 'pattern_probe':
+				$message = $this->send_pattern_probe();
+				break;
+
 			case 'test_sms':
 				$message = $this->send_test( 'test_email' === $tool ? 'email' : 'sms' );
 				break;
@@ -1105,6 +1117,93 @@ final class Admin {
 	 * @param string $channel Channel.
 	 * @return string Human message.
 	 */
+	/**
+	 * Send one real SMS through the approved pattern, to answer "what does this
+	 * gateway actually accept?" with evidence instead of a guess.
+	 *
+	 * The per-variable length cap in this plugin is a conservative estimate: no
+	 * operator publishes its exact rule. Guessing wrong in either direction is
+	 * expensive - too low blocks every message locally, too high returns
+	 * "InvalidData" with no explanation. This sends the real pattern with the
+	 * real link, once, to one number the admin typed, and prints the gateway's
+	 * own answer verbatim.
+	 *
+	 * @return string
+	 */
+	private function send_pattern_probe() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified in handle_tool().
+		$phone = isset( $_POST['probe_phone'] ) ? Validator::normalize_phone( sanitize_text_field_compat( wp_unslash_compat( $_POST['probe_phone'] ) ) ) : '';
+		$mode  = isset( $_POST['probe_mode'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_POST['probe_mode'] ) ) : 'short';
+		$product_id = isset( $_POST['probe_product'] ) ? (int) $_POST['probe_product'] : 0;
+		// phpcs:enable
+
+		if ( '' === $phone ) {
+			return 'شماره‌ای که پیام آزمایشی به آن برود را درست وارد کنید (۰۹…).';
+		}
+
+		if ( ! in_array( $mode, array( 'none', 'short', 'full' ), true ) ) {
+			$mode = 'short';
+		}
+
+		if ( $product_id <= 0 ) {
+			$product_id = (int) $GLOBALS['wpdb']->get_var( 'SELECT product_id FROM ' . WaitlistRepository::table() . ' ORDER BY id DESC LIMIT 1' );
+		}
+
+		if ( $product_id <= 0 ) {
+			$product_id = 1;
+		}
+
+		$short = \Mojoodyar\Notifier::product_short_url( $product_id );
+		$full  = \Mojoodyar\Notifier::product_url( $product_id );
+
+		$link = 'short' === $mode ? $short : ( 'full' === $mode ? $full : '' );
+
+		$context = array(
+			'customer_name'   => 'آزمون موجودیار',
+			'product_name'    => 'کالای آزمایشی',
+			'product_url'     => $full,
+			'sms_product_url' => $link,
+			'site_name'       => (string) Settings::get( 'site_name', '' ),
+			'price'           => '۰ تومان',
+		);
+
+		$template = \Mojoodyar\Logic\SmsPattern::resolve(
+			(string) Settings::get( 'sms_pattern_template', '' ),
+			(string) Settings::get( 'site_name', '' )
+		);
+
+		$instance = Notifier::channel( 'sms' );
+
+		if ( null === $instance || ! $instance->is_configured() ) {
+			return 'درگاه پیامک پیکربندی نشده است؛ ابتدا در «تنظیمات» کامل کنید.';
+		}
+
+		$result = $instance->send(
+			$phone,
+			'',
+			'این یک پیام آزمایشی از موجودیار است.',
+			array( 'context' => $context )
+		);
+
+		$lengths = array();
+
+		foreach ( \Mojoodyar\Logic\SmsPattern::indexes( $template ) as $index ) {
+			$lengths[] = '{' . $index . '}=' . \Mojoodyar\Support\Text::length( \Mojoodyar\Logic\SmsPattern::raw( $index, $context ) );
+		}
+
+		$shape = implode(' ', $lengths) . ' | ' . ( 'none' === $mode ? 'بدون نشانی' : $link );
+
+		if ( true === $result ) {
+			return 'درگاه این را پذیرفت. ' . $shape;
+		}
+
+		$reason = is_object( $result ) && method_exists( $result, 'get_error_message' )
+			? $result->get_error_message()
+			: (string) $result;
+
+		return 'درگاه این را نپذیرفت: ' . $reason . ' — ' . $shape;
+	}
+
 	private function send_test( $channel ) {
 		$email = '';
 		if ( function_exists( 'get_option' ) ) {

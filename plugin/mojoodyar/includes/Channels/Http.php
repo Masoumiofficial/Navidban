@@ -36,7 +36,7 @@ final class Http {
 			'sslverify'   => true,
 			'headers'     => $headers,
 			'body'        => $body,
-			'user-agent'  => 'Mojoodyar/' . ( defined( 'MOJODYAR_VERSION' ) ? MOJODYAR_VERSION : '2.7.0' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
+			'user-agent'  => 'Mojoodyar/' . ( defined( 'MOJODYAR_VERSION' ) ? MOJODYAR_VERSION : '2.7.1' ) . '; ' . ( function_exists( 'home_url' ) ? home_url( '/' ) : '' ),
 		);
 
 		if ( 'json' === $format && ! isset( $args['headers']['Content-Type'] ) ) {

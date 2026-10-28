@@ -70,6 +70,26 @@ if ( $mjy_notice ) {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
 			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
 			<input type="hidden" name="action" value="mojoodyar_tool" />
+			<input type="hidden" name="tool" value="pattern_probe" />
+			<h3>آزمون ارسال الگو (با پیامک واقعی)</h3>
+			<p>
+				یک پیامک واقعی با الگوی تأییدشده می‌فرستد و <strong>عین پاسخ درگاه</strong> را نشان می‌دهد.
+				برای وقتی که نمی‌دانید مشکل از طول مقدار است یا از تعداد متغیرها؛ چون هیچ اپراتوری
+				سقف دقیقش را منتشر نمی‌کند.
+			</p>
+			<p><label>شمارهٔ آزمایشی <input type="tel" dir="ltr" name="probe_phone" placeholder="09xxxxxxxxx" /></label></p>
+			<p><label>شناسهٔ محصول (اختیاری) <input type="number" dir="ltr" name="probe_product" placeholder="مثلاً 1234" /></label></p>
+			<p>
+				<label><input type="radio" name="probe_mode" value="short" checked="checked" /> با نشانی کوتاه</label>
+				<label><input type="radio" name="probe_mode" value="full" /> با نشانی کامل</label>
+				<label><input type="radio" name="probe_mode" value="none" /> بدون نشانی</label>
+			</p>
+			<button class="button button-primary">ارسال آزمون</button>
+		</form>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
+			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
+			<input type="hidden" name="action" value="mojoodyar_tool" />
 			<input type="hidden" name="tool" value="send_due_now" />
 			<h3>ارسال فوری پیام‌های زمان‌بندی‌شده</h3>
 			<p>پیام‌هایی که منتظر زمان اجرا یا عقب‌نشینی پس از خطا هستند، همین حالا ارسال می‌شوند. زمانی که درگاه را درست کرده‌اید به کار می‌آید.</p>

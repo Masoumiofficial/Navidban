@@ -60,6 +60,15 @@ $mjy_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $
 				<tr><th>ارسال‌شده</th><td><?php echo esc_html( Persian::number( $queue['sent'] ) ); ?></td></tr>
 				<tr><th>ناموفق (پس از ۳ تلاش)</th><td><?php echo esc_html( Persian::number( $queue['failed'] ) ); ?></td></tr>
 				<tr><th>ردشده (لغو/تأییدنشده)</th><td><?php echo esc_html( Persian::number( $queue['skipped'] ) ); ?></td></tr>
+				<?php if ( ! empty( $queue['blocked'] ) ) : ?>
+					<tr>
+						<th>متوقف‌شده (ایراد تنظیمات)</th>
+						<td>
+							<?php echo esc_html( Persian::number( $queue['blocked'] ) ); ?>
+							<span class="mjy-muted">— پیش از رسیدن به درگاه متوقف شده؛ تنظیمات را درست کنید</span>
+						</td>
+					</tr>
+				<?php endif; ?>
 				<tr>
 					<th>قدیمی‌ترین پیام در انتظار</th>
 					<td><?php echo $queue['oldest'] ? esc_html( Jalali::format( (string) $queue['oldest'], 'datetime' ) ) : '—'; ?></td>

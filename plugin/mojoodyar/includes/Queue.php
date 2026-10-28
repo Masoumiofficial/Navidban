@@ -215,6 +215,7 @@ final class Queue {
 		$processing = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'processing'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$failed     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'failed'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$skipped    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'skipped'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$blocked    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'blocked'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		// The nearest waiting row, with the two facts that explain it: how long the
 		// wait still is, and whether the wait exists because the last attempt
@@ -254,6 +255,8 @@ final class Queue {
 			}
 		} elseif ( $processing > 0 ) {
 			$hint = 'ردیف‌ها در وضعیت «در حال ارسال» گیر کرده‌اند؛ ابزار «آزادکردن قفل صف» را بزنید.';
+		} elseif ( $blocked > 0 ) {
+			$hint = 'پیام‌ها به‌خاطر یک ایراد تنظیمات متوقف شده‌اند (نه خطای درگاه) و ارسال نشده‌اند؛ همان ایراد را در تنظیمات درست کنید، بعد «تلاش دوباره برای پیام‌های ناموفق».';
 		} elseif ( $failed > 0 ) {
 			$hint = 'همهٔ پیام‌ها ناموفق‌اند؛ ابزار «تلاش دوباره برای پیام‌های ناموفق» را بزنید.';
 		} elseif ( $skipped > 0 ) {
@@ -269,6 +272,7 @@ final class Queue {
 			'processing'     => $processing,
 			'failed'         => $failed,
 			'skipped'        => $skipped,
+			'blocked'        => $blocked,
 			'now'            => $now,
 			'nearest'        => $nearest_when,
 			'nearest_wait'   => $nearest_wait,
@@ -450,6 +454,38 @@ final class Queue {
 			return true;
 		}
 
+		// A configuration error is not the message's fault: it will fail the same
+		// way on every retry until somebody edits the settings. Counting it as an
+		// attempt burned the retry budget and ended with "failed", which reads
+		// like the gateway refused the SMS - while nothing ever left the site.
+		if ( is_object( $result ) && method_exists( $result, 'get_error_code' ) && self::is_config_error( (string) $result->get_error_code() ) ) {
+			$blocked = $wpdb->update(
+				$table,
+				array(
+					'status'      => 'blocked',
+					'last_error'  => Text::substring( (string) $result->get_error_message(), 0, 255 ),
+					'locked_at'   => null,
+					'next_run_at' => gmdate( 'Y-m-d H:i:s' ),
+				),
+				array( 'id' => (int) $queue_id ),
+				array( '%s', '%s', '%s', '%s' ),
+				array( '%d' )
+			);
+
+			// Log once per transition, not once per run: the same blocked row must
+			// not fill the event log every fifteen minutes.
+			if ( false !== $blocked && 0 !== (int) $blocked && 'blocked' !== (string) $row['status'] ) {
+				Logger::log(
+					'error',
+					'queue_blocked',
+					(string) $row['channel'] . '|' . (string) $result->get_error_code()
+						. '|' . \Mojoodyar\Support\Masking::free_text( (string) $result->get_error_message(), 160 )
+				);
+			}
+
+			return false;
+		}
+
 		$attempts = (int) $row['attempts'] + 1;
 		$status   = QueuePolicy::status_after_failure( $attempts );
 		$next_run = QueuePolicy::next_run_after_failure( time(), $attempts );
@@ -560,6 +596,27 @@ final class Queue {
 		return $pulled;
 	}
 
+	/**
+	 * Is this error code a settings problem rather than a delivery problem?
+	 *
+	 * @param string $code WP_Error code.
+	 * @return bool
+	 */
+	public static function is_config_error( $code ) {
+		$code = (string) $code;
+
+		$config_codes = array(
+			'mojoodyar_sms_config',
+			'mojoodyar_sms_pattern',
+			'mojoodyar_sms_value_long',
+			'mojoodyar_phone_invalid',
+			'mojoodyar_email_config',
+			'mojoodyar_mail_failed_config',
+		);
+
+		return in_array( $code, $config_codes, true );
+	}
+
 	public static function retry_failed( $limit = 200 ) {
 		global $wpdb;
 
@@ -568,7 +625,7 @@ final class Queue {
 
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT id FROM {$table} WHERE status = 'failed' ORDER BY id ASC LIMIT %d",
+				"SELECT id FROM {$table} WHERE status IN ('failed','blocked') ORDER BY id ASC LIMIT %d",
 				$limit
 			)
 		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -668,7 +725,7 @@ final class Queue {
 
 		$table = self::table();
 
-		return (int) $wpdb->query( "DELETE FROM {$table} WHERE status IN ('queued','processing','failed','skipped')" ); // phpcs:ignore WordPress.DB.PreparedSQL
+		return (int) $wpdb->query( "DELETE FROM {$table} WHERE status IN ('queued','processing','failed','skipped','blocked')" ); // phpcs:ignore WordPress.DB.PreparedSQL
 	}
 
 	/**
@@ -689,6 +746,7 @@ final class Queue {
 			'sent'       => 0,
 			'failed'     => 0,
 			'skipped'    => 0,
+			'blocked'    => 0,
 			'oldest'     => '',
 		);
 

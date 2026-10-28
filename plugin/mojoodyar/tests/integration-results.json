@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.7.0",
+    "plugin_version": "2.7.1",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-28T09:57:52+00:00",
-    "assertions": 418,
+    "generated_at": "2026-10-28T10:06:27+00:00",
+    "assertions": 430,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -60,6 +60,10 @@
         },
         "نشانی کوتاه و سقف متغیر": {
             "assertions": 13,
+            "failures": 0
+        },
+        "پیام متوقف‌شده (ایراد تنظیمات)": {
+            "assertions": 12,
             "failures": 0
         },
         "نام مشتری و پیگیری تماس": {
