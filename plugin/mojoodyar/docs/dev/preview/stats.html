@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.5.0 — stats</title>
+<title>موجودیار 2.6.0 — stats</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -2007,9 +2007,89 @@ body {
 
 .mjy-log__pager {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 10px;
+	gap: 6px;
 	margin: 0 0 20px;
+}
+
+/* Pager: page numbers are the same glass chip as a button, without the
+   drop shadow - a row of twenty shadows reads as noise. */
+.mjy-log__page {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px;
+	height: 34px;
+	padding: 0 8px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.62);
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	box-shadow: 0 1px 2px rgba(14, 92, 85, 0.08);
+	color: var(--mjy-ink);
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 140ms ease, color 140ms ease;
+}
+
+.mjy-log__page:hover {
+	background: rgba(255, 255, 255, 0.9);
+	color: var(--mjy-primary);
+}
+
+.mjy-log__page--on {
+	background: var(--mjy-primary);
+	border-color: var(--mjy-primary);
+	color: #fff;
+}
+
+.mjy-log__gap {
+	padding: 0 2px;
+	color: #8b968f;
+}
+
+.mjy-log__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.mjy-log__meta p {
+	margin: 0;
+}
+
+.mjy-log__perpage {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12.5px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+.mjy-log__perpage a,
+.mjy-log__perpage-on {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 28px;
+	padding: 0 6px;
+	border-radius: 10px;
+	text-decoration: none;
+	background: rgba(255, 255, 255, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	color: var(--mjy-ink);
+}
+
+.mjy-log__perpage-on {
+	background: rgba(14, 92, 85, 0.12);
+	border-color: rgba(14, 92, 85, 0.25);
+	color: var(--mjy-primary);
+	font-weight: 700;
 }
 
 .mjy-log__more {
@@ -2108,11 +2188,11 @@ body {
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.5.0.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.6.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — آمار<small>آنچه در بازهٔ انتخابی گذشته است، با عدد</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۵.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats" aria-current="page">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — آمار<small>آنچه در بازهٔ انتخابی گذشته است، با عدد</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۶.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats" aria-current="page">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
 	<div class="mjy-ranges no-print">
 					<a
 				class="mjy-range"

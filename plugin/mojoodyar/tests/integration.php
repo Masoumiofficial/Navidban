@@ -1733,6 +1733,99 @@ MjyInt::same( 1, (int) $sent_again['sent'], 'پیام پس از اصلاح در�
 Settings::update( array( 'sms_enabled' => false, 'sms_gateway' => 'melipayamak' ) );
 Settings::flush_cache();
 
+MjyInt::group( 'صف گیرکرده' );
+
+mjy_reset_state();
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) );
+mjy_reset_rate_limit();
+
+Settings::update( array( 'sms_enabled' => true, 'sms_gateway' => 'generic', 'generic_url' => 'https://sms.example/send', 'generic_token' => 'tok', 'send_window_enabled' => false ) );
+Settings::flush_cache();
+
+$stuck_row = WaitlistRepository::create(
+	array(
+		'product_id' => 170,
+		'channel'    => 'sms',
+		'phone'      => '09125550000',
+		'full_name'  => 'آرش نادری',
+		'status'     => 'confirmed',
+	)
+);
+Queue::enqueue( (int) $stuck_row['id'], 'sms', 'restock:20261028:stuck001', array( 'product_id' => 170 ) );
+$stuck_id = (int) $GLOBALS['wpdb']->get_var( 'SELECT MAX(id) FROM ' . Queue::table() );
+
+// Simulate a worker that claimed the row and then died: PHP fatal inside the
+// gateway, max_execution_time, a 502 from the host, or the admin closing the
+// tab. The row is left in "processing" with nobody working on it.
+$GLOBALS['wpdb']->query(
+	'UPDATE ' . Queue::table() . " SET status = 'processing', locked_at = '"
+	. gmdate( 'Y-m-d H:i:s', time() - 3600 ) . "' WHERE id = " . $stuck_id
+);
+
+$stats_before = Queue::stats();
+MjyInt::same( 1, (int) $stats_before['processing'], 'ردیف گیرکرده در شمارندهٔ «در حال ارسال» دیده می‌شود' );
+MjyInt::same( 0, (int) $stats_before['queued'], 'و در شمارندهٔ صف نیست' );
+
+$GLOBALS['mjy_http_response'] = array(
+	'response' => array( 'code' => 200 ),
+	'body'     => '{"ok":true}',
+);
+$GLOBALS['mjy_http_calls'] = array();
+
+// One run must both take the abandoned claim back and send it. Before 2.6.0
+// this returned skipped='empty' and the message sat there for ever.
+Queue::release_lock();
+$healed = Queue::process( 10 );
+MjyInt::same( 1, (int) $healed['reclaimed'], 'اجرای صف، ردیف رهاشده را پس می‌گیرد' );
+MjyInt::same( 1, (int) $healed['sent'], 'و همان پیام ارسال می‌شود' );
+
+$healed_row = $GLOBALS['wpdb']->get_row( 'SELECT * FROM ' . Queue::table() . ' WHERE id = ' . $stuck_id, ARRAY_A );
+MjyInt::same( 'sent', (string) $healed_row['status'], 'ردیف در پایان «ارسال‌شده» است' );
+MjyInt::ok( empty( $healed_row['locked_at'] ), 'قفل رهاشده پاک می‌شود' );
+
+$reclaim_log = $GLOBALS['wpdb']->get_var(
+	'SELECT COUNT(*) FROM ' . \Mojoodyar\Database::table( \Mojoodyar\Database::LOGS ) . " WHERE event = 'queue_reclaimed'"
+);
+MjyInt::ok( (int) $reclaim_log >= 1, 'بازیابی ردیف رهاشده در لاگ ثبت می‌شود' );
+
+// A fresh claim (a worker genuinely running right now) must NOT be stolen.
+$GLOBALS['wpdb']->query(
+	'UPDATE ' . Queue::table() . " SET status = 'processing', locked_at = '" . gmdate( 'Y-m-d H:i:s' ) . "' WHERE id = " . $stuck_id
+);
+Queue::release_lock();
+MjyInt::same( 0, Queue::reclaim_stale(), 'قفل تازه دست‌نخورده می‌ماند' );
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() . ' WHERE id = ' . $stuck_id );
+
+// A row that is not due yet must say "scheduled", not "empty".
+$blocked = WaitlistRepository::create(
+	array(
+		'product_id' => 171,
+		'channel'    => 'sms',
+		'phone'      => '09125550001',
+		'status'     => 'confirmed',
+	)
+);
+Queue::enqueue( (int) $blocked['id'], 'sms', 'restock:20261028:future001', array( 'product_id' => 171 ) );
+$future_id = (int) $GLOBALS['wpdb']->get_var( 'SELECT MAX(id) FROM ' . Queue::table() );
+$GLOBALS['wpdb']->query(
+	'UPDATE ' . Queue::table() . " SET next_run_at = '" . gmdate( 'Y-m-d H:i:s', time() + 3600 ) . "' WHERE id = " . $future_id
+);
+
+Queue::release_lock();
+$future_run = Queue::process( 10 );
+MjyInt::same( 'scheduled', (string) $future_run['skipped'], 'ردیف با زمان اجرای آینده، «خالی» گزارش نمی‌شود' );
+MjyInt::same( 0, (int) $future_run['sent'], 'و هنوز ارسال نمی‌شود' );
+
+$diagnosis = Queue::diagnose();
+MjyInt::same( 1, (int) $diagnosis['scheduled'], 'تشخیص، تعداد ردیف‌های زمان‌بندی‌شده را می‌دهد' );
+MjyInt::same( 0, (int) $diagnosis['ready'], 'و تعداد آمادهٔ ارسال را صفر می‌دهد' );
+MjyInt::ok( false !== strpos( (string) $diagnosis['hint'], 'زمان' ), 'تشخیص دلیل فارسی دارد' );
+
+$GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() . ' WHERE id = ' . $future_id );
+Queue::release_lock();
+
 MjyInt::group( 'پیگیری تلفنی مرحله‌ای' );
 
 $GLOBALS['mjy_options']['mojoodyar_settings'] = Settings::defaults();

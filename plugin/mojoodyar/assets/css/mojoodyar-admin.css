@@ -1975,9 +1975,89 @@
 
 .mjy-log__pager {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 10px;
+	gap: 6px;
 	margin: 0 0 20px;
+}
+
+/* Pager: page numbers are the same glass chip as a button, without the
+   drop shadow - a row of twenty shadows reads as noise. */
+.mjy-log__page {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px;
+	height: 34px;
+	padding: 0 8px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.62);
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	box-shadow: 0 1px 2px rgba(14, 92, 85, 0.08);
+	color: var(--mjy-ink);
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 140ms ease, color 140ms ease;
+}
+
+.mjy-log__page:hover {
+	background: rgba(255, 255, 255, 0.9);
+	color: var(--mjy-primary);
+}
+
+.mjy-log__page--on {
+	background: var(--mjy-primary);
+	border-color: var(--mjy-primary);
+	color: #fff;
+}
+
+.mjy-log__gap {
+	padding: 0 2px;
+	color: #8b968f;
+}
+
+.mjy-log__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.mjy-log__meta p {
+	margin: 0;
+}
+
+.mjy-log__perpage {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12.5px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+.mjy-log__perpage a,
+.mjy-log__perpage-on {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 28px;
+	padding: 0 6px;
+	border-radius: 10px;
+	text-decoration: none;
+	background: rgba(255, 255, 255, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	color: var(--mjy-ink);
+}
+
+.mjy-log__perpage-on {
+	background: rgba(14, 92, 85, 0.12);
+	border-color: rgba(14, 92, 85, 0.25);
+	color: var(--mjy-primary);
+	font-weight: 700;
 }
 
 .mjy-log__more {

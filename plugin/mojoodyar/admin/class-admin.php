@@ -530,17 +530,20 @@ final class Admin {
 		$search = isset( $_GET['s'] ) ? sanitize_text_field_compat( wp_unslash_compat( $_GET['s'] ) ) : '';
 		$days   = isset( $_GET['days'] ) ? (int) $_GET['days'] : 0;
 		$page   = isset( $_GET['paged'] ) ? max( 1, (int) $_GET['paged'] ) : 1;
+		$per    = isset( $_GET['per_page'] ) ? (int) $_GET['per_page'] : Logs::PER_PAGE;
 		// phpcs:enable
 
 		$level = in_array( $level, Logs::FILTER_LEVELS, true ) ? $level : '';
 		$days  = in_array( $days, Logs::RANGES, true ) ? $days : 0;
+		$per   = in_array( $per, Logs::PER_PAGE_OPTIONS, true ) ? $per : Logs::PER_PAGE;
 
 		return array(
-			'level'  => $level,
-			'event'  => $event,
-			'search' => $search,
-			'days'   => $days,
-			'page'   => $page,
+			'level'    => $level,
+			'event'    => $event,
+			'search'   => $search,
+			'days'     => $days,
+			'page'     => $page,
+			'per_page' => $per,
 		);
 	}
 
@@ -556,11 +559,12 @@ final class Admin {
 
 		$result = Logs::query(
 			array(
-				'level'  => $filters['level'],
-				'event'  => $filters['event'],
-				'search' => $filters['search'],
-				'days'   => $filters['days'],
-				'page'   => $filters['page'],
+				'level'    => $filters['level'],
+				'event'    => $filters['event'],
+				'search'   => $filters['search'],
+				'days'     => $filters['days'],
+				'page'     => $filters['page'],
+				'per_page' => $filters['per_page'],
 			)
 		);
 
@@ -915,6 +919,42 @@ final class Admin {
 	}
 
 	/**
+	 * Turn the queue's stop reason into a Persian sentence plus the counts.
+	 *
+	 * @param string $skipped Stop reason returned by Queue::process().
+	 * @return string
+	 */
+	protected static function queue_reason( $skipped ) {
+		$diagnosis = Queue::diagnose();
+
+		$reasons = array(
+			'empty'     => 'صف خالی است؛ هیچ اعلانی در انتظار ارسال نیست.',
+			'scheduled' => 'هیچ پیامی زمانِ ارسالش نرسیده است.',
+			'window'    => 'بیرون از بازهٔ مجاز ارسال هستیم؛ ساعت شروع و پایان را در تنظیمات ببینید.',
+			'rate'      => 'سقف ارسال در هر دقیقه پر شده است؛ چند دقیقه بعد دوباره بزنید.',
+			'locked'    => 'قفل صف در اختیار اجرای دیگری است؛ چند دقیقه بعد دوباره بزنید.',
+			'budget'    => 'زمان اجرا تمام شد؛ بقیهٔ پیام‌ها در اجرای بعدی می‌روند.',
+		);
+
+		$text = isset( $reasons[ $skipped ] ) ? $reasons[ $skipped ] : '';
+
+		$text .= sprintf(
+			' (آمادهٔ ارسال: %s، زمان‌بندی‌شده: %s، در حال ارسال: %s، ناموفق: %s، ردشده: %s)',
+			Persian::number( (int) $diagnosis['ready'] ),
+			Persian::number( (int) $diagnosis['scheduled'] ),
+			Persian::number( (int) $diagnosis['processing'] ),
+			Persian::number( (int) $diagnosis['failed'] ),
+			Persian::number( (int) $diagnosis['skipped'] )
+		);
+
+		if ( (int) $diagnosis['scheduled'] > 0 && 'scheduled' === $skipped ) {
+			$text .= ' ' . $diagnosis['hint'];
+		}
+
+		return $text;
+	}
+
+	/**
 	 * Handle the one-click tools.
 	 *
 	 * @return void
@@ -951,11 +991,30 @@ final class Admin {
 
 			case 'flush_queue':
 				$stats = Queue::process( 200 );
+
+				// "0 sent (reason: empty)" was the sentence that had the shopkeeper
+				// convinced the plugin was broken while two messages sat in the
+				// table: the queue was empty *for this run*, but we never said
+				// whether those rows were scheduled, stuck, failed or missing. The
+				// message now carries the composition of the queue.
 				$message = sprintf(
 					'پردازش صف: %s ارسال، %s خطا%s',
 					Persian::number( $stats['sent'] ),
 					Persian::number( $stats['failed'] ),
-					'' !== $stats['skipped'] ? ' (دلیل توقف: ' . $stats['skipped'] . ')' : ''
+					(int) $stats['reclaimed'] > 0
+						? ' — ' . Persian::number( $stats['reclaimed'] ) . ' ردیفِ جا‌مانده از اجرای نیمه‌کاره آزاد شد'
+						: ''
+				);
+
+				$message .= ' ' . self::queue_reason( (string) $stats['skipped'] );
+				break;
+
+			case 'unlock_queue':
+				$freed   = Queue::reclaim_stale();
+				Queue::release_lock();
+				$message = sprintf(
+					'قفل صف آزاد شد. %s ردیفِ «در حال ارسال» به صف برگشت.',
+					Persian::number( $freed )
 				);
 				break;
 

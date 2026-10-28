@@ -263,6 +263,45 @@ MjyAdmin::ok( false !== strpos( $logs_html, 'admin-post.php?action=mojoodyar_exp
 MjyAdmin::ok( false !== strpos( $logs_html, 'name="tool" value="clear_logs"' ), 'دکمهٔ پاک کردن لاگ‌ها با nonce هست' );
 MjyAdmin::ok( false !== strpos( $logs_html, '_wpnonce' ), 'فرم پاک کردن nonce دارد' );
 MjyAdmin::ok( false === strpos( $logs_html, 'Undefined' ), 'صفحه بدون notice رندر می‌شود' );
+MjyAdmin::ok( false !== strpos( $rendered['tools'], 'value="unlock_queue"' ), 'ابزار آزادکردن صف در صفحهٔ ابزارها هست' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'name="per_page"' ), 'انتخاب تعداد ردیف در هر صفحه هست' );
+MjyAdmin::ok( false !== strpos( $logs_html, 'name="per_page" value="25"' ), 'پیش‌فرض ۲۵ ردیف است تا صفحه سنگین نشود' );
+
+// The pager has to survive the filters: a page-2 link that drops ?event=
+// silently shows the whole log on page two.
+$_GET['page']     = 'mojoodyar-logs';
+$_GET['event']    = 'bad_nonce';
+$_GET['per_page'] = '100';
+$_GET['paged']    = '2';
+$logs_paged = mjy_render( array( $admin, 'render_logs' ) );
+unset( $_GET['event'], $_GET['per_page'], $_GET['paged'] );
+unset( $_GET['page'] );
+
+// Pagination only exists if there is something to paginate: 30 rows at 25 per
+// page is exactly the two-page case a shop hits on day one.
+for ( $mjy_page_fill = 0; $mjy_page_fill < 30; $mjy_page_fill++ ) {
+	\Mojoodyar\Logger::log( 'info', 'log_page_fill', 'row=' . $mjy_page_fill );
+}
+
+$_GET['page']     = 'mojoodyar-logs';
+$_GET['event']    = 'log_page_fill';
+$_GET['per_page'] = '25';
+$_GET['paged']    = '1';
+$logs_paged = mjy_render( array( $admin, 'render_logs' ) );
+unset( $_GET['event'], $_GET['per_page'], $_GET['paged'] );
+unset( $_GET['page'] );
+
+MjyAdmin::ok( false !== strpos( $logs_paged, 'mjy-log__page--on' ), 'شمارهٔ صفحهٔ جاری در صفحه‌بندی دیده می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_paged, 'paged=2' ), 'لینک صفحهٔ دوم ساخته می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_paged, 'event=log_page_fill' ), 'فیلتر رویداد در لینک صفحه‌بندی حفظ می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_paged, 'per_page=50' ), 'انتخاب ۵۰ ردیف در هر صفحه در دسترس است' );
+MjyAdmin::ok( false !== strpos( $logs_paged, 'name="per_page" value="25"' ), 'تعداد ردیف انتخاب‌شده در فرم فیلتر حفظ می‌شود' );
+MjyAdmin::ok( false !== strpos( $logs_paged, 'نمایش ' ), 'بازهٔ ردیف‌های نمایش‌داده‌شده نوشته می‌شود' );
+
+// The default page must stay small: 25 rows, not the whole table.
+\Mojoodyar\Logs::query( array( 'page' => 1 ) );
+$mjy_default_page = mjy_render( array( $admin, 'render_logs' ) );
+MjyAdmin::ok( false !== strpos( $mjy_default_page, 'value="25"' ), 'صفحه به‌طور پیش‌فرض ۲۵ ردیف نشان می‌دهد' );
 
 // The dashboard must point at the log screen: that is how the panel is found.
 $dashboard_html = $rendered['dashboard'];

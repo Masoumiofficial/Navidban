@@ -33,12 +33,13 @@ $mjy_base_url = 'admin.php?page=mojoodyar-logs';
 $mjy_link = static function ( array $overrides ) use ( $mjy_base_url, $filters ) {
 	$query = array_merge(
 		array(
-			'page'   => 'mojoodyar-logs',
-			'level'  => (string) $filters['level'],
-			'event'  => (string) $filters['event'],
-			's'      => (string) $filters['search'],
-			'days'   => (int) $filters['days'],
-			'paged'  => 1,
+			'page'     => 'mojoodyar-logs',
+			'level'    => (string) $filters['level'],
+			'event'    => (string) $filters['event'],
+			's'        => (string) $filters['search'],
+			'days'     => (int) $filters['days'],
+			'per_page' => (int) $filters['per_page'],
+			'paged'    => 1,
 		),
 		$overrides
 	);
@@ -75,6 +76,7 @@ $mjy_link = static function ( array $overrides ) use ( $mjy_base_url, $filters )
 
 	<form method="get" class="mjy-filters">
 		<input type="hidden" name="page" value="mojoodyar-logs" />
+		<input type="hidden" name="per_page" value="<?php echo (int) $filters['per_page']; ?>" />
 
 		<label>سطح
 			<select name="level">
@@ -125,13 +127,29 @@ $mjy_link = static function ( array $overrides ) use ( $mjy_base_url, $filters )
 		} ) ) ), 'mojoodyar_export_logs' ) ); ?>">خروجی CSV لاگ</a>
 	</form>
 
-	<p class="mjy-muted">
-		<?php echo esc_html( Persian::number( $result['total'] ) ); ?> رویداد
-		<?php if ( (int) $result['pages'] > 1 ) : ?>
-			— صفحهٔ <?php echo esc_html( Persian::number( $result['page'] ) ); ?> از <?php echo esc_html( Persian::number( $result['pages'] ) ); ?>
-		<?php endif; ?>
-		· آدرس و ایمیل هرگز خام ذخیره نمی‌شوند؛ فقط هش IP و کلید رویداد.
-	</p>
+	<div class="mjy-log__meta">
+		<p class="mjy-muted">
+			<?php echo esc_html( Persian::number( $result['total'] ) ); ?> رویداد
+			<?php if ( (int) $result['total'] > 0 ) : ?>
+				— نمایش <?php echo esc_html( Persian::number( $result['from'] ) ); ?> تا <?php echo esc_html( Persian::number( $result['to'] ) ); ?>
+			<?php endif; ?>
+			<?php if ( (int) $result['pages'] > 1 ) : ?>
+				— صفحهٔ <?php echo esc_html( Persian::number( $result['page'] ) ); ?> از <?php echo esc_html( Persian::number( $result['pages'] ) ); ?>
+			<?php endif; ?>
+			· آدرس و ایمیل هرگز خام ذخیره نمی‌شوند؛ فقط هش IP و کلید رویداد.
+		</p>
+
+		<nav class="mjy-log__perpage" aria-label="تعداد ردیف در هر صفحه">
+			<span>در هر صفحه:</span>
+			<?php foreach ( \Mojoodyar\Logs::PER_PAGE_OPTIONS as $mjy_per ) : ?>
+				<?php if ( (int) $mjy_per === (int) $result['per_page'] ) : ?>
+					<span class="mjy-log__perpage-on"><?php echo esc_html( Persian::number( $mjy_per ) ); ?></span>
+				<?php else : ?>
+					<a href="<?php echo esc_url( $mjy_link( array( 'per_page' => (int) $mjy_per ) ) ); ?>"><?php echo esc_html( Persian::number( $mjy_per ) ); ?></a>
+				<?php endif; ?>
+			<?php endforeach; ?>
+		</nav>
+	</div>
 
 	<?php if ( empty( $result['rows'] ) ) : ?>
 		<div class="mjy-panel">
@@ -196,16 +214,53 @@ $mjy_link = static function ( array $overrides ) use ( $mjy_base_url, $filters )
 			<?php endforeach; ?>
 		</div>
 
-		<?php if ( (int) $result['pages'] > 1 ) : ?>
-			<div class="mjy-log__pager">
-				<?php if ( (int) $result['page'] > 1 ) : ?>
-					<a class="button" href="<?php echo esc_url( $mjy_link( array( 'paged' => (int) $result['page'] - 1 ) ) ); ?>">قبلی</a>
+		<?php
+		// A two-button pager is unusable once a busy shop has thousands of rows:
+		// reaching "three days ago" meant dozens of clicks. The window below
+		// shows the current page plus two neighbours on each side, with first
+		// and last always reachable.
+		if ( (int) $result['pages'] > 1 ) :
+			$mjy_current = (int) $result['page'];
+			$mjy_last    = (int) $result['pages'];
+			$mjy_numbers = array( 1, $mjy_last );
+
+			for ( $mjy_i = max( 1, $mjy_current - 2 ); $mjy_i <= min( $mjy_last, $mjy_current + 2 ); $mjy_i++ ) {
+				$mjy_numbers[] = $mjy_i;
+			}
+
+			$mjy_numbers = array_values( array_unique( $mjy_numbers ) );
+			sort( $mjy_numbers );
+			?>
+			<nav class="mjy-log__pager" aria-label="صفحه‌بندی رویدادها">
+				<?php if ( $mjy_current > 1 ) : ?>
+					<a class="button" rel="prev" href="<?php echo esc_url( $mjy_link( array( 'paged' => $mjy_current - 1 ) ) ); ?>">‹ قبلی</a>
 				<?php endif; ?>
-				<span class="mjy-muted">صفحهٔ <?php echo esc_html( Persian::number( $result['page'] ) ); ?> از <?php echo esc_html( Persian::number( $result['pages'] ) ); ?></span>
-				<?php if ( (int) $result['page'] < (int) $result['pages'] ) : ?>
-					<a class="button" href="<?php echo esc_url( $mjy_link( array( 'paged' => (int) $result['page'] + 1 ) ) ); ?>">بعدی</a>
+
+				<?php
+				$mjy_previous = 0;
+
+				foreach ( $mjy_numbers as $mjy_number ) :
+					if ( $mjy_previous > 0 && $mjy_number - $mjy_previous > 1 ) :
+						?>
+						<span class="mjy-log__gap" aria-hidden="true">…</span>
+						<?php
+					endif;
+
+					$mjy_previous = $mjy_number;
+					?>
+					<?php if ( $mjy_number === $mjy_current ) : ?>
+						<span class="mjy-log__page mjy-log__page--on" aria-current="page"><?php echo esc_html( Persian::number( $mjy_number ) ); ?></span>
+					<?php else : ?>
+						<a class="mjy-log__page" href="<?php echo esc_url( $mjy_link( array( 'paged' => $mjy_number ) ) ); ?>"><?php echo esc_html( Persian::number( $mjy_number ) ); ?></a>
+					<?php endif; ?>
+				<?php endforeach; ?>
+
+				<?php if ( $mjy_current < $mjy_last ) : ?>
+					<a class="button" rel="next" href="<?php echo esc_url( $mjy_link( array( 'paged' => $mjy_current + 1 ) ) ); ?>">بعدی ›</a>
 				<?php endif; ?>
-			</div>
+
+				<span class="mjy-muted">صفحهٔ <?php echo esc_html( Persian::number( $mjy_current ) ); ?> از <?php echo esc_html( Persian::number( $mjy_last ) ); ?></span>
+			</nav>
 		<?php endif; ?>
 	<?php endif; ?>
 

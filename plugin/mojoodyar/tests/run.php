@@ -935,7 +935,11 @@ MjyTest::ok( false !== strpos( $retry, 'در صف' ), 'وضعیت queued یعن�
 
 // Panel tool rows used to render the raw key as a reason.
 MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'run_reconcile' ), 'اجرای پایش موجودی' ), 'ابزار «اجرای پایش» فارسی است' );
-MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'flush_queue' ), 'آزادکردن قفل صف' ), 'ابزار «آزادکردن قفل» فارسی است' );
+MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'flush_queue' ), 'پردازش صف' ), 'ابزار «پردازش صف» فارسی است' );
+MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'unlock_queue' ), 'آزادکردن صف' ), 'ابزار «آزادکردن صف» فارسی است' );
+MjyTest::ok( false !== strpos( LogExplain::detail( 'queue_reclaimed', 'rows=2' ), '۲' ), 'تعداد ردیفِ آزادشده با رقم فارسی خوانده می‌شود' );
+MjyTest::ok( '' !== LogExplain::advice( 'queue_reclaimed', 'rows=1' ), 'برای ردیفِ جامانده راهنمای اقدام هست' );
+MjyTest::ok( '' !== LogExplain::advice( 'queue_insert_failed', 'Duplicate entry' ), 'برای خطای نوشتن در صف راهنمای اقدام هست' );
 MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'clear_logs' ), 'پاک کردن لاگ' ), 'ابزار «پاک کردن لاگ» فارسی است' );
 MjyTest::ok( false !== strpos( LogExplain::tool( 'nope' ), 'ناشناخته' ), 'ابزار ناشناخته پنهان نمی‌شود' );
 

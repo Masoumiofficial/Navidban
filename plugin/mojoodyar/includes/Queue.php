@@ -85,7 +85,38 @@ final class Queue {
 
 		$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
-		return false !== $result;
+		if ( false === $result ) {
+			// A failed INSERT used to be silently counted as queued: enqueue()
+			// returned true because `false !== false` was the only test, and the
+			// caller's "queued=2" in the log was a lie. The shop then saw an
+			// empty queue with a log insisting two messages were waiting.
+			Logger::log(
+				'error',
+				'queue_insert_failed',
+				\Mojoodyar\Support\Masking::free_text( (string) $wpdb->last_error, 150 )
+			);
+
+			return false;
+		}
+
+		// INSERT IGNORE also answers 0 when the unique key swallowed the row,
+		// which is the intended duplicate guard - the message is already queued.
+		return true;
+	}
+
+	/**
+	 * Was a queue row actually written by the last enqueue() call?
+	 *
+	 * INSERT IGNORE cannot tell us: it returns the number of *inserted* rows,
+	 * so 0 means "the unique key already had this message". Callers that want
+	 * to report "N messages queued" need that distinction.
+	 *
+	 * @return int Rows inserted by the most recent query.
+	 */
+	public static function last_insert_count() {
+		global $wpdb;
+
+		return (int) $wpdb->rows_affected;
 	}
 
 	/**
@@ -126,6 +157,96 @@ final class Queue {
 	 * @param int|null $limit Optional hard limit (defaults to the configured batch size).
 	 * @return array{processed:int,sent:int,failed:int,skipped:string}
 	 */
+	public static function reclaim_stale() {
+		global $wpdb;
+
+		$table = self::table();
+
+		// A claimed row whose worker never came back. The claim writes
+		// locked_at, so a row older than the TTL is abandoned by definition:
+		// the whole send is a single HTTP call with a 15 second timeout, and the
+		// run itself is capped by TIME_BUDGET, so nothing legitimate holds a
+		// claim for five minutes.
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - (int) QueuePolicy::LOCK_TTL );
+
+		$reclaimed = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET status = 'queued', locked_at = NULL
+				 WHERE status = 'processing' AND ( locked_at IS NULL OR locked_at < %s )",
+				$cutoff
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$reclaimed = (int) $reclaimed;
+
+		if ( $reclaimed > 0 ) {
+			// Worth a warning: it means a worker died mid-send, and the same
+			// crash may be hitting every run.
+			Logger::log( 'warning', 'queue_reclaimed', 'rows=' . $reclaimed );
+		}
+
+		return $reclaimed;
+	}
+
+	/**
+	 * Explain why the queue is not moving.
+	 *
+	 * "0 sent (reason: empty)" is the least useful sentence a queue can print:
+	 * the rows may be scheduled for later, stuck in processing after a crashed
+	 * worker, or not exist at all - three completely different problems that
+	 * all render as "empty". This returns the counts behind the sentence.
+	 *
+	 * @return array{queued:int,ready:int,scheduled:int,processing:int,failed:int,skipped:int,hint:string}
+	 */
+	public static function diagnose() {
+		global $wpdb;
+
+		$table = self::table();
+		$now   = gmdate( 'Y-m-d H:i:s' );
+
+		$queued = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE status = 'queued' AND next_run_at <= %s", $now )
+		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$scheduled = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE status = 'queued' AND next_run_at > %s", $now )
+		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$processing = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'processing'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$failed     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'failed'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$skipped    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'skipped'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$earliest = $wpdb->get_var(
+			$wpdb->prepare( "SELECT next_run_at FROM {$table} WHERE status = 'queued' AND next_run_at > %s ORDER BY next_run_at ASC LIMIT 1", $now )
+		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$hint = '';
+
+		if ( $queued > 0 ) {
+			$hint = 'آمادهٔ ارسال است؛ اگر ارسال نشد، قفل صف یا بازهٔ ارسال را ببینید.';
+		} elseif ( $scheduled > 0 ) {
+			$hint = 'زمان اجرای بعدی این پیام‌ها نرسیده است' . ( is_string( $earliest ) ? ' (نزدیک‌ترین: ' . $earliest . ' UTC)' : '' ) . '.';
+		} elseif ( $processing > 0 ) {
+			$hint = 'ردیف‌ها در وضعیت «در حال ارسال» گیر کرده‌اند؛ ابزار «آزادکردن قفل صف» را بزنید.';
+		} elseif ( $failed > 0 ) {
+			$hint = 'همهٔ پیام‌ها ناموفق‌اند؛ ابزار «تلاش دوباره برای پیام‌های ناموفق» را بزنید.';
+		} elseif ( $skipped > 0 ) {
+			$hint = 'پیام‌ها رد شده‌اند (لغو اشتراک یا تأییدنشده)؛ لیست انتظار را ببینید.';
+		} else {
+			$hint = 'صف خالی است؛ هنوز اعلانی ساخته نشده است.';
+		}
+
+		return array(
+			'queued'     => $queued,
+			'ready'      => $queued,
+			'scheduled'  => $scheduled,
+			'processing' => $processing,
+			'failed'     => $failed,
+			'skipped'    => $skipped,
+			'hint'       => $hint,
+		);
+	}
+
 	public static function process( $limit = null ) {
 		global $wpdb;
 
@@ -134,6 +255,7 @@ final class Queue {
 			'sent'      => 0,
 			'failed'    => 0,
 			'skipped'   => '',
+			'reclaimed' => 0,
 		);
 
 		if ( ! self::acquire_lock() ) {
@@ -141,6 +263,13 @@ final class Queue {
 
 			return $stats;
 		}
+
+		// Before looking for work, take back rows abandoned by a worker that
+		// died mid-send. Without this a single crash left those rows in
+		// "processing" forever: the selection below only reads 'queued', so the
+		// queue reported "empty" for ever while the dashboard kept showing one
+		// message in flight.
+		$stats['reclaimed'] = self::reclaim_stale();
 
 		$window_enabled = Settings::enabled( 'send_window_enabled' );
 		$inside_window  = QueuePolicy::inside_window(
@@ -184,7 +313,13 @@ final class Queue {
 
 		if ( ! is_array( $rows ) || empty( $rows ) ) {
 			self::release_lock();
-			$stats['skipped'] = 'empty';
+
+			// Distinguish "there is nothing" from "nothing is due yet": the two
+			// need completely different advice, and calling both "empty" is how
+			// an admin ends up convinced the queue is broken.
+			$diagnosis        = self::diagnose();
+			$stats['skipped'] = $diagnosis['scheduled'] > 0 ? 'scheduled' : 'empty';
+			$stats['stats']   = $diagnosis;
 
 			return $stats;
 		}

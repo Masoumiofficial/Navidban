@@ -70,6 +70,15 @@ if ( $mjy_notice ) {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
 			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
 			<input type="hidden" name="action" value="mojoodyar_tool" />
+			<input type="hidden" name="tool" value="unlock_queue" />
+			<h3>آزادکردن صفِ گیرکرده</h3>
+			<p>اگر «پردازش صف» می‌گوید قفل است یا ردیفی در وضعیت «در حال ارسال» مانده، اینجا آزاد می‌شود.</p>
+			<button class="button">آزادسازی</button>
+		</form>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
+			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
+			<input type="hidden" name="action" value="mojoodyar_tool" />
 			<input type="hidden" name="tool" value="empty_queue" />
 			<h3>تخلیهٔ صف</h3>
 			<p>همهٔ پیام‌های در انتظار، ناموفق و ردشده حذف می‌شوند. رکوردهای لیست انتظار دست‌نخورده می‌مانند.</p>

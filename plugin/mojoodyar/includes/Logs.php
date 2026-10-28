@@ -22,11 +22,22 @@ defined( 'ABSPATH' ) || exit;
 final class Logs {
 
 	/**
-	 * Rows per page.
+	 * Default rows per page.
+	 *
+	 * 50 rows times two columns of Persian text plus a raw-log block made the
+	 * screen slow to paint on a shared host and hard to scan; 25 keeps the
+	 * first page instant and the pager small.
 	 *
 	 * @var int
 	 */
-	const PER_PAGE = 50;
+	const PER_PAGE = 25;
+
+	/**
+	 * Rows-per-page choices offered to the admin.
+	 *
+	 * @var int[]
+	 */
+	const PER_PAGE_OPTIONS = array( 25, 50, 100 );
 
 	/**
 	 * Levels offered in the filter, in the order they matter.
@@ -138,10 +149,13 @@ final class Logs {
 			: $wpdb->get_var( $wpdb->prepare( $count_sql, $where['values'] ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		return array(
-			'rows'  => is_array( $rows ) ? $rows : array(),
-			'total' => $total,
-			'pages' => (int) ceil( $total / $per_page ),
-			'page'  => $page,
+			'rows'     => is_array( $rows ) ? $rows : array(),
+			'total'    => $total,
+			'pages'    => max( 1, (int) ceil( $total / $per_page ) ),
+			'page'     => $page,
+			'per_page' => $per_page,
+			'from'     => $total > 0 ? ( $offset + 1 ) : 0,
+			'to'       => min( $total, $offset + count( is_array( $rows ) ? $rows : array() ) ),
 		);
 	}
 

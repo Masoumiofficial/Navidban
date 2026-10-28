@@ -38,6 +38,8 @@ final class LogExplain {
 		'sent'                => 'پیام ارسال شد',
 		'delivery_failed'     => 'ارسال پیام ناموفق بود',
 		'queue_run'           => 'صف ارسال اجرا شد',
+		'queue_reclaimed'     => 'ردیفِ جامانده از اجرای نیمه‌کاره به صف برگشت',
+		'queue_insert_failed' => 'نوشتن ردیف در جدول صف انجام نشد',
 		'restock_queued'      => 'اعلان بازگشت موجودی در صف گذاشته شد',
 		'restock_no_units'    => 'موجودی برگشت ولی واحدی برای اعلام نبود',
 		'reconcile'           => 'پایش تطبیقی موجودی اجرا شد',
@@ -137,7 +139,7 @@ final class LogExplain {
 	 *
 	 * @var string[]
 	 */
-	const COUNT_KEYS = array( 'scanned', 'transitions', 'queued', 'sent', 'failed', 'count', 'units', 'attempt' );
+	const COUNT_KEYS = array( 'scanned', 'transitions', 'queued', 'sent', 'failed', 'count', 'units', 'attempt', 'rows' );
 
 	/**
 	 * Tool keys, as used by the "ابزار" buttons in the panel.
@@ -148,7 +150,8 @@ final class LogExplain {
 		'run_reconcile'      => 'اجرای پایش موجودی',
 		'rebuild_snapshots'  => 'بازسازی تصویر موجودی',
 		'process_queue'      => 'پردازش صف',
-		'flush_queue'        => 'آزادکردن قفل صف',
+		'flush_queue'        => 'پردازش صف تا سقف ۲۰۰ پیام',
+		'unlock_queue'       => 'آزادکردن صفِ گیرکرده',
 		'empty_queue'        => 'پاک‌کردن صف',
 		'retry_failed'       => 'تلاش دوباره برای پیام‌های ناموفق',
 		'prune'              => 'پاک‌سازی ردیف‌های قدیمی',
@@ -505,6 +508,14 @@ final class LogExplain {
 
 		if ( 'delivery_failed' === $event ) {
 			return 'ابزارها → «ارسال آزمایشی» را بزنید تا متن خطای واقعی درگاه را ببینید.';
+		}
+
+		if ( 'queue_reclaimed' === $event ) {
+			return 'یک اجرای ارسال نیمه‌کاره مانده بود (فاجعهٔ PHP، قطع اتصال یا بستن مرورگر). ردیف دوباره در صف رفت؛ اگر تکرار شد لاگ خطای PHP هاست را ببینید.';
+		}
+
+		if ( 'queue_insert_failed' === $event ) {
+			return 'معمولاً یعنی جدول صف وجود ندارد یا کاربر پایگاه داده اجازهٔ نوشتن ندارد. ابزارها → «بازسازی جدول‌ها» را بزنید.';
 		}
 
 		if ( 'restock_no_units' === $event ) {

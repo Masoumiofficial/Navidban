@@ -23,19 +23,31 @@
 Queue::process()
  1. acquire_lock()      ← آپشن mojoodyar_queue_lock با TTL ۳۰۰ ثانیه
     └─ اگر قفل موجود و تازه است: برگرد با skipped='locked'
- 2. بازهٔ ارسال (اختیاری، پیش‌فرض خاموش)
+ 2. reclaim_stale()     ← ردیف‌های processing با locked_at قدیمی‌تر از TTL
+    └─ وضعیت به queued برمی‌گردد (attempts دست‌نخورده)، رویداد queue_reclaimed
+ 3. بازهٔ ارسال (اختیاری، پیش‌فرض خاموش)
     └─ خارج از بازه: skipped='window' (کارها *حفظ* می‌شوند، حذف نمی‌شوند)
- 3. allowance = min(batch_size, per_minute - sent_last_minute())
+ 4. allowance = min(batch_size, per_minute - sent_last_minute())
     └─ ≤۰: skipped='rate'
- 4. SELECT ... WHERE status='queued' AND next_run_at <= now
+ 5. SELECT ... WHERE status='queued' AND next_run_at <= now
     ORDER BY next_run_at ASC, id ASC LIMIT allowance
- 5. برای هر ردیف: UPDATE ... SET status='processing', locked_at=now
+    └─ اگر خالی بود ولی ردیفی با next_run_at در آینده هست: skipped='scheduled'
+ 6. برای هر ردیف: UPDATE ... SET status='processing', locked_at=now
     WHERE id=%d AND status='queued'     ← claim اتمی؛ اگر ۰ ردیف، رد شو
- 6. deliver(id): کانال را صدا بزن
- 7. موفق → sent / ناموفق → attempts++ با backoff
- 8. budget_exhausted(): اگر از TIME_BUDGET گذشته، حلقه را بشکن
- 9. release_lock()
+ 7. deliver(id): کانال را صدا بزن
+ 8. موفق → sent / ناموفق → attempts++ با backoff
+ 9. budget_exhausted(): اگر از TIME_BUDGET گذشته، حلقه را بشکن
+10. release_lock()
 ```
+
+گام ۲ از ۲.۶.۰ اضافه شد. پیش از آن، ثابت `QueuePolicy::LOCK_TTL` تعریف شده
+بود ولی هیچ‌جا استفاده نمی‌شد: قفلِ *گزینه* با TTL آزاد می‌شد، اما ردیف‌هایی
+که یک اجرای مرده در وضعیت `processing` رها کرده بود تا ابد همان‌جا می‌ماندند،
+چون گام ۵ فقط `status='queued'` را می‌خواند. نتیجه یک فروشگاه واقعی: صف
+همیشه «خالی» گزارش می‌شد و پیامکِ بازگشت موجودی هرگز نمی‌رفت. مهلت ۳۰۰ ثانیه
+سخاوتمندانه است چون هر ارسال یک درخواست HTTP با تایم‌اوت ۱۵ ثانیه است و کل
+اجرا هم با `TIME_BUDGET` محدود می‌شود؛ هیچ اجرای سالمی پنج دقیقه یک ردیف را
+نگاه نمی‌دارد.
 
 نکتهٔ مهم: گام ۵ با `AND status='queued'` انجام می‌شود. اگر دو فرآیند
 هم‌زمان (مثلاً cron + اجرای دستی مدیر) وارد شوند، یکی از آن‌ها صفر ردیف

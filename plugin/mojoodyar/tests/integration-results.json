@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.5.0",
+    "plugin_version": "2.6.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-10-28T06:41:29+00:00",
-    "assertions": 364,
+    "generated_at": "2026-10-28T08:57:11+00:00",
+    "assertions": 377,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -84,6 +84,10 @@
         },
         "پیام ناموفق و تلاش دوباره": {
             "assertions": 17,
+            "failures": 0
+        },
+        "صف گیرکرده": {
+            "assertions": 13,
             "failures": 0
         },
         "پیگیری تلفنی مرحله‌ای": {

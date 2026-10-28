@@ -277,15 +277,20 @@ final class StockWatcher {
 				)
 			);
 
-			if ( $queued ) {
+			// Count what actually landed in the table, not what we asked for:
+			// INSERT IGNORE answering 0 means the unique key already held this
+			// exact message, and reporting it as "queued" is how a log ended up
+			// promising two messages that were never written.
+			if ( $queued && Queue::last_insert_count() > 0 ) {
 				$count++;
 			}
 		}
 
 		Logger::log(
-			'info',
+			$count > 0 ? 'info' : 'warning',
 			'restock_queued',
 			$product_id . ':' . $variation_id . '|units=' . ( null === $qty ? 'unmanaged' : (int) $qty ) . '|queued=' . $count
+				. '|waiting=' . $waiting
 		);
 
 		return array(
