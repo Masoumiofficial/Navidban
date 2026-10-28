@@ -1,0 +1,115 @@
+{
+    "plugin_version": "2.8.1",
+    "php_version": "8.3.33",
+    "generated_at": "2026-10-28T11:39:35+00:00",
+    "assertions": 444,
+    "failures": 0,
+    "pass_rate": 100,
+    "groups": {
+        "نصب و چیدمان پایگاه داده": {
+            "assertions": 12,
+            "failures": 0
+        },
+        "بارگذاری شرطی": {
+            "assertions": 8,
+            "failures": 0
+        },
+        "ثبت درخواست": {
+            "assertions": 20,
+            "failures": 0
+        },
+        "ثبت یک‌مرحله‌ای (پیش‌فرض تازه)": {
+            "assertions": 10,
+            "failures": 0
+        },
+        "تأیید و لغو اشتراک": {
+            "assertions": 7,
+            "failures": 0
+        },
+        "انتخاب کانال فرم": {
+            "assertions": 15,
+            "failures": 0
+        },
+        "رندر فرم فروشگاه": {
+            "assertions": 10,
+            "failures": 0
+        },
+        "موتور موجودی": {
+            "assertions": 12,
+            "failures": 0
+        },
+        "پایش تطبیقی": {
+            "assertions": 9,
+            "failures": 0
+        },
+        "صف ارسال": {
+            "assertions": 19,
+            "failures": 0
+        },
+        "خطای ارسال ایمیل": {
+            "assertions": 13,
+            "failures": 0
+        },
+        "کانال پیامک": {
+            "assertions": 12,
+            "failures": 0
+        },
+        "الگوی ملی‌پیامک (bodyId)": {
+            "assertions": 37,
+            "failures": 0
+        },
+        "نشانی کوتاه و سقف متغیر": {
+            "assertions": 21,
+            "failures": 0
+        },
+        "تعداد تلاش قابل تنظیم": {
+            "assertions": 6,
+            "failures": 0
+        },
+        "پیام متوقف‌شده (ایراد تنظیمات)": {
+            "assertions": 12,
+            "failures": 0
+        },
+        "نام مشتری و پیگیری تماس": {
+            "assertions": 27,
+            "failures": 0
+        },
+        "زنجیرهٔ اعلان پیامکی از فرم تا صف": {
+            "assertions": 13,
+            "failures": 0
+        },
+        "حالت‌هایی که اعلان را بی‌صدا می‌خوردند": {
+            "assertions": 7,
+            "failures": 0
+        },
+        "آمار و گزارش": {
+            "assertions": 28,
+            "failures": 0
+        },
+        "ثبت دوبارهٔ همان مشتری": {
+            "assertions": 12,
+            "failures": 0
+        },
+        "گزارش رویدادها": {
+            "assertions": 30,
+            "failures": 0
+        },
+        "پیام ناموفق و تلاش دوباره": {
+            "assertions": 17,
+            "failures": 0
+        },
+        "صف گیرکرده": {
+            "assertions": 23,
+            "failures": 0
+        },
+        "پیگیری تلفنی مرحله‌ای": {
+            "assertions": 47,
+            "failures": 0
+        },
+        "مهاجرت از برند قدیم (۱.۰.x)": {
+            "assertions": 17,
+            "failures": 0
+        }
+    },
+    "failed": []
+}

@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>موجودیار 2.8.0 — logs</title>
+<style>
+/* --- wordpress-ish page shell (preview only) --- */
+
+body {
+    margin: 0;
+    padding: 20px 20px 60px;
+    background: #f0f0f1;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 13px;
+    color: #1d2327;
+}
+.mjy-preview-note {
+    max-width: 1180px;
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #fffbe6;
+    border: 1px solid #f0d98a;
+    font-size: 12px;
+    line-height: 1.9;
+    color: #6b5200;
+    direction: rtl;
+    font-family: Vazirmatn, Tahoma, Arial, sans-serif;
+}
+
+/* --- the real plugin stylesheet, verbatim --- */
+/*
+ * Mojoodyar — admin panel (RTL, Persian).
+ *
+ * "Frosted glass" design system. Everything is scoped to .mjy-wrap so we never
+ * restyle WordPress itself.
+ *
+ * Rules this file follows:
+ *  - no external font/image request: the panel must work on an offline host;
+ *  - every glass surface keeps a solid fallback colour, so the layout is still
+ *    readable in browsers without backdrop-filter (Firefox < 103, old Safari);
+ *  - contrast is checked against the *light* fallback, not against the blur.
+ */
+
+.mjy-wrap {
+	--mjy-primary: #0e5c55;
+	--mjy-primary-hover: #14857b;
+	--mjy-accent: #f2a93b;
+	--mjy-line: rgba(14, 92, 85, 0.12);
+	--mjy-bg: #eef4f2;
+	--mjy-error: #c6483c;
+	--mjy-ok: #1f8f60;
+	--mjy-ink: #14241f;
+	--mjy-ink-soft: #5b6b66;
+	--mjy-glass: rgba(255, 255, 255, 0.66);
+	--mjy-glass-strong: rgba(255, 255, 255, 0.84);
+	--mjy-radius: 20px;
+	--mjy-shadow: 0 18px 44px -20px rgba(14, 92, 85, 0.45);
+	--mjy-shadow-soft: 0 6px 18px -10px rgba(14, 92, 85, 0.4);
+
+	position: relative;
+	box-sizing: border-box;
+	max-width: 1180px;
+	margin: 12px 20px 40px 0;
+	padding: 26px 26px 30px;
+	border-radius: 26px;
+	direction: rtl;
+	color: var(--mjy-ink);
+	font-family: Vazirmatn, IRANSansX, "Segoe UI", -apple-system, BlinkMacSystemFont, Tahoma, Arial, sans-serif;
+	background-color: var(--mjy-bg);
+	background-image:
+		radial-gradient(at 92% 4%, rgba(242, 169, 59, 0.22) 0, rgba(242, 169, 59, 0) 45%),
+		radial-gradient(at 6% 0%, rgba(20, 133, 123, 0.28) 0, rgba(20, 133, 123, 0) 50%),
+		radial-gradient(at 50% 100%, rgba(14, 92, 85, 0.16) 0, rgba(14, 92, 85, 0) 60%);
+	box-shadow: var(--mjy-shadow);
+}
+
+.mjy-wrap *,
+.mjy-wrap *::before,
+.mjy-wrap *::after {
+	box-sizing: border-box;
+}
+
+.mjy-wrap h1,
+.mjy-wrap h2,
+.mjy-wrap h3 {
+	color: var(--mjy-ink);
+	font-weight: 700;
+	letter-spacing: 0;
+}
+
+.mjy-wrap h2 {
+	margin: 26px 0 12px;
+	font-size: 17px;
+}
+
+.mjy-wrap a {
+	color: var(--mjy-primary-hover);
+}
+
+.mjy-wrap a:focus-visible,
+.mjy-wrap button:focus-visible,
+.mjy-wrap input:focus-visible,
+.mjy-wrap select:focus-visible,
+.mjy-wrap textarea:focus-visible,
+.mjy-wrap summary:focus-visible {
+	outline: 2px solid var(--mjy-primary-hover);
+	outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+ * Hero / app bar
+ * ---------------------------------------------------------------------- */
+
+.mjy-hero {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+	padding: 18px 22px;
+	margin-bottom: 14px;
+	border: 1px solid rgba(255, 255, 255, 0.75);
+	border-radius: var(--mjy-radius);
+	background: linear-gradient(135deg, rgba(14, 92, 85, 0.96), rgba(20, 133, 123, 0.92));
+	box-shadow: var(--mjy-shadow-soft);
+	color: #fff;
+}
+
+.mjy-hero__mark {
+	display: grid;
+	place-items: center;
+	width: 46px;
+	height: 46px;
+	flex: 0 0 46px;
+	border-radius: 15px;
+	background: rgba(255, 255, 255, 0.16);
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.mjy-hero__mark svg {
+	width: 24px;
+	height: 24px;
+	display: block;
+	fill: none;
+	stroke: #fff;
+	stroke-width: 1.7;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.mjy-hero__text {
+	flex: 1 1 240px;
+	min-width: 0;
+}
+
+.mjy-hero__title {
+	margin: 0;
+	font-size: 21px;
+	line-height: 1.5;
+	color: #fff;
+}
+
+.mjy-hero__title small {
+	display: block;
+	margin-top: 2px;
+	font-size: 12px;
+	font-weight: 400;
+	color: rgba(255, 255, 255, 0.76);
+}
+
+.mjy-hero__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.mjy-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	background: rgba(255, 255, 255, 0.14);
+	font-size: 12px;
+	line-height: 1.7;
+	color: #fff;
+	white-space: nowrap;
+}
+
+.mjy-chip--accent {
+	border-color: rgba(242, 169, 59, 0.55);
+	background: rgba(242, 169, 59, 0.22);
+	color: #ffe9c4;
+}
+
+/* Tab bar. */
+.mjy-tabs-wrap {
+	margin: 0 0 20px;
+}
+
+.mjy-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding: 6px;
+	margin: 0;
+	list-style: none;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.8);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(16px) saturate(1.5);
+	backdrop-filter: blur(16px) saturate(1.5);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-tabs li {
+	margin: 0;
+}
+
+.mjy-tabs a {
+	display: block;
+	padding: 8px 16px;
+	border-radius: 11px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.8;
+	color: var(--mjy-primary);
+	text-decoration: none;
+	transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.mjy-tabs a:hover,
+.mjy-tabs a:focus {
+	background: rgba(20, 133, 123, 0.1);
+	color: var(--mjy-primary);
+}
+
+.mjy-tabs a[aria-current="page"] {
+	color: #fff;
+	background: linear-gradient(135deg, #0a4741, #0f6f66);
+	box-shadow: 0 8px 18px -10px rgba(14, 92, 85, 0.9);
+}
+
+/* -------------------------------------------------------------------------
+ * Glass surfaces
+ * ---------------------------------------------------------------------- */
+
+.mjy-card,
+.mjy-panel {
+	position: relative;
+	padding: 18px 20px;
+	border-radius: var(--mjy-radius);
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(18px) saturate(1.45);
+	backdrop-filter: blur(18px) saturate(1.45);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-card::after {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto;
+	height: 3px;
+	border-radius: var(--mjy-radius) var(--mjy-radius) 0 0;
+	background: linear-gradient(90deg, var(--mjy-primary), var(--mjy-primary-hover), var(--mjy-accent));
+	opacity: 0.9;
+}
+
+.mjy-card h3 {
+	margin: 0 0 8px;
+	font-size: 14px;
+}
+
+.mjy-card p {
+	margin: 0 0 10px;
+	font-size: 12.5px;
+	line-height: 1.95;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-card__label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-card__value {
+	display: block;
+	font-size: 27px;
+	line-height: 1.4;
+	font-weight: 800;
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover) 70%, var(--mjy-accent));
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: var(--mjy-primary);
+	-webkit-text-fill-color: transparent;
+}
+
+/* Browsers without background-clip:text keep a readable solid colour. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+	.mjy-card__value {
+		-webkit-text-fill-color: currentColor;
+	}
+}
+
+.mjy-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 14px;
+	margin: 4px 0 22px;
+}
+
+.mjy-panel {
+	margin-bottom: 18px;
+}
+
+/* Section heading: a small gradient tick + the title, so every block has an
+   obvious start without a decorative icon font. */
+.mjy-panel > h2,
+.mjy-panel > h3 {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+}
+
+.mjy-panel > h2::before,
+.mjy-panel > h3::before {
+	content: "";
+	flex: 0 0 4px;
+	width: 4px;
+	height: 1.05em;
+	border-radius: 2px;
+	background: linear-gradient(180deg, var(--mjy-primary), var(--mjy-accent));
+}
+
+.mjy-panel > h3 {
+	margin-top: 22px;
+	font-size: 14px;
+	color: var(--mjy-ink);
+}
+
+.mjy-panel > h3::before {
+	height: 0.95em;
+	background: linear-gradient(180deg, var(--mjy-primary-hover), rgba(20, 133, 123, 0.35));
+}
+
+.mjy-panel > p:first-of-type {
+	margin-top: 2px;
+}
+
+/* A card placed inside a panel is a sub-block, not a second sheet of glass:
+   two frosted layers on top of each other look muddy. */
+.mjy-panel .mjy-card {
+	background: rgba(255, 255, 255, 0.5);
+	box-shadow: none;
+}
+
+.mjy-panel .mjy-card::after {
+	display: none;
+}
+
+/* Inside a panel the first field should not push the heading away. */
+.mjy-panel .form-table tr:first-child th,
+.mjy-panel .form-table tr:first-child td {
+	padding-top: 4px;
+}
+
+.mjy-panel > h2:first-child,
+.mjy-panel > h3:first-child {
+	margin-top: 0;
+}
+
+.mjy-sub {
+	margin: 0 0 16px;
+	color: var(--mjy-ink-soft);
+	font-size: 13px;
+}
+
+.mjy-muted {
+	color: var(--mjy-ink-soft);
+	font-size: 12px;
+}
+
+.mjy-divider {
+	height: 1px;
+	margin: 16px 0;
+	border: 0;
+	background: linear-gradient(90deg, transparent, rgba(14, 92, 85, 0.18), transparent);
+}
+
+/* -------------------------------------------------------------------------
+ * Forms
+ * ---------------------------------------------------------------------- */
+
+/*
+ * FIELD LOOK
+ *
+ * Two hard-won details live here:
+ *
+ * 1. `input:not([type])` — an <input> with no type attribute is a text box in
+ *    every browser, but `input[type="text"]` does NOT match it. WordPress views
+ *    written without an explicit type (the form title, the button label, the
+ *    gateway credentials, the test-phone box) rendered as raw WP boxes until
+ *    this selector existed.
+ * 2. `.mjy-wrap.mjy-wrap` — the class is doubled on purpose. wp-admin's
+ *    forms.css styles bare inputs with selectors around specificity (0,1,1); a
+ *    single `.mjy-wrap input[...]` is (0,2,1) and normally wins, but a theme or
+ *    a page builder that ships `.form-table input` and loads after us can still
+ *    pull one field back to the default look. Doubling the class makes the
+ *    field style independent of load order.
+ */
+.mjy-wrap.mjy-wrap input:not([type]),
+.mjy-wrap.mjy-wrap input[type="text"],
+.mjy-wrap.mjy-wrap input[type="email"],
+.mjy-wrap.mjy-wrap input[type="url"],
+.mjy-wrap.mjy-wrap input[type="password"],
+.mjy-wrap.mjy-wrap input[type="number"],
+.mjy-wrap.mjy-wrap input[type="search"],
+.mjy-wrap.mjy-wrap input[type="tel"],
+.mjy-wrap.mjy-wrap input[type="date"],
+.mjy-wrap.mjy-wrap input[type="datetime-local"],
+.mjy-wrap.mjy-wrap input[type="time"],
+.mjy-wrap.mjy-wrap input[type="month"],
+.mjy-wrap.mjy-wrap input[type="week"],
+.mjy-wrap.mjy-wrap select,
+.mjy-wrap.mjy-wrap textarea {
+	min-height: 40px;
+	padding: 8px 14px;
+	border: 1px solid rgba(14, 92, 85, 0.22);
+	border-radius: 12px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.84));
+	color: var(--mjy-ink);
+	font-size: 13.5px;
+	line-height: 1.65;
+	box-shadow:
+		inset 0 1px 0 #fff,
+		0 1px 2px rgba(14, 92, 85, 0.07);
+	transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.mjy-wrap.mjy-wrap input:not([type])::placeholder,
+.mjy-wrap.mjy-wrap input[type="text"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="email"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="url"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="password"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="number"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="search"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="tel"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="date"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="datetime-local"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="time"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="month"]::placeholder,
+.mjy-wrap.mjy-wrap input[type="week"]::placeholder,
+.mjy-wrap.mjy-wrap select::placeholder,
+.mjy-wrap.mjy-wrap textarea::placeholder {
+	color: rgba(91, 107, 102, 0.75);
+	opacity: 1;
+}
+
+.mjy-wrap.mjy-wrap input:not([type]):hover,
+.mjy-wrap.mjy-wrap input[type="text"]:hover,
+.mjy-wrap.mjy-wrap input[type="email"]:hover,
+.mjy-wrap.mjy-wrap input[type="url"]:hover,
+.mjy-wrap.mjy-wrap input[type="password"]:hover,
+.mjy-wrap.mjy-wrap input[type="number"]:hover,
+.mjy-wrap.mjy-wrap input[type="search"]:hover,
+.mjy-wrap.mjy-wrap input[type="tel"]:hover,
+.mjy-wrap.mjy-wrap input[type="date"]:hover,
+.mjy-wrap.mjy-wrap input[type="datetime-local"]:hover,
+.mjy-wrap.mjy-wrap input[type="time"]:hover,
+.mjy-wrap.mjy-wrap input[type="month"]:hover,
+.mjy-wrap.mjy-wrap input[type="week"]:hover,
+.mjy-wrap.mjy-wrap select:hover,
+.mjy-wrap.mjy-wrap textarea:hover {
+	border-color: rgba(14, 92, 85, 0.36);
+	background: #fff;
+}
+
+.mjy-wrap.mjy-wrap input:not([type]):focus,
+.mjy-wrap.mjy-wrap input[type="text"]:focus,
+.mjy-wrap.mjy-wrap input[type="email"]:focus,
+.mjy-wrap.mjy-wrap input[type="url"]:focus,
+.mjy-wrap.mjy-wrap input[type="password"]:focus,
+.mjy-wrap.mjy-wrap input[type="number"]:focus,
+.mjy-wrap.mjy-wrap input[type="search"]:focus,
+.mjy-wrap.mjy-wrap input[type="tel"]:focus,
+.mjy-wrap.mjy-wrap input[type="date"]:focus,
+.mjy-wrap.mjy-wrap input[type="datetime-local"]:focus,
+.mjy-wrap.mjy-wrap input[type="time"]:focus,
+.mjy-wrap.mjy-wrap input[type="month"]:focus,
+.mjy-wrap.mjy-wrap input[type="week"]:focus,
+.mjy-wrap.mjy-wrap select:focus,
+.mjy-wrap.mjy-wrap textarea:focus {
+	border-color: var(--mjy-primary-hover);
+	background: #fff;
+	box-shadow:
+		0 0 0 3px rgba(20, 133, 123, 0.16),
+		inset 0 1px 0 #fff;
+	outline: 0;
+}
+
+.mjy-wrap.mjy-wrap select {
+	min-height: 40px;
+	padding-inline-end: 28px;
+}
+
+.mjy-wrap.mjy-wrap textarea {
+	min-height: 96px;
+	line-height: 1.95;
+	resize: vertical;
+}
+
+.mjy-wrap .form-table {
+	margin: 0;
+}
+
+/* Widths are declared here rather than inherited from wp-admin's stylesheet:
+   the panel must look the same even if a security plugin strips core CSS, and
+   the static preview (no wp-admin CSS) has to be representative. */
+.mjy-wrap .regular-text {
+	width: 25em;
+	max-width: 100%;
+}
+
+.mjy-wrap .large-text {
+	width: 100%;
+	max-width: 42em;
+}
+
+.mjy-wrap textarea.code {
+	direction: ltr;
+	text-align: left;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12.5px;
+	line-height: 1.8;
+}
+
+.mjy-wrap .check-column {
+	width: 2.4em;
+	text-align: center;
+}
+
+.mjy-wrap .widefat {
+	border: 0;
+}
+
+.mjy-wrap .form-table th {
+	width: 220px;
+	padding: 14px 0;
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--mjy-ink);
+	vertical-align: top;
+}
+
+.mjy-wrap .form-table td {
+	padding: 12px 0;
+	font-size: 13px;
+	line-height: 1.95;
+}
+
+/* Hairline between rows: inside one glass panel, five unseparated rows read as
+   a text dump. The line is drawn with border-top on both cells so it lines up
+   in both LTR and RTL layouts. */
+.mjy-wrap .form-table tr + tr > th,
+.mjy-wrap .form-table tr + tr > td {
+	border-top: 1px solid rgba(14, 92, 85, 0.08);
+}
+
+.mjy-wrap .form-table th > label {
+	display: inline-block;
+	padding-top: 9px;
+	cursor: pointer;
+}
+
+/* A control and its inline description share one line without the description
+   wrapping under the field. */
+.mjy-wrap .form-table td > input + .description,
+.mjy-wrap .form-table td > select + .description {
+	display: inline-block;
+	margin: 0 10px 0 0;
+	vertical-align: middle;
+}
+
+.mjy-wrap .description {
+	display: block;
+	margin: 5px 0 0;
+	color: var(--mjy-ink-soft);
+	font-size: 12px;
+	line-height: 1.9;
+	max-width: 60ch;
+}
+
+/* A description that has to sit next to a control (not under it). */
+.mjy-wrap .description--inline {
+	display: inline-block;
+	margin: 0 8px 0 0;
+}
+
+.mjy-wrap .description code,
+.mjy-wrap .description strong {
+	font-size: inherit;
+}
+
+/* Native checkboxes and radios, themed with accent-color (no custom sprite,
+   so keyboard and screen-reader behaviour stays untouched). */
+.mjy-wrap input[type="checkbox"],
+.mjy-wrap input[type="radio"] {
+	width: 18px;
+	height: 18px;
+	margin: 0 0 0 2px;
+	vertical-align: -3px;
+	accent-color: var(--mjy-primary);
+	cursor: pointer;
+}
+
+.mjy-wrap label {
+	font-size: 13px;
+	line-height: 1.95;
+	color: var(--mjy-ink);
+}
+
+/* Switch-style checkbox rows: keeps long Persian labels from jumping. */
+.mjy-check {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 0 0 6px;
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+.mjy-check input[type="checkbox"] {
+	margin-top: 5px;
+	flex: 0 0 auto;
+}
+
+/* -------------------------------------------------------------------------
+ * Buttons
+ * ---------------------------------------------------------------------- */
+
+.mjy-wrap .button,
+.mjy-wrap .button-secondary,
+.mjy-wrap .button-primary,
+.mjy-wrap button.button,
+.mjy-wrap input[type="submit"] {
+	padding: 6px 18px;
+	min-height: 36px;
+	border-radius: 11px;
+	border: 1px solid rgba(14, 92, 85, 0.22);
+	background: var(--mjy-glass-strong);
+	color: var(--mjy-primary);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.8;
+	box-shadow: var(--mjy-shadow-soft);
+	transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
+
+.mjy-wrap .button:hover,
+.mjy-wrap .button-secondary:hover,
+.mjy-wrap button.button:hover {
+	background: #fff;
+	color: var(--mjy-primary);
+	transform: translateY(-1px);
+}
+
+.mjy-wrap .button-primary,
+.mjy-wrap input[type="submit"].button-primary {
+	border-color: transparent;
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
+	color: #fff;
+	text-shadow: none;
+}
+
+.mjy-wrap .button-primary:hover,
+.mjy-wrap input[type="submit"].button-primary:hover {
+	background: linear-gradient(135deg, #0b4d47, #14857b);
+	color: #fff;
+}
+
+.mjy-wrap .button-link-delete {
+	color: var(--mjy-error);
+	border-color: rgba(198, 72, 60, 0.35);
+}
+
+.mjy-wrap .button:focus,
+.mjy-wrap .button-secondary:focus,
+.mjy-wrap .button-primary:focus,
+.mjy-wrap button.button:focus {
+	box-shadow: 0 0 0 3px rgba(20, 133, 123, 0.28);
+	outline: 0;
+}
+
+.mjy-wrap .button:disabled,
+.mjy-wrap .button[disabled] {
+	opacity: 0.55;
+	transform: none;
+}
+
+/* Save/submit bar: sits at the end of a long settings form and stays reachable
+   while scrolling a tall panel list. */
+.mjy-actions {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin: 18px 0 0;
+	padding: 12px 16px;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: rgba(255, 255, 255, 0.88);
+	-webkit-backdrop-filter: blur(18px) saturate(1.4);
+	backdrop-filter: blur(18px) saturate(1.4);
+	box-shadow: 0 -8px 24px -18px rgba(14, 92, 85, 0.8);
+}
+
+.mjy-actions .button-primary,
+.mjy-actions input[type="submit"] {
+	padding: 8px 26px;
+	min-height: 40px;
+	font-size: 14px;
+}
+
+.mjy-actions p {
+	margin: 0;
+	font-size: 12px;
+	color: var(--mjy-ink-soft);
+}
+
+/* -------------------------------------------------------------------------
+ * Filters, tables, badges
+ * ---------------------------------------------------------------------- */
+
+.mjy-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px;
+	margin: 0 0 18px;
+	padding: 14px 16px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	border-radius: var(--mjy-radius);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(16px) saturate(1.4);
+	backdrop-filter: blur(16px) saturate(1.4);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-filters label {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-table {
+	margin: 0;
+	border: 0;
+	border-radius: var(--mjy-radius);
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.72);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-table thead th,
+.mjy-table thead td {
+	padding: 11px 12px;
+	border: 0;
+	background: rgba(14, 92, 85, 0.06);
+	font-size: 12.5px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+	text-align: right;
+}
+
+.mjy-table tbody th,
+.mjy-table tbody td {
+	padding: 11px 12px;
+	border: 0;
+	border-top: 1px solid var(--mjy-line);
+	font-size: 13px;
+	line-height: 1.9;
+	text-align: right;
+	vertical-align: middle;
+}
+
+.mjy-table.striped > tbody > tr:nth-child(odd) {
+	background: rgba(255, 255, 255, 0.45);
+}
+
+.mjy-table tbody tr:hover {
+	background: rgba(20, 133, 123, 0.07);
+}
+
+.mjy-table tfoot th,
+.mjy-table tfoot td {
+	border-top: 1px solid var(--mjy-line);
+	font-size: 12px;
+}
+
+.mjy-bulk {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+	margin: 12px 0;
+	padding: 12px 14px;
+	border-radius: 14px;
+	border: 1px solid var(--mjy-line);
+	background: rgba(255, 255, 255, 0.55);
+}
+
+.mjy-badge {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 999px;
+	font-size: 11.5px;
+	font-weight: 700;
+	line-height: 1.9;
+	white-space: nowrap;
+	border: 1px solid transparent;
+}
+
+.mjy-badge--pending {
+	color: #8a5a10;
+	background: #fff4e0;
+	border-color: #f6dcae;
+}
+
+.mjy-badge--confirmed {
+	color: #10664a;
+	background: #e2f6ec;
+	border-color: #b7e6cf;
+}
+
+.mjy-badge--notified {
+	color: #0d5a72;
+	background: #e2f2f8;
+	border-color: #b6dcec;
+}
+
+.mjy-badge--unsubscribed {
+	color: #6b6f73;
+	background: #eef0f1;
+	border-color: #dde1e3;
+}
+
+.mjy-badge--email,
+.mjy-badge--sms {
+	color: var(--mjy-primary);
+	background: rgba(20, 133, 123, 0.12);
+	border-color: rgba(20, 133, 123, 0.28);
+}
+
+.mjy-ok {
+	color: var(--mjy-ok);
+	font-weight: 700;
+}
+
+.mjy-bad {
+	color: var(--mjy-error);
+	font-weight: 700;
+}
+
+.mjy-empty {
+	padding: 26px 18px;
+	border-radius: var(--mjy-radius);
+	border: 1px dashed rgba(14, 92, 85, 0.28);
+	background: rgba(255, 255, 255, 0.5);
+	text-align: center;
+	color: var(--mjy-ink-soft);
+	font-size: 13px;
+	line-height: 2;
+}
+
+/* Pagination (WordPress core classes, restyled to match the cards). */
+.mjy-wrap .tablenav {
+	display: flex;
+	justify-content: flex-start;
+	margin: 14px 0 0;
+	height: auto;
+}
+
+.mjy-wrap .tablenav-pages {
+	float: none;
+	margin: 0;
+}
+
+.mjy-wrap .tablenav-pages a,
+.mjy-wrap .tablenav-pages span {
+	display: inline-block;
+	min-width: 30px;
+	padding: 4px 10px;
+	margin-inline-end: 4px;
+	border: 1px solid var(--mjy-line);
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.75);
+	font-size: 12.5px;
+	line-height: 1.9;
+	color: var(--mjy-primary);
+	text-align: center;
+	text-decoration: none;
+}
+
+.mjy-wrap .tablenav-pages a:hover {
+	background: #fff;
+	border-color: var(--mjy-primary-hover);
+}
+
+.mjy-wrap .tablenav-pages .current {
+	border-color: transparent;
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
+	color: #fff;
+	font-weight: 700;
+}
+
+/* -------------------------------------------------------------------------
+ * Notices and diagnostics
+ * ---------------------------------------------------------------------- */
+
+.mjy-wrap .notice {
+	border-radius: 14px;
+	border-inline-start-width: 4px;
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-wrap .notice p {
+	font-size: 13px;
+	line-height: 1.95;
+}
+
+.mjy-diagnosis {
+	margin: 10px 0 14px;
+	padding: 12px 14px;
+	border-radius: 14px;
+	border: 1px solid rgba(20, 133, 123, 0.25);
+	border-inline-start: 3px solid var(--mjy-primary-hover);
+	background: rgba(255, 255, 255, 0.72);
+	font-size: 13px;
+	line-height: 1.95;
+	color: var(--mjy-ink);
+	direction: rtl;
+	text-align: right;
+}
+
+.mjy-diagnosis code,
+.mjy-wrap code {
+	direction: ltr;
+	unicode-bidi: embed;
+	display: inline-block;
+	max-width: 100%;
+	padding: 1px 6px;
+	border-radius: 6px;
+	background: rgba(14, 92, 85, 0.08);
+	font-size: 12px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+.mjy-diagnosis--warn {
+	border-inline-start-color: var(--mjy-accent);
+	border-color: rgba(242, 169, 59, 0.4);
+	background: #fff8ec;
+}
+
+.mjy-kv {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 8px 18px;
+	margin: 10px 0 0;
+	font-size: 12.5px;
+}
+
+.mjy-kv div {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 6px 10px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.6);
+}
+
+.mjy-kv dt {
+	color: var(--mjy-ink-soft);
+	margin: 0;
+}
+
+.mjy-kv dd {
+	margin: 0;
+	font-weight: 600;
+	text-align: left;
+	direction: ltr;
+}
+
+/* Lists inside panels: WordPress core sets almost nothing, Persian line-height
+   needs more room. */
+.mjy-wrap ul,
+.mjy-wrap ol {
+	margin: 8px 0 14px;
+	padding-inline-start: 22px;
+	font-size: 13px;
+	line-height: 2.1;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-wrap ul li,
+.mjy-wrap ol li {
+	margin-bottom: 4px;
+}
+
+.mjy-wrap strong {
+	color: var(--mjy-ink);
+}
+
+/* -------------------------------------------------------------------------
+ * Help screen
+ * ---------------------------------------------------------------------- */
+
+.mjy-wrap details {
+	margin: 0 0 10px;
+	padding: 12px 16px;
+	border-radius: 14px;
+	border: 1px solid var(--mjy-line);
+	background: rgba(255, 255, 255, 0.6);
+}
+
+.mjy-wrap summary {
+	cursor: pointer;
+	font-size: 13.5px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+}
+
+.mjy-wrap details p,
+.mjy-wrap details li {
+	font-size: 13px;
+	line-height: 2;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-footer {
+	margin: 26px 0 0;
+	padding-top: 14px;
+	border-top: 1px solid var(--mjy-line);
+	font-size: 12px;
+	color: var(--mjy-ink-soft);
+	text-align: center;
+}
+
+/* -------------------------------------------------------------------------
+ * Motion and small screens
+ * ---------------------------------------------------------------------- */
+
+/* SMS pattern (bodyId) helper block -------------------------------------- */
+
+.mjy-pattern-vars {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	margin: 0 0 6px;
+	padding: 0;
+	list-style: none;
+}
+
+.mjy-pattern-vars li {
+	background: var(--mjy-glass);
+	border: 1px solid var(--mjy-line);
+	border-radius: 999px;
+	padding: 4px 12px;
+	font-size: 12px;
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-pattern-vars code,
+.mjy-pattern-sample {
+	direction: ltr;
+	unicode-bidi: embed;
+}
+
+.mjy-pattern-help {
+	background: var(--mjy-glass);
+	border: 1px solid var(--mjy-line);
+	border-radius: var(--mjy-radius);
+	padding: 14px 16px;
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-pattern-help p {
+	margin: 0 0 8px;
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+/* A warning inside the pattern help: amber edge, same glass body. */
+.mjy-pattern-help--warn {
+	border-color: rgba(242, 169, 59, 0.45);
+	background: linear-gradient(180deg, rgba(255, 248, 236, 0.85), rgba(255, 255, 255, 0.55));
+}
+
+.mjy-pattern-help p:last-child {
+	margin-bottom: 0;
+}
+
+.mjy-pattern-sample {
+	display: inline-block;
+	max-width: 100%;
+	padding: 10px 14px;
+	border-radius: 14px;
+	background: var(--mjy-glass-strong);
+	border: 1px solid var(--mjy-line);
+	font-size: 13px;
+	line-height: 1.8;
+	white-space: normal;
+}
+
+.mjy-pattern-ok {
+	margin: 0;
+	padding: 10px 14px;
+	border-radius: 14px;
+	background: rgba(31, 143, 96, 0.1);
+	border: 1px solid rgba(31, 143, 96, 0.3);
+	color: var(--mjy-ok);
+	font-size: 13px;
+}
+
+.mjy-pattern-findings {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mjy-pattern-findings li {
+	margin: 0 0 8px;
+	padding: 10px 14px;
+	border-radius: 14px;
+	font-size: 13px;
+	line-height: 1.8;
+	background: var(--mjy-glass);
+	border: 1px solid var(--mjy-line);
+}
+
+.mjy-pattern-findings li.is-error {
+	background: rgba(198, 72, 60, 0.09);
+	border-color: rgba(198, 72, 60, 0.32);
+}
+
+.mjy-pattern-findings li.is-warning {
+	background: rgba(242, 169, 59, 0.14);
+	border-color: rgba(242, 169, 59, 0.38);
+}
+
+#mjy-sms-pattern {
+	width: 100%;
+	max-width: 640px;
+	border-radius: 14px;
+	border: 1px solid var(--mjy-line);
+	background: var(--mjy-glass-strong);
+	padding: 10px 12px;
+	font-size: 13px;
+	line-height: 1.9;
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+/* Notices and pagination: WordPress styles both, but the defaults sit oddly on
+   the glass background, so they get the same radius and palette as the rest. */
+
+.mjy-wrap .notice {
+	margin: 0 0 16px;
+	padding: 10px 14px;
+	border: 1px solid var(--mjy-line);
+	border-radius: 14px;
+	background: var(--mjy-glass-strong);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-wrap .notice p {
+	margin: 4px 0;
+	font-size: 13px;
+	line-height: 1.9;
+}
+
+.mjy-wrap .notice-success {
+	border-color: rgba(31, 143, 96, 0.35);
+}
+
+.mjy-wrap .notice-error {
+	border-color: rgba(198, 72, 60, 0.35);
+}
+
+.mjy-wrap .tablenav {
+	height: auto;
+	margin: 14px 0 0;
+}
+
+.mjy-wrap .tablenav-pages {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	float: none;
+	text-align: start;
+}
+
+.mjy-wrap .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 32px;
+	height: 32px;
+	padding: 0 10px;
+	border-radius: 10px;
+	border: 1px solid var(--mjy-line);
+	background: var(--mjy-glass);
+	color: var(--mjy-primary);
+	font-size: 12.5px;
+	text-decoration: none;
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-wrap .page-numbers.current {
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
+	border-color: transparent;
+	color: #fff;
+	font-weight: 700;
+}
+
+.mjy-wrap .page-numbers:hover,
+.mjy-wrap .page-numbers:focus {
+	border-color: var(--mjy-primary-hover);
+	color: var(--mjy-primary);
+}
+
+.mjy-wrap .page-numbers.current:hover {
+	color: #fff;
+}
+
+.mjy-call__open {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	border: 1px solid var(--mjy-line);
+	border-radius: 999px;
+	background: var(--mjy-glass-strong);
+	color: var(--mjy-primary);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.7;
+	text-decoration: none;
+	white-space: nowrap;
+	box-shadow: var(--mjy-shadow-soft);
+	transition: transform 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out;
+}
+
+.mjy-call__open::before {
+	content: "";
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--mjy-accent);
+	box-shadow: 0 0 0 3px rgba(242, 169, 59, 0.18);
+}
+
+.mjy-call__open:hover,
+.mjy-call__open:focus {
+	color: var(--mjy-primary-hover);
+	border-color: var(--mjy-primary-hover);
+	transform: translateY(-1px);
+}
+
+.mjy-call__open.is-closed::before {
+	background: var(--mjy-ink-soft);
+	box-shadow: 0 0 0 3px rgba(91, 107, 102, 0.14);
+}
+
+.mjy-call__when {
+	display: block;
+	width: 100%;
+	margin-top: 4px;
+	color: var(--mjy-ink-soft);
+	font-size: 11px;
+	line-height: 1.7;
+}
+
+/* Follow-up dialog -------------------------------------------------------- */
+
+.mjy-modal {
+	width: min(680px, calc(100% - 32px));
+	max-height: min(86vh, 760px);
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	border-radius: var(--mjy-radius);
+	background: #fbfdfc;
+	box-shadow: 0 30px 80px -30px rgba(14, 92, 85, 0.55);
+	overflow: hidden;
+	color: var(--mjy-ink);
+}
+
+.mjy-modal::backdrop {
+	background: rgba(16, 32, 30, 0.42);
+	backdrop-filter: blur(3px);
+}
+
+.mjy-modal__panel {
+	display: flex;
+	flex-direction: column;
+	max-height: inherit;
+}
+
+.mjy-modal__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--mjy-line);
+	background: linear-gradient(135deg, rgba(14, 92, 85, 0.06), rgba(20, 133, 123, 0.03));
+}
+
+.mjy-modal__title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+}
+
+.mjy-modal__x {
+	border: 0;
+	background: transparent;
+	font-size: 22px;
+	line-height: 1;
+	padding: 2px 8px;
+	border-radius: 8px;
+	color: var(--mjy-ink-soft);
+	cursor: pointer;
+}
+
+.mjy-modal__x:hover,
+.mjy-modal__x:focus {
+	background: rgba(14, 92, 85, 0.08);
+	color: var(--mjy-primary);
+}
+
+.mjy-modal__body {
+	padding: 18px 20px 22px;
+	overflow-y: auto;
+}
+
+/* Follow-up panel --------------------------------------------------------- */
+
+.mjy-follow__who {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+.mjy-follow__name {
+	display: block;
+	font-size: 15px;
+	color: var(--mjy-ink);
+}
+
+.mjy-follow__phone {
+	display: inline-block;
+	margin-top: 3px;
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.4px;
+	color: var(--mjy-primary-hover);
+	text-decoration: none;
+	border-bottom: 1px dashed rgba(20, 133, 123, 0.45);
+}
+
+.mjy-follow__badge {
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.mjy-follow__badge.is-open {
+	background: rgba(242, 169, 59, 0.16);
+	color: #8a5a10;
+}
+
+.mjy-follow__badge.is-closed {
+	background: rgba(91, 107, 102, 0.12);
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__closed-note {
+	margin: 0 0 14px;
+	padding: 10px 12px;
+	border-radius: 12px;
+	background: rgba(91, 107, 102, 0.08);
+	font-size: 12px;
+	line-height: 1.9;
+}
+
+.mjy-follow__title {
+	margin: 0 0 8px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__empty {
+	margin: 0 0 16px;
+	padding: 12px;
+	border: 1px dashed var(--mjy-line);
+	border-radius: 12px;
+	font-size: 12px;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__timeline {
+	margin: 0 0 18px;
+	padding: 0;
+	list-style: none;
+	border-inline-start: 2px solid rgba(14, 92, 85, 0.14);
+}
+
+.mjy-follow__item {
+	position: relative;
+	display: flex;
+	gap: 10px;
+	padding: 0 14px 12px;
+}
+
+.mjy-follow__item::before {
+	content: "";
+	position: absolute;
+	inset-inline-start: -7px;
+	top: 6px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--mjy-primary-hover);
+	box-shadow: 0 0 0 3px #fbfdfc;
+}
+
+.mjy-follow__stage {
+	min-width: 72px;
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-follow__body strong {
+	font-size: 13px;
+}
+
+.mjy-follow__note {
+	margin: 4px 0 2px;
+	font-size: 12px;
+	line-height: 1.9;
+	color: var(--mjy-ink);
+	white-space: pre-wrap;
+}
+
+.mjy-follow__outcomes {
+	margin: 0 0 14px;
+	padding: 12px;
+	border: 1px solid var(--mjy-line);
+	border-radius: 14px;
+}
+
+.mjy-follow__outcomes legend {
+	padding: 0 6px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-outcome {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 8px;
+	padding: 6px 10px;
+	border: 1px solid var(--mjy-line);
+	border-radius: 999px;
+	background: #fff;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.mjy-outcome input[type="radio"] {
+	margin: 0;
+	accent-color: var(--mjy-primary);
+}
+
+.mjy-outcome:has(input:checked) {
+	border-color: var(--mjy-primary);
+	box-shadow: 0 0 0 3px rgba(14, 92, 85, 0.1);
+}
+
+.mjy-follow__field {
+	margin: 0 0 12px;
+}
+
+.mjy-follow__field label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__field textarea,
+.mjy-follow__field select {
+	width: 100%;
+	border-radius: 12px;
+}
+
+.mjy-follow__counter {
+	display: block;
+	margin-top: 2px;
+	font-size: 11px;
+	color: var(--mjy-ink-soft);
+	text-align: end;
+}
+
+.mjy-follow__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.mjy-btn {
+	padding: 8px 18px;
+	border-radius: 999px;
+	border: 1px solid var(--mjy-line);
+	background: #fff;
+	color: var(--mjy-primary);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.8;
+	cursor: pointer;
+	transition: transform 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+.mjy-btn:hover,
+.mjy-btn:focus {
+	transform: translateY(-1px);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-btn--primary {
+	border-color: transparent;
+	background: var(--mjy-primary);
+	color: #fff;
+}
+
+.mjy-btn--primary:hover,
+.mjy-btn--primary:focus {
+	background: var(--mjy-primary-hover);
+	color: #fff;
+}
+
+.mjy-btn--danger {
+	border-color: rgba(198, 72, 60, 0.35);
+	color: var(--mjy-error);
+}
+
+.mjy-btn--danger:hover,
+.mjy-btn--danger:focus {
+	border-color: var(--mjy-error);
+	color: var(--mjy-error);
+}
+
+.mjy-follow__hint,
+.mjy-follow__fallback {
+	margin: 0 0 6px;
+	font-size: 11px;
+	line-height: 1.9;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-follow__back {
+	margin-top: 16px;
+}
+
+@media screen and (max-width: 782px) {
+	.mjy-modal {
+		width: calc(100% - 16px);
+		max-height: 92vh;
+	}
+
+	.mjy-modal__body {
+		padding: 14px;
+	}
+
+	.mjy-outcome {
+		font-size: 11px;
+	}
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+	.mjy-wrap *,
+	.mjy-wrap *::before,
+	.mjy-wrap *::after {
+		transition: none;
+		animation: none;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.mjy-wrap {
+		margin: 10px 10px 30px;
+		padding: 16px;
+		border-radius: 20px;
+	}
+
+	.mjy-hero {
+		padding: 14px 16px;
+	}
+
+	.mjy-tabs {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.mjy-tabs a {
+		white-space: nowrap;
+	}
+
+	.mjy-hero__title {
+		font-size: 18px;
+	}
+
+	.mjy-wrap .form-table th {
+		width: auto;
+		display: block;
+		padding-bottom: 4px;
+	}
+
+	.mjy-wrap .form-table td {
+		display: block;
+		padding-top: 0;
+	}
+
+	.mjy-table {
+		display: block;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.mjy-table thead th,
+	.mjy-table tbody td,
+	.mjy-table tbody th {
+		font-size: 12px;
+		padding: 9px 8px;
+		white-space: nowrap;
+	}
+
+	.mjy-actions {
+		position: static;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Statistics screen
+ *
+ * The chart is plain divs. No canvas, no SVG library, no network request: the
+ * admin area stays usable on a host with no outbound connection, and the bars
+ * scale with the container instead of a fixed bitmap width.
+ * ---------------------------------------------------------------------- */
+
+.mjy-ranges {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 18px;
+}
+
+.mjy-range {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	padding: 0 18px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(14px);
+	backdrop-filter: blur(14px);
+	box-shadow: var(--mjy-shadow-soft);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+	text-decoration: none;
+	transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.mjy-range:hover,
+.mjy-range:focus {
+	color: var(--mjy-primary);
+	transform: translateY(-1px);
+	box-shadow: var(--mjy-shadow-soft), 0 0 0 2px rgba(20, 133, 123, 0.18);
+}
+
+.mjy-range.is-active,
+.mjy-range[aria-current="page"] {
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
+	color: #fff;
+	border-color: transparent;
+}
+
+.mjy-range-export {
+	margin-inline-start: auto;
+}
+
+.mjy-card__hint {
+	display: block;
+	margin-top: 4px;
+	font-size: 11.5px;
+	line-height: 1.8;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-chart {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 190px;
+	padding: 14px 6px 0;
+	margin-top: 10px;
+	border-radius: 16px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(14, 92, 85, 0.05));
+	border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.mjy-chart__col {
+	position: relative;
+	display: flex;
+	flex: 1 1 0;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	min-width: 2px;
+	height: 100%;
+}
+
+.mjy-chart__bar {
+	position: relative;
+	width: 100%;
+	max-width: 34px;
+	min-height: 0;
+	border-radius: 7px 7px 3px 3px;
+	background: linear-gradient(180deg, var(--mjy-primary-hover), var(--mjy-primary));
+	box-shadow: 0 4px 12px rgba(14, 92, 85, 0.18);
+	transition: filter 0.15s ease;
+}
+
+.mjy-chart--alt .mjy-chart__bar {
+	background: linear-gradient(180deg, var(--mjy-accent), #d78f28);
+	box-shadow: 0 4px 12px rgba(242, 169, 59, 0.22);
+}
+
+.mjy-chart__col:hover .mjy-chart__bar {
+	filter: brightness(1.08);
+}
+
+.mjy-chart__value {
+	position: absolute;
+	inset-inline-start: 50%;
+	bottom: 100%;
+	transform: translateX(50%);
+	margin-bottom: 4px;
+	font-size: 10.5px;
+	font-weight: 700;
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-chart--alt .mjy-chart__value {
+	color: #8a5a10;
+}
+
+.mjy-chart__label {
+	position: absolute;
+	top: 100%;
+	margin-top: 6px;
+	font-size: 10px;
+	font-style: normal;
+	line-height: 1.5;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+	transform: translateY(0);
+}
+
+.mjy-chart__label.is-empty {
+	visibility: hidden;
+}
+
+.mjy-chart + .mjy-muted,
+.mjy-chart ~ .mjy-muted {
+	margin-top: 34px;
+}
+
+.mjy-split {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 16px;
+}
+
+.mjy-share {
+	position: relative;
+	min-width: 120px;
+}
+
+.mjy-share__bar {
+	display: block;
+	height: 8px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--mjy-primary), var(--mjy-primary-hover));
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.mjy-share__text {
+	display: block;
+	margin-top: 4px;
+	font-size: 11.5px;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-panel--warn {
+	border-color: rgba(242, 169, 59, 0.55);
+	box-shadow: var(--mjy-shadow-soft), inset 0 0 0 1px rgba(242, 169, 59, 0.18);
+}
+
+@media (max-width: 782px) {
+	.mjy-chart {
+		height: 150px;
+		gap: 2px;
+	}
+
+	.mjy-chart__value {
+		display: none;
+	}
+
+	.mjy-range-export {
+		margin-inline-start: 0;
+		width: 100%;
+	}
+
+	.mjy-split {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Log screen
+ *
+ * Each row shows the readable sentence first and keeps the raw log one click
+ * away. The side stripe carries the severity, so a wall of rows can be
+ * scanned without reading a single word.
+ * ---------------------------------------------------------------------- */
+
+.mjy-log {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0 0 18px;
+}
+
+.mjy-log__row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 12px;
+	align-items: start;
+	padding: 14px 16px 14px 18px;
+	border-radius: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	border-inline-start: 4px solid var(--mjy-primary);
+	background: var(--mjy-glass);
+	-webkit-backdrop-filter: blur(16px) saturate(1.3);
+	backdrop-filter: blur(16px) saturate(1.3);
+	box-shadow: var(--mjy-shadow-soft);
+}
+
+.mjy-log__row--warning {
+	border-inline-start-color: var(--mjy-accent);
+}
+
+.mjy-log__row--error,
+.mjy-log__row--security {
+	border-inline-start-color: #c0463b;
+}
+
+.mjy-log__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.mjy-log__level {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	background: rgba(14, 92, 85, 0.1);
+	color: var(--mjy-primary);
+}
+
+.mjy-log__level--warning {
+	background: rgba(242, 169, 59, 0.18);
+	color: #8a5a10;
+}
+
+.mjy-log__level--error,
+.mjy-log__level--security {
+	background: rgba(192, 70, 59, 0.12);
+	color: #a3372e;
+}
+
+.mjy-log__title {
+	font-size: 13.5px;
+	font-weight: 700;
+	color: var(--mjy-ink);
+}
+
+.mjy-log__time {
+	margin-inline-start: auto;
+	font-size: 11.5px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+.mjy-log__detail {
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.9;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-log__advice {
+	margin: 6px 0 0;
+	font-size: 12px;
+	line-height: 1.9;
+	color: #8a5a10;
+	background: rgba(242, 169, 59, 0.12);
+	border-radius: 10px;
+	padding: 7px 10px;
+}
+
+.mjy-log__raw {
+	font-size: 11.5px;
+	min-width: 120px;
+}
+
+.mjy-log__raw details {
+	border: 1px solid rgba(20, 36, 31, 0.1);
+	border-radius: 10px;
+	padding: 6px 10px;
+	background: rgba(255, 255, 255, 0.6);
+}
+
+.mjy-log__raw summary {
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-log__raw dl {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 2px 10px;
+	margin: 8px 0 0;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 11px;
+}
+
+.mjy-log__raw dt {
+	color: #7d8a86;
+}
+
+.mjy-log__raw dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+	color: var(--mjy-ink);
+}
+
+.mjy-log__pager {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 20px;
+}
+
+/* Pager: page numbers are the same glass chip as a button, without the
+   drop shadow - a row of twenty shadows reads as noise. */
+.mjy-log__page {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px;
+	height: 34px;
+	padding: 0 8px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.62);
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	box-shadow: 0 1px 2px rgba(14, 92, 85, 0.08);
+	color: var(--mjy-ink);
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 140ms ease, color 140ms ease;
+}
+
+.mjy-log__page:hover {
+	background: rgba(255, 255, 255, 0.9);
+	color: var(--mjy-primary);
+}
+
+.mjy-log__page--on {
+	background: var(--mjy-primary);
+	border-color: var(--mjy-primary);
+	color: #fff;
+}
+
+.mjy-log__gap {
+	padding: 0 2px;
+	color: #8b968f;
+}
+
+.mjy-log__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.mjy-log__meta p {
+	margin: 0;
+}
+
+.mjy-log__perpage {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12.5px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+.mjy-log__perpage a,
+.mjy-log__perpage-on {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 28px;
+	padding: 0 6px;
+	border-radius: 10px;
+	text-decoration: none;
+	background: rgba(255, 255, 255, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	color: var(--mjy-ink);
+}
+
+.mjy-log__perpage-on {
+	background: rgba(14, 92, 85, 0.12);
+	border-color: rgba(14, 92, 85, 0.25);
+	color: var(--mjy-primary);
+	font-weight: 700;
+}
+
+.mjy-log__more {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 12px 0 0;
+}
+
+.mjy-quicklinks {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: -6px 0 18px;
+	font-size: 12.5px;
+	color: var(--mjy-ink-soft);
+}
+
+/* Dashboard event list: the same language as the log screen, in five lines. */
+.mjy-events {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 6px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mjy-events__item {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 10px;
+	align-items: start;
+	padding: 9px 12px;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.62);
+	border: 1px solid rgba(255, 255, 255, 0.8);
+	border-inline-start: 3px solid var(--mjy-accent);
+}
+
+.mjy-events__item--error,
+.mjy-events__item--security {
+	border-inline-start-color: #c0463b;
+}
+
+.mjy-events__level {
+	font-size: 10.5px;
+	font-weight: 700;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: rgba(14, 92, 85, 0.1);
+	color: var(--mjy-primary);
+	white-space: nowrap;
+}
+
+.mjy-events__text strong {
+	display: block;
+	font-size: 12.5px;
+}
+
+.mjy-events__text em {
+	display: block;
+	margin-top: 2px;
+	font-size: 11.5px;
+	font-style: normal;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-events__time {
+	font-size: 11px;
+	color: var(--mjy-ink-soft);
+	white-space: nowrap;
+}
+
+@media (max-width: 782px) {
+	.mjy-log__row {
+		grid-template-columns: 1fr;
+	}
+
+	.mjy-log__time {
+		margin-inline-start: 0;
+		width: 100%;
+	}
+
+	.mjy-events__item {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+
+	.mjy-events__time {
+		grid-column: 2;
+	}
+}
+
+</style>
+</head>
+<body>
+<p class="mjy-preview-note">
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.8.0.
+    این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
+    فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
+</p>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — گزارش رویدادها<small>همهٔ وقایع افزونه، با توضیح فارسی و لاگ اصلی</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۸.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs" aria-current="page">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+	<div class="mjy-grid">
+		<div class="mjy-card">
+			<span class="mjy-card__label">کل رویدادها</span>
+			<strong class="mjy-card__value">۶</strong>
+			<span class="mjy-card__hint">۶ مورد در ۲۴ ساعت گذشته</span>
+		</div>
+		<div class="mjy-card">
+			<span class="mjy-card__label">هشدار و خطا</span>
+			<strong class="mjy-card__value">۳</strong>
+			<span class="mjy-card__hint">چیزی که ارزش دیدن دارد</span>
+		</div>
+		<div class="mjy-card">
+			<span class="mjy-card__label">رویداد امنیتی</span>
+			<strong class="mjy-card__value">۲</strong>
+			<span class="mjy-card__hint">درخواست ردشده، محدودیت نرخ، کد امنیتی</span>
+		</div>
+		<div class="mjy-card">
+			<span class="mjy-card__label">خطای ارسال</span>
+			<strong class="mjy-card__value">۰</strong>
+			<span class="mjy-card__hint">درگاه یا پایگاه داده</span>
+		</div>
+	</div>
+
+	<form method="get" class="mjy-filters">
+		<input type="hidden" name="page" value="mojoodyar-logs" />
+		<input type="hidden" name="per_page" value="25" />
+
+		<label>سطح
+			<select name="level">
+				<option value="">همه</option>
+									<option value="security" >
+						امنیتی					</option>
+									<option value="error" >
+						خطا					</option>
+									<option value="warning" >
+						هشدار					</option>
+									<option value="info" >
+						اطلاع					</option>
+							</select>
+		</label>
+
+		<label>رویداد
+			<select name="event">
+				<option value="">همه</option>
+									<option value="subscribe_rejected" >
+						درخواست رد شد و ردیفی ساخته نشد (۲)					</option>
+									<option value="delivery_failed" >
+						ارسال پیام ناموفق بود (۱)					</option>
+									<option value="reconcile" >
+						پایش تطبیقی موجودی اجرا شد (۱)					</option>
+									<option value="restock_queued" >
+						اعلان بازگشت موجودی در صف گذاشته شد (۱)					</option>
+									<option value="sent" >
+						پیام ارسال شد (۱)					</option>
+							</select>
+		</label>
+
+		<label>بازه
+			<select name="days">
+				<option value="0">همه</option>
+									<option value="1" >
+						۲۴ ساعت					</option>
+									<option value="7" >
+						۷ روز					</option>
+									<option value="30" >
+						۳۰ روز					</option>
+							</select>
+		</label>
+
+		<label>جست‌وجو در متن لاگ
+			<input type="search" name="s" value="" placeholder="مثلاً bad_nonce یا 501" />
+		</label>
+
+		<button class="button">اعمال فیلتر</button>
+		<a class="button button-secondary" href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">پاک کردن</a>
+		<a class="button button-primary" href="https://shop.test/wp-admin/admin-post.php?action=mojoodyar_export_logs&&_wpnonce=stub-nonce">خروجی CSV لاگ</a>
+	</form>
+
+	<div class="mjy-log__meta">
+		<p class="mjy-muted">
+			۶ رویداد
+							— نمایش ۱ تا ۶									· آدرس و ایمیل هرگز خام ذخیره نمی‌شوند؛ فقط هش IP و کلید رویداد.
+		</p>
+
+		<nav class="mjy-log__perpage" aria-label="تعداد ردیف در هر صفحه">
+			<span>در هر صفحه:</span>
+												<span class="mjy-log__perpage-on">۲۵</span>
+																<a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs&per_page=50&paged=1">۵۰</a>
+																<a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs&per_page=100&paged=1">۱۰۰</a>
+									</nav>
+	</div>
+
+			<div class="mjy-log">
+											<article class="mjy-log__row mjy-log__row--info">
+					<div class="mjy-log__main">
+						<div class="mjy-log__head">
+							<span class="mjy-log__level mjy-log__level--info">
+								اطلاع							</span>
+							<strong class="mjy-log__title">پیام ارسال شد</strong>
+							<span class="mjy-log__time">
+								۶ آبان ۱۴۰۵								<span class="mjy-muted">· همین حالا</span>
+							</span>
+						</div>
+
+						<p class="mjy-log__detail">دلیل: sms، دلیل: restock</p>
+
+											</div>
+
+					<div class="mjy-log__raw">
+						<details>
+							<summary>لاگ اصلی</summary>
+							<dl>
+								<dt>event</dt>
+								<dd dir="ltr">sent</dd>
+								<dt>level</dt>
+								<dd dir="ltr">info</dd>
+								<dt>context</dt>
+								<dd dir="ltr">sms|restock</dd>
+								<dt>id</dt>
+								<dd dir="ltr">6</dd>
+															</dl>
+						</details>
+					</div>
+				</article>
+											<article class="mjy-log__row mjy-log__row--info">
+					<div class="mjy-log__main">
+						<div class="mjy-log__head">
+							<span class="mjy-log__level mjy-log__level--info">
+								اطلاع							</span>
+							<strong class="mjy-log__title">اعلان بازگشت موجودی در صف گذاشته شد</strong>
+							<span class="mjy-log__time">
+								۶ آبان ۱۴۰۵								<span class="mjy-muted">· همین حالا</span>
+							</span>
+						</div>
+
+						<p class="mjy-log__detail">محصول #501، تعداد واحد: ۲، تعداد پیام در صف: ۲</p>
+
+											</div>
+
+					<div class="mjy-log__raw">
+						<details>
+							<summary>لاگ اصلی</summary>
+							<dl>
+								<dt>event</dt>
+								<dd dir="ltr">restock_queued</dd>
+								<dt>level</dt>
+								<dd dir="ltr">info</dd>
+								<dt>context</dt>
+								<dd dir="ltr">501:0|units=2|queued=2</dd>
+								<dt>id</dt>
+								<dd dir="ltr">5</dd>
+															</dl>
+						</details>
+					</div>
+				</article>
+											<article class="mjy-log__row mjy-log__row--info">
+					<div class="mjy-log__main">
+						<div class="mjy-log__head">
+							<span class="mjy-log__level mjy-log__level--info">
+								اطلاع							</span>
+							<strong class="mjy-log__title">پایش تطبیقی موجودی اجرا شد</strong>
+							<span class="mjy-log__time">
+								۶ آبان ۱۴۰۵								<span class="mjy-muted">· همین حالا</span>
+							</span>
+						</div>
+
+						<p class="mjy-log__detail">محصول بررسی‌شده: ۸، گذار موجودی: ۰، تعداد پیام در صف: ۰</p>
+
+											</div>
+
+					<div class="mjy-log__raw">
+						<details>
+							<summary>لاگ اصلی</summary>
+							<dl>
+								<dt>event</dt>
+								<dd dir="ltr">reconcile</dd>
+								<dt>level</dt>
+								<dd dir="ltr">info</dd>
+								<dt>context</dt>
+								<dd dir="ltr">scanned=8|transitions=0|queued=0</dd>
+								<dt>id</dt>
+								<dd dir="ltr">4</dd>
+															</dl>
+						</details>
+					</div>
+				</article>
+											<article class="mjy-log__row mjy-log__row--warning">
+					<div class="mjy-log__main">
+						<div class="mjy-log__head">
+							<span class="mjy-log__level mjy-log__level--warning">
+								هشدار							</span>
+							<strong class="mjy-log__title">ارسال پیام ناموفق بود</strong>
+							<span class="mjy-log__time">
+								۶ آبان ۱۴۰۵								<span class="mjy-muted">· همین حالا</span>
+							</span>
+						</div>
+
+						<p class="mjy-log__detail">کانال: پیامک — وضعیت ردیف: ناموفق (تلاش‌ها تمام شد) — تلاش شمارهٔ ۳ — خطای درگاه: شمارهٔ فرستنده تأیید نشده است</p>
+
+													<p class="mjy-log__advice">
+								<span aria-hidden="true">↳</span>
+								ابزارها → «ارسال آزمایشی» را بزنید تا متن خطای واقعی درگاه را ببینید.							</p>
+											</div>
+
+					<div class="mjy-log__raw">
+						<details>
+							<summary>لاگ اصلی</summary>
+							<dl>
+								<dt>event</dt>
+								<dd dir="ltr">delivery_failed</dd>
+								<dt>level</dt>
+								<dd dir="ltr">warning</dd>
+								<dt>context</dt>
+								<dd dir="ltr">sms|failed|attempt=3|err=شمارهٔ فرستنده تأیید نشده است</dd>
+								<dt>id</dt>
+								<dd dir="ltr">3</dd>
+															</dl>
+						</details>
+					</div>
+				</article>
+											<article class="mjy-log__row mjy-log__row--security">
+					<div class="mjy-log__main">
+						<div class="mjy-log__head">
+							<span class="mjy-log__level mjy-log__level--security">
+								امنیتی							</span>
+							<strong class="mjy-log__title">درخواست رد شد و ردیفی ساخته نشد</strong>
+							<span class="mjy-log__time">
+								۶ آبان ۱۴۰۵								<span class="mjy-muted">· همین حالا</span>
+							</span>
+						</div>
+
+						<p class="mjy-log__detail">دلیل: کد امنیتی فرم منقضی شده بود (صفحه از کش بارگذاری شده یا نشست تمام شده)</p>
+
+													<p class="mjy-log__advice">
+								<span aria-hidden="true">↳</span>
+								کش صفحه را برای صفحه‌های محصول خاموش کنید یا زمان اعتبار nonce را بالا ببرید.							</p>
+											</div>
+
+					<div class="mjy-log__raw">
+						<details>
+							<summary>لاگ اصلی</summary>
+							<dl>
+								<dt>event</dt>
+								<dd dir="ltr">subscribe_rejected</dd>
+								<dt>level</dt>
+								<dd dir="ltr">security</dd>
+								<dt>context</dt>
+								<dd dir="ltr">bad_nonce</dd>
+								<dt>id</dt>
+								<dd dir="ltr">2</dd>
+																	<dt>ip_hash</dt>
+									<dd dir="ltr">bbbbbbbbbbbb…</dd>
+															</dl>
+						</details>
+					</div>
+				</article>
+											<article class="mjy-log__row mjy-log__row--security">
+					<div class="mjy-log__main">
+						<div class="mjy-log__head">
+							<span class="mjy-log__level mjy-log__level--security">
+								امنیتی							</span>
+							<strong class="mjy-log__title">درخواست رد شد و ردیفی ساخته نشد</strong>
+							<span class="mjy-log__time">
+								۶ آبان ۱۴۰۵								<span class="mjy-muted">· همین حالا</span>
+							</span>
+						</div>
+
+						<p class="mjy-log__detail">دلیل: همین مخاطب قبلاً برای همین محصول ثبت شده است</p>
+
+													<p class="mjy-log__advice">
+								<span aria-hidden="true">↳</span>
+								کاری لازم نیست؛ مشتری از قبل در لیست است.							</p>
+											</div>
+
+					<div class="mjy-log__raw">
+						<details>
+							<summary>لاگ اصلی</summary>
+							<dl>
+								<dt>event</dt>
+								<dd dir="ltr">subscribe_rejected</dd>
+								<dt>level</dt>
+								<dd dir="ltr">security</dd>
+								<dt>context</dt>
+								<dd dir="ltr">duplicate</dd>
+								<dt>id</dt>
+								<dd dir="ltr">1</dd>
+																	<dt>ip_hash</dt>
+									<dd dir="ltr">aaaaaaaaaaaa…</dd>
+															</dl>
+						</details>
+					</div>
+				</article>
+					</div>
+
+			
+	<div class="mjy-panel mjy-panel--warn">
+		<h2>پاک کردن لاگ‌ها</h2>
+		<p class="mjy-muted">
+			لاگ‌ها به‌صورت خودکار هر ۹۰ روز پاک می‌شوند (قابل تغییر در تنظیمات → پیشرفته).
+			پاک کردن دستی برگشت‌پذیر نیست و برای پیگیری تیکت پشتیبانی لازم است.
+		</p>
+		<form method="post" action="https://shop.test/wp-admin/admin-post.php" onsubmit="return confirm('همهٔ لاگ‌ها پاک شوند؟ این کار برگشت‌پذیر نیست.');">
+			<input type="hidden" name="_wpnonce" value="stub-nonce" />			<input type="hidden" name="action" value="mojoodyar_tool" />
+			<input type="hidden" name="tool" value="clear_logs" />
+			<button class="button" type="submit">پاک کردن همهٔ لاگ‌ها</button>
+		</form>
+	</div>
+
+<p class="mjy-footer">موجودیار — محصولی از اتحاد وردپرس</p></div>
+</body>
+</html>

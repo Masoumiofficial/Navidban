@@ -1,0 +1,12 @@
+{
+  "generated_by": "tools/build-assets.sh",
+  "front_gzip_bytes": 4489,
+  "front_raw_bytes": 13572,
+  "budget_gzip_bytes": 12288,
+  "files": {
+    "assets/css/mojoodyar-front.css": {"sha256": "a0c0cb6c92102bc75a6d585f65bfa4a5d2befe6b42b108cdc69ce1d1a1b5384b", "bytes": 5863, "gzip_bytes": 2010},
+    "assets/js/mojoodyar-front.js": {"sha256": "7249570d01687430877f73790732c98f5df4eec100c1b0f5f1699a397d9d55b0", "bytes": 7709, "gzip_bytes": 2479},
+    "assets/css/mojoodyar-admin.css": {"sha256": "8cddc6ff31e78788446b71af50c4640d1af6338cc8de1764d1f2eb6662afb795", "bytes": 29909, "gzip_bytes": 6814},
+    "assets/js/mojoodyar-admin.js": {"sha256": "35604a5b35d844f6dd9033c713fb13f599cb2559aaed38bc52a058b3a9e01f24", "bytes": 2103, "gzip_bytes": 956}
+  }
+}

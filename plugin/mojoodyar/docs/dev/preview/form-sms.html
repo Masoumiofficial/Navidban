@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>موجودیار 2.8.0 — فرم فروشگاه (فقط موبایل)</title>
+<style>
+/* --- wordpress-ish page shell (preview only) --- */
+
+body {
+    margin: 0;
+    padding: 40px 16px 80px;
+    background: #f4f7f6;
+    font-family: Vazirmatn, IRANSansX, Tahoma, Arial, sans-serif;
+    font-size: 15px;
+    color: #10201e;
+}
+.mjy-demo {
+    max-width: 520px;
+    margin: 0 auto;
+}
+.mjy-preview-note {
+    max-width: 520px;
+    margin: 0 auto 18px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #fffbe6;
+    border: 1px solid #f0d98a;
+    font-size: 12px;
+    line-height: 1.9;
+    color: #6b5200;
+    direction: rtl;
+}
+
+/* --- the real plugin stylesheet, verbatim --- */
+/*
+ * Mojoodyar — storefront form.
+ * Loaded only on a single product page whose product (or a variation) is
+ * unavailable. No !important: the theme must always be able to override it.
+ *
+ * Everything is scoped to .mjy-form and written with logical properties, so a
+ * theme with dir="rtl" on <html> gets the same layout we design for.
+ */
+
+.mjy-form {
+	--mjy-primary: #0e5c55;
+	--mjy-primary-hover: #14857b;
+	--mjy-accent: #f2a93b;
+	--mjy-ink: #10201e;
+	--mjy-ink-soft: #5b6b66;
+	--mjy-line: rgba(14, 92, 85, 0.16);
+	--mjy-error: #c6483c;
+	--mjy-ok: #1f8f60;
+
+	position: relative;
+	margin: 1.75rem 0;
+	padding: 1.5rem 1.5rem 1.25rem;
+	border: 1px solid rgba(255, 255, 255, 0.7);
+	border-radius: 20px;
+	background: rgba(255, 255, 255, 0.72);
+	background-image: linear-gradient(135deg, rgba(20, 133, 123, 0.1), rgba(242, 169, 59, 0.08));
+	box-shadow: 0 18px 40px -26px rgba(14, 92, 85, 0.55);
+	-webkit-backdrop-filter: blur(14px) saturate(1.4);
+	backdrop-filter: blur(14px) saturate(1.4);
+	color: var(--mjy-ink);
+	text-align: right;
+	overflow: hidden;
+}
+
+/* Accent rule along the top edge. */
+.mjy-form::before {
+	content: "";
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline: 0;
+	height: 4px;
+	background: linear-gradient(90deg, var(--mjy-primary), var(--mjy-primary-hover), var(--mjy-accent));
+}
+
+.mjy-form__title {
+	margin: 0 0 0.4rem;
+	font-size: 1.15rem;
+	line-height: 1.7;
+	font-weight: 700;
+	color: var(--mjy-ink);
+}
+
+.mjy-form__intro {
+	margin: 0 0 1.1rem;
+	font-size: 0.95rem;
+	line-height: 1.95;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-form__notice {
+	margin: 0 0 1rem;
+	padding: 0.7rem 0.95rem;
+	border-inline-start: 4px solid var(--mjy-ok);
+	border-radius: 12px;
+	background: rgba(31, 143, 96, 0.1);
+	color: #10664a;
+	font-size: 0.92rem;
+	line-height: 1.9;
+}
+
+.mjy-form__channels {
+	margin: 0 0 1rem;
+	padding: 0;
+	border: 0;
+}
+
+.mjy-form__channels legend {
+	margin-bottom: 0.5rem;
+	padding: 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-form__channels label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	margin-inline-end: 0.6rem;
+	padding: 0.45rem 0.9rem;
+	border: 1px solid var(--mjy-line);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.85);
+	font-size: 0.92rem;
+	cursor: pointer;
+}
+
+.mjy-form__channels label:hover {
+	border-color: rgba(20, 133, 123, 0.45);
+}
+
+.mjy-form__fields {
+	display: flex;
+	flex-direction: column;
+}
+
+/* SMS-first: the phone input comes first, without touching the DOM order that
+   the JavaScript relies on. The name field stays above it - a visitor reads
+   "who are you" before "how do we reach you". */
+.mjy-form[data-mode="sms"] .mjy-form__fields [data-mjy="phone-field"] {
+	order: -1;
+}
+
+.mjy-form[data-mode="sms"] .mjy-form__fields [data-mjy="name-field"] {
+	order: -2;
+}
+
+.mjy-form__field {
+	margin: 0 0 0.9rem;
+}
+
+.mjy-form [hidden] {
+	display: none;
+}
+
+.mjy-form__field label {
+	display: block;
+	margin-bottom: 0.35rem;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-form__field input {
+	width: 100%;
+	max-width: 22rem;
+	padding: 0.65rem 0.85rem;
+	border: 1px solid var(--mjy-line);
+	border-radius: 12px;
+	background: #fff;
+	color: var(--mjy-ink);
+	font-size: 1rem;
+	line-height: 1.7;
+	box-shadow: inset 0 1px 2px rgba(14, 92, 85, 0.06);
+	transition: border-color 140ms ease-in, box-shadow 140ms ease-in;
+}
+
+.mjy-form__field input::placeholder {
+	color: #9aa8a4;
+}
+
+.mjy-form__field input:focus {
+	border-color: var(--mjy-primary-hover);
+	box-shadow: 0 0 0 3px rgba(20, 133, 123, 0.18);
+	outline: 0;
+}
+
+.mjy-form__field input:focus-visible,
+.mjy-form__channels input:focus-visible,
+.mjy-button:focus-visible {
+	outline: 3px solid var(--mjy-accent);
+	outline-offset: 2px;
+}
+
+.mjy-form__consent {
+	margin: 0 0 1rem;
+	font-size: 0.85rem;
+	line-height: 1.95;
+	color: var(--mjy-ink-soft);
+}
+
+.mjy-form__consent label {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.4rem;
+}
+
+.mjy-form__consent input {
+	margin-top: 0.35rem;
+}
+
+.mjy-form__consent a {
+	margin-inline-start: 0.35rem;
+	text-decoration: underline;
+	color: var(--mjy-primary-hover);
+}
+
+/* Honeypot: off-screen, but not display:none (some bots skip hidden fields). */
+.mjy-form__hp {
+	position: absolute;
+	inset-inline-start: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.mjy-button {
+	display: inline-block;
+	padding: 0.75rem 1.6rem;
+	border: 0;
+	border-radius: 12px;
+	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
+	color: #fff;
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.7;
+	cursor: pointer;
+	box-shadow: 0 10px 22px -14px rgba(14, 92, 85, 0.9);
+	transition: transform 140ms ease-in, box-shadow 140ms ease-in;
+}
+
+.mjy-button:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 14px 26px -14px rgba(14, 92, 85, 0.95);
+}
+
+.mjy-button[disabled] {
+	opacity: 0.65;
+	cursor: progress;
+	transform: none;
+}
+
+.mjy-form__message {
+	margin: 0.9rem 0 0;
+	min-height: 1.2em;
+	font-size: 0.9rem;
+	line-height: 1.85;
+}
+
+.mjy-form__message.is-error {
+	color: var(--mjy-error);
+}
+
+.mjy-form__message.is-success {
+	color: var(--mjy-ok);
+}
+
+/* A variation is selected and it is available: the form is not relevant. */
+.mjy-form.is-hidden {
+	display: none;
+}
+
+/* Keyboard-only users get the same visible focus the button has. */
+.mjy-form :focus:not(:focus-visible) {
+	outline: 0;
+}
+
+@media (max-width: 480px) {
+	.mjy-form {
+		padding: 1.1rem 1rem 1rem;
+		border-radius: 16px;
+	}
+
+	.mjy-form__field input {
+		max-width: 100%;
+	}
+
+	.mjy-button {
+		width: 100%;
+	}
+}
+
+/* Older browsers without backdrop-filter still get an opaque, readable card. */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+	.mjy-form {
+		background: #f6f9f8;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mjy-form,
+	.mjy-form *,
+	.mjy-form *::before,
+	.mjy-form *::after {
+		transition: none;
+	}
+}
+
+</style>
+</head>
+<body>
+<p class="mjy-preview-note">
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.8.0.
+    این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
+    فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
+</p>
+<div class="mjy-demo"><section
+	class="mjy-form"
+	id="mjy-form"
+	dir="rtl"
+	data-product="501"
+	data-mode="sms"
+	data-consent="0"
+	data-variations="[]"
+>
+	<h3 class="mjy-form__title">خبرم کن</h3>
+
+	
+	<p class="mjy-form__intro">این کالا فعلاً موجود نیست. شمارهٔ خود را بگذارید تا به‌محض بازگشت موجودی خبرتان کنیم.</p>
+
+	<form class="mjy-form__body" novalidate>
+		<input type="hidden" name="product_id" value="501" />
+		<input type="hidden" name="variation_id" value="0" data-mjy="variation-id" />
+
+					<input type="hidden" name="channel" value="sms" />
+		
+		<div class="mjy-form__fields">
+							<p class="mjy-form__field" data-mjy="name-field">
+					<label for="mjy-name">نام و نام خانوادگی</label>
+					<input
+						type="text"
+						id="mjy-name"
+						name="name"
+						maxlength="120"
+						autocomplete="name"
+						placeholder="مثلاً مریم احمدی"
+						value=""
+						required					/>
+				</p>
+			
+			
+							<p class="mjy-form__field" data-mjy="phone-field">
+					<label for="mjy-phone">شمارهٔ موبایل</label>
+					<input
+						type="tel"
+						id="mjy-phone"
+						name="phone"
+						dir="ltr"
+						inputmode="tel"
+						autocomplete="tel"
+						placeholder="09xxxxxxxxx"
+						value=""
+						required					/>
+				</p>
+					</div>
+
+		<div class="mjy-form__hp" aria-hidden="true">
+			<label for="mjy-website">این فیلد را خالی بگذارید</label>
+			<input type="text" id="mjy-website" name="website" tabindex="-1" autocomplete="off" />
+		</div>
+
+		
+		<p class="mjy-form__actions">
+			<button type="submit" class="mjy-button">خبرم کن</button>
+		</p>
+
+		<p class="mjy-form__message" role="status" aria-live="polite" data-mjy="message"></p>
+	</form>
+
+	<noscript>
+		<p class="mjy-form__intro">
+			برای ثبت درخواست، جاوااسکریپت مرورگر باید فعال باشد. می‌توانید با پشتیبانی فروشگاه تماس بگیرید.
+		</p>
+	</noscript>
+</section>
+</div>
+</body>
+</html>

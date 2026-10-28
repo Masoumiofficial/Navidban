@@ -1,0 +1,47 @@
+{
+    "plugin_version": "2.8.1",
+    "php_version": "8.3.33",
+    "generated_at": "2026-10-28T11:39:36+00:00",
+    "assertions": 173,
+    "failures": 0,
+    "pass_rate": 100,
+    "groups": {
+        "منو و سطوح دسترسی": {
+            "assertions": 8,
+            "failures": 0
+        },
+        "رندر صفحات": {
+            "assertions": 28,
+            "failures": 0
+        },
+        "صفحهٔ آمار": {
+            "assertions": 15,
+            "failures": 0
+        },
+        "گزارش رویدادها": {
+            "assertions": 29,
+            "failures": 0
+        },
+        "پوستهٔ شیشه‌ای": {
+            "assertions": 10,
+            "failures": 0
+        },
+        "قراردادهای خروجی": {
+            "assertions": 58,
+            "failures": 0
+        },
+        "پوشش استایل": {
+            "assertions": 16,
+            "failures": 0
+        },
+        "صفحهٔ تشخیص محصول": {
+            "assertions": 6,
+            "failures": 0
+        },
+        "سلامت اجرا": {
+            "assertions": 3,
+            "failures": 0
+        }
+    },
+    "failed": []
+}
