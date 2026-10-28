@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.6.2",
+    "plugin_version": "2.6.3",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-28T09:33:02+00:00",
-    "assertions": 164,
+    "generated_at": "2026-10-28T09:51:24+00:00",
+    "assertions": 166,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -27,7 +27,7 @@
             "failures": 0
         },
         "قراردادهای خروجی": {
-            "assertions": 50,
+            "assertions": 52,
             "failures": 0
         },
         "پوشش استایل": {

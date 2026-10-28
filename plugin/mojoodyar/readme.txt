@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.6.2
+Stable tag: 2.6.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 8. صفحهٔ خطای فرم
 
 == Changelog ==
+
+= 2.6.3 =
+* نشانی محصول دیگر در الگوی پیشنهادی نیست: نشانی واقعی محصول ۴۰ تا ۶۰ کاراکتر است و اپراتور هر متغیر الگو را با `InvalidData` رد می‌کند.
+* اگر الگوی شما متغیر `{2}` (نشانی محصول) دارد و مقدارش از سقف بیشتر است، افزونه پیش از تماس با درگاه و با نام بردن همان متغیر و طول واقعی‌اش متوقف می‌شود؛ دیگر هیچ تلاشی هدر نمی‌رود.
+* در تنظیمات، طول هر مقدار کنار نمونهٔ ارسالی نوشته می‌شود.
 
 = 2.6.2 =
 * رفع خطای `InvalidData` ملی‌پیامک: مقدارهای الگو (نام مشتری، نام محصول) حالا حداکثر ۲۵ کاراکتر می‌شوند — شایع‌ترین دلیل رد شدن ارسال الگویی. نشانی محصول بریده نمی‌شود.

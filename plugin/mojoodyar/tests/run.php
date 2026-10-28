@@ -733,6 +733,23 @@ MjyTest::same( 'abc', SmsPattern::clip( 'abc', 25 ), 'مقدار کوتاه‌ت
 
 // The failure log needs the shape, never the values (they carry the customer's
 // name), so an opaque "InvalidData" becomes something the shop can compare.
+// The real shop that reported InvalidData sent three values: 11, 22 and 51
+// characters. The 51 is the product permalink, which is exactly what the
+// pre-send check has to name before the gateway does.
+$real_context = array(
+	'customer_name' => 'مریم احمدی',
+	'product_name'  => 'کفش دویدن نایک پگاسوس',
+	'product_url'   => 'https://etebahwp.com/product/nike-air-zoom-pegasus-41',
+	'site_name'     => 'اتحاد وردپرس',
+);
+$real_template = '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} اتحاد وردپرس';
+$too_long      = SmsPattern::overlong( $real_template, $real_context );
+MjyTest::same( 1, count( $too_long ), 'فقط نشانی محصول به‌عنوان مقدار بی‌درمان گزارش می‌شود' );
+MjyTest::same( 2, (int) $too_long[0]['index'], 'شمارهٔ متغیر مشکل‌دار گفته می‌شود' );
+MjyTest::ok( (int) $too_long[0]['length'] > 40, 'طول واقعی مقدار مشکل‌دار گزارش می‌شود' );
+MjyTest::same( array(), SmsPattern::overlong( '{0} عزیز، {1} موجود شد — اتحاد وردپرس', $real_context ), 'الگوی بدون نشانی هیچ مقدار بی‌درمانی ندارد' );
+MjyTest::same( 'https://etebahwp.com/product/nike-air-zoom-pegasus-41', SmsPattern::raw( 2, $real_context ), 'raw() مقدار را دست‌نخورده برمی‌گرداند' );
+
 MjyTest::same(
 	'values=2,lengths=4,9',
 	SmsPattern::shape( '{0} عزیز، {1} آمد — فروشگاه', array( 'customer_name' => 'مریم', 'product_name' => 'کفش دویدن' ) ),

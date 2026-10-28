@@ -96,6 +96,27 @@ final class SmsMelipayamak implements ChannelInterface {
 				return Http::error( 'mojoodyar_sms_pattern', 'متن الگوی پیامک ایراد دارد: ' . $findings[0]['message'] );
 			}
 
+			// A value the operator will refuse is caught here, not after the
+			// gateway has already answered "InvalidData" and burned an attempt.
+			// The offending variable is named with its real length, because the
+			// fix is almost always "drop {2} from the approved pattern".
+			$overlong = SmsPattern::overlong( $pattern, $map );
+
+			if ( ! empty( $overlong ) ) {
+				$first = $overlong[0];
+
+				return Http::error(
+					'mojoodyar_sms_value_long',
+					sprintf(
+						'مقدار {%s} (%s) %s کاراکتر است و از سقف %s کاراکتری متغیرهای الگو بیشتر است؛ درگاه آن را با InvalidData رد می‌کند. این متغیر را از الگوی پنل پیامک بردارید (و همان را در تنظیمات) یا مقدار کوتاه‌تری بفرستید.',
+						(string) $first['index'],
+						(string) $first['label'],
+						\Mojoodyar\Support\Persian::number( (int) $first['length'] ),
+						\Mojoodyar\Support\Persian::number( (int) SmsPattern::MAX_VALUE_LENGTH )
+					)
+				);
+			}
+
 			$values = SmsPattern::payload( $pattern, $map );
 
 			if ( '' === $values ) {

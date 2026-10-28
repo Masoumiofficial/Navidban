@@ -97,7 +97,10 @@ final class SmsPattern {
 			$site_name = 'فروشگاه شما';
 		}
 
-		return '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} — ' . $site_name;
+		// No {2}/product_url on purpose. A product permalink is 40-60 characters
+		// and operators cap each pattern variable far below that, so a template
+		// with the link in it is the fastest way to a permanent InvalidData.
+		return '{0} عزیز، {1} دوباره موجود شد — ' . $site_name;
 	}
 
 	/**
@@ -133,7 +136,45 @@ final class SmsPattern {
 	 * @param array $context Context map from Notifier::build_context().
 	 * @return string
 	 */
-	public static function value( $index, array $context ) {
+	public static function value( $index, array $context, $clip = true ) {
+		$key = isset( self::VARIABLES[ (string) $index ] ) ? self::VARIABLES[ (string) $index ] : '';
+
+		if ( '' === $key ) {
+			// Out of the supported range: sent as nothing, never as a dash.
+			return '';
+		}
+
+		$value = self::raw( $index, $context );
+
+		// A URL is never clipped: half a URL is worse than a long value. It is
+		// caught before the send instead, by overlong().
+		if ( $clip && 'product_url' !== $key ) {
+			$value = self::clip( $value );
+		}
+
+		// An empty slot shifts nothing but reads as an error on most panels, so
+		// send a neutral dash instead of an empty field.
+		return '' === $value ? '-' : $value;
+	}
+
+	/**
+	 * Context key for a variable index.
+	 *
+	 * @param int $index Variable index.
+	 * @return string Empty when the index is out of range.
+	 */
+	public static function key( $index ) {
+		return isset( self::VARIABLES[ (string) $index ] ) ? self::VARIABLES[ (string) $index ] : '';
+	}
+
+	/**
+	 * The value as it would go out, before any length clipping.
+	 *
+	 * @param int   $index   Variable index.
+	 * @param array $context Context.
+	 * @return string
+	 */
+	public static function raw( $index, array $context ) {
 		$key = isset( self::VARIABLES[ (string) $index ] ) ? self::VARIABLES[ (string) $index ] : '';
 
 		if ( '' === $key || ! isset( $context[ $key ] ) ) {
@@ -152,17 +193,45 @@ final class SmsPattern {
 			$value = '';
 		}
 
-		$value = trim( $value );
+		return trim( $value );
+	}
 
-		// A URL is never clipped: half a URL is worse than a long value, and the
-		// admin can drop {2} from the template if the operator complains.
-		if ( 'product_url' !== $key ) {
-			$value = self::clip( $value );
+	/**
+	 * Values that clipping cannot fix, i.e. the ones that will be refused.
+	 *
+	 * Names and titles are shortened automatically, so they never block a send.
+	 * A product URL is the exception: clipping it would deliver a broken link,
+	 * so it is kept whole and checked *before* the HTTP call. The gateway would
+	 * otherwise answer "InvalidData", burn an attempt, and leave the shop with
+	 * no idea which variable was the problem.
+	 *
+	 * @param string $template Template.
+	 * @param array  $context  Context.
+	 * @param int    $limit    Maximum characters per value.
+	 * @return array[] Each: index, label, length.
+	 */
+	public static function overlong( $template, array $context, $limit = self::MAX_VALUE_LENGTH ) {
+		$labels = self::labels();
+		$out    = array();
+
+		foreach ( self::indexes( $template ) as $index ) {
+			// Clippable values are handled by value(); only the URL is rigid.
+			if ( 'product_url' !== self::key( $index ) ) {
+				continue;
+			}
+
+			$length = Text::length( self::raw( $index, $context ) );
+
+			if ( $length > $limit ) {
+				$out[] = array(
+					'index'  => $index,
+					'label'  => isset( $labels[ (string) $index ] ) ? $labels[ (string) $index ] : '',
+					'length' => $length,
+				);
+			}
 		}
 
-		// An empty slot shifts nothing but reads as an error on most panels, so
-		// send a neutral dash instead of an empty field.
-		return '' === $value ? '-' : $value;
+		return $out;
 	}
 
 	/**

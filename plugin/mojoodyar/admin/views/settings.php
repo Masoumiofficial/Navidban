@@ -371,7 +371,11 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 								<strong>۴.</strong> الگوهایی مثل «<code>{0} باتشکر</code>» یا «<code>{0} گوگل</code>»
 								تأیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
 							<p>
-								<strong>۵.</strong> هر مقدار حداکثر <strong><?php echo esc_html( \Mojoodyar\Support\Persian::number( \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH ) ); ?></strong>
+								<strong>۴.۵.</strong> نشانی محصول (<code>{2}</code>) را در الگو نگذارید؛ طولش از سقف
+							اپراتور بیشتر است و پیام با <code>InvalidData</code> برمی‌گردد.
+						</p>
+						<p class="description">
+							<strong>۵.</strong> هر مقدار حداکثر <strong><?php echo esc_html( \Mojoodyar\Support\Persian::number( \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH ) ); ?></strong>
 								کاراکتر باشد؛ این محدودیت رایج اپراتورها است و شایع‌ترین دلیل پاسخ
 								<code>InvalidData</code> از درگاه. افزونه نام مشتری و نام محصول را خودکار
 								تا همین طول کوتاه می‌کند (نشانی محصول را نه).
@@ -390,6 +394,17 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 						<p class="description">
 							نمونهٔ مقداری که افزونه برای همین متن می‌فرستد:
 							<code dir="ltr"><?php echo esc_html( \Mojoodyar\Logic\SmsPattern::payload( $mjy_pattern_text, $mjy_sample_context ) ); ?></code>
+						</p>
+						<p class="description">
+							طول هر مقدار:
+							<?php foreach ( \Mojoodyar\Logic\SmsPattern::indexes( $mjy_pattern_text ) as $mjy_var_index ) : ?>
+								<?php $mjy_var_length = \Mojoodyar\Support\Text::length( \Mojoodyar\Logic\SmsPattern::raw( $mjy_var_index, $mjy_sample_context ) ); ?>
+								<code dir="ltr"><?php echo esc_html( '{' . $mjy_var_index . '}=' . $mjy_var_length ); ?></code>
+							<?php endforeach; ?>
+							— سقف مجاز
+							<code dir="ltr"><?php echo esc_html( (string) \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH ); ?></code>
+							کاراکتر. نشانی محصول را در الگو نگذارید: نشانی واقعی محصول معمولاً
+							۴۰ تا ۶۰ کاراکتر است و درگاه آن را با <code>InvalidData</code> رد می‌کند.
 						</p>
 					</td>
 				</tr>

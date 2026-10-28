@@ -1024,11 +1024,16 @@ $pattern_call = $GLOBALS['mjy_http_calls'][0][1]['body'];
 MjyInt::same( 98765, $pattern_call['bodyId'], 'شناسهٔ الگو به عدد تبدیل شد' );
 MjyInt::same( '09121234567', $pattern_call['to'], 'شماره در حالت الگو' );
 MjyInt::ok( ! isset( $pattern_call['isflash'] ), 'پارامترهای حالت متنی در حالت الگو فرستاده نمی‌شوند' );
+// The suggested template carries two values: the customer and the product. A
+// product permalink is 40-60 characters and no operator accepts that as a
+// pattern variable - including it is how a shop ends up with InvalidData for
+// ever, so the default no longer has {2}.
 MjyInt::same(
-	'مریم;کفش دویدن;https://shop.test/p/10',
+	'مریم;کفش دویدن',
 	$pattern_call['text'],
 	'مقدارها به ترتیب شماره با جداکنندهٔ نقطه‌ویرگول'
 );
+MjyInt::ok( false === strpos( \Mojoodyar\Logic\SmsPattern::default_template( 'فروشگاه نمونه' ), '{2}' ), 'الگوی پیشنهادی نشانی محصول را ندارد' );
 MjyInt::ok( false === strpos( $pattern_call['text'], 'متن ساده' ), 'متن کاملِ رندرشده جای مقدارها فرستاده نمی‌شود' );
 
 // A stored template that reorders or drops variables changes the payload.
@@ -1084,6 +1089,37 @@ $GLOBALS['mjy_http_calls'] = array();
 $plain_sms->send( '09121234567', '', 'x', $long_context );
 $long_values = explode( ';', (string) $GLOBALS['mjy_http_calls'][0][1]['body']['text'] );
 MjyInt::ok( \Mojoodyar\Support\Text::length( $long_values[1] ) <= \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH, 'نام محصول بلند پیش از ارسال کوتاه می‌شود', $long_values[1] );
+
+// The reported case exactly: the approved pattern ends with the product URL,
+// and that URL is 51 characters. The send must stop on our side with the
+// variable named, instead of reaching the gateway for another InvalidData.
+Settings::update( array( 'sms_pattern_template' => '{0} عزیز، {1} دوباره موجود شد. مشاهده و خرید: {2} اتحاد وردپرس' ) );
+$GLOBALS['mjy_http_calls'] = array();
+$url_context = array(
+	'context' => array(
+		'customer_name' => 'مریم احمدی',
+		'product_name'  => 'کفش دویدن نایک پگاسوس',
+		'product_url'   => 'https://etebahwp.com/product/nike-air-zoom-pegasus-41',
+		'site_name'     => 'اتحاد وردپرس',
+	),
+);
+$long_url    = $plain_sms->send( '09121234567', '', 'x', $url_context );
+$long_reason = is_object( $long_url ) ? $long_url->get_error_message() : (string) $long_url;
+
+MjyInt::ok( true !== $long_url, 'مقدار بلندِ بی‌درمان پیش از تماس با درگاه رد می‌شود' );
+MjyInt::same( 0, count( $GLOBALS['mjy_http_calls'] ), 'برای آن هیچ تماسی با درگاه انجام نشد' );
+MjyInt::ok( false !== strpos( $long_reason, '{2}' ), 'شمارهٔ متغیر مشکل‌دار در پیام هست' );
+MjyInt::ok( false !== strpos( $long_reason, \Mojoodyar\Support\Persian::number( \Mojoodyar\Support\Text::length( $url_context['context']['product_url'] ) ) ), 'طول واقعی مقدار در پیام هست' );
+MjyInt::ok( false !== strpos( $long_reason, '۲۵' ), 'سقف مجاز در پیام هست' );
+
+// The same message with the URL removed goes out: two values, both under the cap.
+Settings::update( array( 'sms_pattern_template' => '{0} عزیز، {1} دوباره موجود شد — اتحاد وردپرس' ) );
+$GLOBALS['mjy_http_calls']    = array();
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"1234","RetStatus":1,"StrRetStatus":"Ok"}' );
+$fixed = $plain_sms->send( '09121234567', '', 'x', $url_context );
+MjyInt::same( true, $fixed, 'الگوی دو‌متغیره بدون نشانی ارسال می‌شود' );
+MjyInt::same( 1, count( $GLOBALS['mjy_http_calls'] ), 'و تماس با درگاه انجام شد' );
+MjyInt::same( 'مریم احمدی;کفش دویدن نایک پگاسوس', $GLOBALS['mjy_http_calls'][0][1]['body']['text'], 'مقدارها درست و کوتاه فرستاده شدند' );
 
 // The gateway's opaque rejection must arrive with the shape of the request.
 $GLOBALS['mjy_http_calls']    = array();

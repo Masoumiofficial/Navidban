@@ -369,7 +369,9 @@ MjyAdmin::ok( false !== strpos( $settings_html, 'name="mojoodyar_settings[sms_pa
 MjyAdmin::ok( false !== strpos( $settings_html, '<textarea' ), 'متن الگو در textarea ویرایش می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, '{0}' ) && false !== strpos( $settings_html, '{1}' ), 'فهرست متغیرها با شمارهٔ صفر شروع می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'متغیر در انتها' ), 'قاعدهٔ «متغیر در انتها» در راهنما آمده' );
-MjyAdmin::ok( false !== strpos( $settings_html, 'مریم;کفش دویدن نایک;https://example.com/p/12' ), 'نمونهٔ مقدارهای ارسالی نشان داده می‌شود' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'نمونهٔ مقداری که افزونه برای همین متن می‌فرستد' ), 'نمونهٔ مقدارهای ارسالی نشان داده می‌شود' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'طول هر مقدار' ), 'طول هر مقدار کنار نمونه نوشته می‌شود' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'نشانی محصول را در الگو نگذارید' ), 'هشدار دربارهٔ نشانی محصول در الگو هست' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'mjy-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تأیید می‌گیرد' );
 MjyAdmin::ok( false === strpos( $settings_html, 'mjy-pattern-findings' ), 'برای الگوی پیش‌فرض هیچ ایرادی رندر نمی‌شود' );
 
