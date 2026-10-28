@@ -1823,6 +1823,35 @@ MjyInt::same( 1, (int) $diagnosis['scheduled'], 'تشخیص، تعداد ردی�
 MjyInt::same( 0, (int) $diagnosis['ready'], 'و تعداد آمادهٔ ارسال را صفر می‌دهد' );
 MjyInt::ok( false !== strpos( (string) $diagnosis['hint'], 'زمان' ), 'تشخیص دلیل فارسی دارد' );
 
+// The admin needs the wait in words, not a UTC string to compare by hand.
+MjyInt::same( (string) $GLOBALS['wpdb']->get_var( 'SELECT next_run_at FROM ' . Queue::table() . ' WHERE id = ' . $future_id ), (string) $diagnosis['nearest'], 'زمان نزدیک‌ترین پیام در تشخیص هست' );
+MjyInt::ok( (int) $diagnosis['nearest_wait'] > 3000, 'مدت انتظار بر حسب ثانیه گزارش می‌شود' );
+MjyInt::same( 0, (int) $diagnosis['nearest_tries'], 'ردیفِ زمان‌بندی‌نشده تلاش ناموفق ندارد' );
+MjyInt::ok( false !== strpos( (string) $diagnosis['hint'], 'ساعت دیگر' ), 'انتظار به فارسی و نه به عدد خام خوانده می‌شود' );
+
+// A row waiting because its last attempt failed must say so, with the gateway's
+// own sentence: otherwise "scheduled" looks identical to "not created yet".
+$GLOBALS['wpdb']->query(
+	'UPDATE ' . Queue::table() . " SET attempts = 1, last_error = 'شمارهٔ فرستنده تأیید نشده است' WHERE id = " . $future_id
+);
+$backoff = Queue::diagnose();
+MjyInt::same( 1, (int) $backoff['nearest_tries'], 'تلاش ناموفق ردیف گزارش می‌شود' );
+MjyInt::ok( false !== strpos( (string) $backoff['hint'], 'عقب‌نشینی' ), 'دلیل انتظار (عقب‌نشینی) گفته می‌شود' );
+MjyInt::ok( false !== strpos( (string) $backoff['hint'], 'شمارهٔ فرستنده' ), 'متن خطای درگاه در تشخیص می‌آید' );
+
+// The manual override: when the gateway is fixed, the admin should not have to
+// wait out a backoff he already knows the outcome of.
+MjyInt::same( 1, Queue::pull_forward(), 'ابزار ارسال فوری، ردیف زمان‌بندی‌شده را به «همین حالا» می‌آورد' );
+$GLOBALS['mjy_http_response'] = array(
+	'response' => array( 'code' => 200 ),
+	'body'     => '{"ok":true}',
+);
+$GLOBALS['mjy_http_calls'] = array();
+Queue::release_lock();
+$pulled_run = Queue::process( 10 );
+MjyInt::same( 1, (int) $pulled_run['sent'], 'و همان اجرا آن را ارسال می‌کند' );
+MjyInt::same( 0, Queue::pull_forward(), 'اجرای دوبارهٔ ابزار چیزی برای منتقل‌کردن ندارد' );
+
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() . ' WHERE id = ' . $future_id );
 Queue::release_lock();
 

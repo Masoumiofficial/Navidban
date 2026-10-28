@@ -70,6 +70,38 @@ final class Persian {
 	 * @param int $seconds_ago Age in seconds.
 	 * @return string
 	 */
+	/**
+	 * How far in the future something is, in words.
+	 *
+	 * The mirror of relative(): a queue row is often not broken but simply
+	 * waiting for its next_run_at, and "in 41 seconds" is the difference between
+	 * "the plugin is dead" and "it is about to send".
+	 *
+	 * @param int $seconds_until Seconds from now.
+	 * @return string
+	 */
+	public static function until( $seconds_until ) {
+		$seconds_until = (int) $seconds_until;
+
+		if ( $seconds_until <= 0 ) {
+			return 'همین حالا';
+		}
+
+		if ( $seconds_until < 60 ) {
+			return self::digits( $seconds_until ) . ' ثانیهٔ دیگر';
+		}
+
+		if ( $seconds_until < 3600 ) {
+			return self::digits( (int) ceil( $seconds_until / 60 ) ) . ' دقیقهٔ دیگر';
+		}
+
+		if ( $seconds_until < 86400 ) {
+			return self::digits( (int) ceil( $seconds_until / 3600 ) ) . ' ساعت دیگر';
+		}
+
+		return self::digits( (int) ceil( $seconds_until / 86400 ) ) . ' روز دیگر';
+	}
+
 	public static function relative( $seconds_ago ) {
 		$seconds_ago = (int) $seconds_ago;
 		if ( $seconds_ago < 0 ) {

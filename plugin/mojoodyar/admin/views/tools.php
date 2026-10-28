@@ -70,6 +70,15 @@ if ( $mjy_notice ) {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
 			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
 			<input type="hidden" name="action" value="mojoodyar_tool" />
+			<input type="hidden" name="tool" value="send_due_now" />
+			<h3>ارسال فوری پیام‌های زمان‌بندی‌شده</h3>
+			<p>پیام‌هایی که منتظر زمان اجرا یا عقب‌نشینی پس از خطا هستند، همین حالا ارسال می‌شوند. زمانی که درگاه را درست کرده‌اید به کار می‌آید.</p>
+			<button class="button button-primary">ارسال فوری</button>
+		</form>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mjy-card">
+			<?php wp_nonce_field( 'mojoodyar_tool' ); ?>
+			<input type="hidden" name="action" value="mojoodyar_tool" />
 			<input type="hidden" name="tool" value="unlock_queue" />
 			<h3>آزادکردن صفِ گیرکرده</h3>
 			<p>اگر «پردازش صف» می‌گوید قفل است یا ردیفی در وضعیت «در حال ارسال» مانده، اینجا آزاد می‌شود.</p>

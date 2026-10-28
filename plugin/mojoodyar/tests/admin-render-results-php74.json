@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.6.0",
+    "plugin_version": "2.6.1",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-28T08:57:15+00:00",
-    "assertions": 163,
+    "generated_at": "2026-10-28T09:11:39+00:00",
+    "assertions": 164,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -19,7 +19,7 @@
             "failures": 0
         },
         "گزارش رویدادها": {
-            "assertions": 28,
+            "assertions": 29,
             "failures": 0
         },
         "پوستهٔ شیشه‌ای": {

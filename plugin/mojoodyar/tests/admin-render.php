@@ -264,6 +264,7 @@ MjyAdmin::ok( false !== strpos( $logs_html, 'name="tool" value="clear_logs"' ), 
 MjyAdmin::ok( false !== strpos( $logs_html, '_wpnonce' ), 'فرم پاک کردن nonce دارد' );
 MjyAdmin::ok( false === strpos( $logs_html, 'Undefined' ), 'صفحه بدون notice رندر می‌شود' );
 MjyAdmin::ok( false !== strpos( $rendered['tools'], 'value="unlock_queue"' ), 'ابزار آزادکردن صف در صفحهٔ ابزارها هست' );
+MjyAdmin::ok( false !== strpos( $rendered['tools'], 'value="send_due_now"' ), 'ابزار ارسال فوری پیام‌های زمان‌بندی‌شده هست' );
 MjyAdmin::ok( false !== strpos( $logs_html, 'name="per_page"' ), 'انتخاب تعداد ردیف در هر صفحه هست' );
 MjyAdmin::ok( false !== strpos( $logs_html, 'name="per_page" value="25"' ), 'پیش‌فرض ۲۵ ردیف است تا صفحه سنگین نشود' );
 

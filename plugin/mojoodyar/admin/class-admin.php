@@ -929,7 +929,7 @@ final class Admin {
 
 		$reasons = array(
 			'empty'     => 'صف خالی است؛ هیچ اعلانی در انتظار ارسال نیست.',
-			'scheduled' => 'هیچ پیامی زمانِ ارسالش نرسیده است.',
+			'scheduled' => 'هیچ پیامی هنوز زمانِ ارسالش نرسیده است.',
 			'window'    => 'بیرون از بازهٔ مجاز ارسال هستیم؛ ساعت شروع و پایان را در تنظیمات ببینید.',
 			'rate'      => 'سقف ارسال در هر دقیقه پر شده است؛ چند دقیقه بعد دوباره بزنید.',
 			'locked'    => 'قفل صف در اختیار اجرای دیگری است؛ چند دقیقه بعد دوباره بزنید.',
@@ -947,6 +947,8 @@ final class Admin {
 			Persian::number( (int) $diagnosis['skipped'] )
 		);
 
+		// The hint already carries the nearest time, the wait and the reason the
+		// row is waiting at all; without it the sentence reads like a dead end.
 		if ( (int) $diagnosis['scheduled'] > 0 && 'scheduled' === $skipped ) {
 			$text .= ' ' . $diagnosis['hint'];
 		}
@@ -1007,6 +1009,23 @@ final class Admin {
 				);
 
 				$message .= ' ' . self::queue_reason( (string) $stats['skipped'] );
+				break;
+
+			case 'send_due_now':
+				$pulled  = Queue::pull_forward();
+				$stats   = Queue::process( 200 );
+				$message = sprintf(
+					'%s پیام زمان‌بندی‌شده به «همین حالا» منتقل شد؛ %s ارسال، %s خطا.',
+					Persian::number( $pulled ),
+					Persian::number( $stats['sent'] ),
+					Persian::number( $stats['failed'] )
+				);
+
+				if ( (int) $stats['failed'] > 0 ) {
+					$message .= ' دلیل خطا در «گزارش رویدادها» زیر «ارسال پیام ناموفق بود» نوشته شده است.';
+				} else {
+					$message .= ' ' . self::queue_reason( (string) $stats['skipped'] );
+				}
 				break;
 
 			case 'unlock_queue':

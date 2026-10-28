@@ -216,16 +216,42 @@ final class Queue {
 		$failed     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'failed'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$skipped    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'skipped'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
-		$earliest = $wpdb->get_var(
-			$wpdb->prepare( "SELECT next_run_at FROM {$table} WHERE status = 'queued' AND next_run_at > %s ORDER BY next_run_at ASC LIMIT 1", $now )
+		// The nearest waiting row, with the two facts that explain it: how long the
+		// wait still is, and whether the wait exists because the last attempt
+		// failed (backoff) rather than because the message was created later.
+		$nearest = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT next_run_at, attempts, last_error FROM {$table}
+				 WHERE status = 'queued' AND next_run_at > %s
+				 ORDER BY next_run_at ASC LIMIT 1",
+				$now
+			),
+			ARRAY_A
 		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$nearest       = is_array( $nearest ) ? $nearest : array();
+		$nearest_when  = isset( $nearest['next_run_at'] ) ? (string) $nearest['next_run_at'] : '';
+		$nearest_wait  = ( '' !== $nearest_when ) ? ( max( 0, (int) strtotime( $nearest_when . ' UTC' ) - time() ) ) : 0;
+		$nearest_tries = isset( $nearest['attempts'] ) ? (int) $nearest['attempts'] : 0;
+		$nearest_error = isset( $nearest['last_error'] ) ? trim( (string) $nearest['last_error'] ) : '';
 
 		$hint = '';
 
 		if ( $queued > 0 ) {
 			$hint = 'آمادهٔ ارسال است؛ اگر ارسال نشد، قفل صف یا بازهٔ ارسال را ببینید.';
 		} elseif ( $scheduled > 0 ) {
-			$hint = 'زمان اجرای بعدی این پیام‌ها نرسیده است' . ( is_string( $earliest ) ? ' (نزدیک‌ترین: ' . $earliest . ' UTC)' : '' ) . '.';
+			$hint = 'زمان اجرای بعدی این پیام‌ها نرسیده است';
+
+			if ( '' !== $nearest_when ) {
+				$hint .= ': ' . $nearest_when . ' UTC (' . \Mojoodyar\Support\Persian::until( $nearest_wait ) . ')';
+			}
+
+			if ( $nearest_tries > 0 ) {
+				$hint .= ' — این پیام‌ها پیش‌تر ارسالشان ناموفق بوده و در حال عقب‌نشینی‌اند';
+				$hint .= '' !== $nearest_error ? ': ' . $nearest_error : '.';
+			} else {
+				$hint .= '.';
+			}
 		} elseif ( $processing > 0 ) {
 			$hint = 'ردیف‌ها در وضعیت «در حال ارسال» گیر کرده‌اند؛ ابزار «آزادکردن قفل صف» را بزنید.';
 		} elseif ( $failed > 0 ) {
@@ -237,13 +263,18 @@ final class Queue {
 		}
 
 		return array(
-			'queued'     => $queued,
-			'ready'      => $queued,
-			'scheduled'  => $scheduled,
-			'processing' => $processing,
-			'failed'     => $failed,
-			'skipped'    => $skipped,
-			'hint'       => $hint,
+			'queued'         => $queued,
+			'ready'          => $queued,
+			'scheduled'      => $scheduled,
+			'processing'     => $processing,
+			'failed'         => $failed,
+			'skipped'        => $skipped,
+			'now'            => $now,
+			'nearest'        => $nearest_when,
+			'nearest_wait'   => $nearest_wait,
+			'nearest_tries'  => $nearest_tries,
+			'nearest_error'  => $nearest_error,
+			'hint'           => $hint,
 		);
 	}
 
@@ -496,6 +527,39 @@ final class Queue {
 	 * @param int $limit Safety cap.
 	 * @return int Rows requeued.
 	 */
+	/**
+	 * Make every waiting message due right now.
+	 *
+	 * Backoff exists so a broken gateway is not hammered, but when the admin has
+	 * just fixed the gateway and can see two messages sitting there, waiting
+	 * fifteen minutes for a retry they already know the outcome of is not
+	 * patience - it is a stuck button.
+	 *
+	 * @return int Rows pulled forward.
+	 */
+	public static function pull_forward() {
+		global $wpdb;
+
+		$table = self::table();
+		$now   = gmdate( 'Y-m-d H:i:s' );
+
+		$pulled = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET next_run_at = %s WHERE status = 'queued' AND next_run_at > %s",
+				$now,
+				$now
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$pulled = (int) $pulled;
+
+		if ( $pulled > 0 ) {
+			Logger::log( 'info', 'queue_pull_forward', 'rows=' . $pulled );
+		}
+
+		return $pulled;
+	}
+
 	public static function retry_failed( $limit = 200 ) {
 		global $wpdb;
 

@@ -940,6 +940,12 @@ MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'unlock_queue' 
 MjyTest::ok( false !== strpos( LogExplain::detail( 'queue_reclaimed', 'rows=2' ), '۲' ), 'تعداد ردیفِ آزادشده با رقم فارسی خوانده می‌شود' );
 MjyTest::ok( '' !== LogExplain::advice( 'queue_reclaimed', 'rows=1' ), 'برای ردیفِ جامانده راهنمای اقدام هست' );
 MjyTest::ok( '' !== LogExplain::advice( 'queue_insert_failed', 'Duplicate entry' ), 'برای خطای نوشتن در صف راهنمای اقدام هست' );
+MjyTest::ok( false !== strpos( LogExplain::detail( 'queue_pull_forward', 'rows=2' ), '۲' ), 'انتقال زمان‌بندی‌شده‌ها با رقم فارسی خوانده می‌شود' );
+MjyTest::same( 'همین حالا', Persian::until( 0 ), 'انتظار صفر «همین حالا» است' );
+MjyTest::same( '۴۱ ثانیهٔ دیگر', Persian::until( 41 ), 'انتظار کمتر از یک دقیقه به ثانیه گفته می‌شود' );
+MjyTest::same( '۲ دقیقهٔ دیگر', Persian::until( 90 ), 'انتظار یک‌ونیم دقیقه به بالا گرد می‌شود' );
+MjyTest::same( '۳ ساعت دیگر', Persian::until( 3 * 3600 ), 'انتظار ساعت‌ها درست خوانده می‌شود' );
+MjyTest::same( 'همین حالا', Persian::until( -20 ), 'انتظار منفی «همین حالا» است' );
 MjyTest::ok( false !== strpos( LogExplain::detail( 'admin_tool', 'clear_logs' ), 'پاک کردن لاگ' ), 'ابزار «پاک کردن لاگ» فارسی است' );
 MjyTest::ok( false !== strpos( LogExplain::tool( 'nope' ), 'ناشناخته' ), 'ابزار ناشناخته پنهان نمی‌شود' );
 
