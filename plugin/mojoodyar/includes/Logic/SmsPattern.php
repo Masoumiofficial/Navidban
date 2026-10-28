@@ -40,6 +40,21 @@ defined( 'ABSPATH' ) || exit;
 final class SmsPattern {
 
 	/**
+	 * Longest value most Iranian operators accept for one pattern variable.
+	 *
+	 * This is the single most common reason a correct-looking pattern send comes
+	 * back as "InvalidData": the panel approved the template, the site sent the
+	 * right number of values, and one of them (a long product title) was over
+	 * the operator's per-variable limit. Values are clipped to this length so a
+	 * 30-character product name does not throw the whole message away.
+	 *
+	 * It is a length guard, not a claim about any specific operator's rules.
+	 *
+	 * @var int
+	 */
+	const MAX_VALUE_LENGTH = 25;
+
+	/**
 	 * Variable index => context key, in the canonical order shown in the panel.
 	 *
 	 * @var array<string,string>
@@ -139,9 +154,64 @@ final class SmsPattern {
 
 		$value = trim( $value );
 
+		// A URL is never clipped: half a URL is worse than a long value, and the
+		// admin can drop {2} from the template if the operator complains.
+		if ( 'product_url' !== $key ) {
+			$value = self::clip( $value );
+		}
+
 		// An empty slot shifts nothing but reads as an error on most panels, so
 		// send a neutral dash instead of an empty field.
 		return '' === $value ? '-' : $value;
+	}
+
+	/**
+	 * Shorten a value to the operator's per-variable budget.
+	 *
+	 * Cuts on a word boundary when one exists in the second half of the string,
+	 * because "کفش دویدن نایک…" reads like a real truncation while
+	 * "کفش دویدن نای…" reads like a bug.
+	 *
+	 * @param string $value Raw value.
+	 * @param int    $limit Maximum characters.
+	 * @return string
+	 */
+	public static function clip( $value, $limit = self::MAX_VALUE_LENGTH ) {
+		$value = (string) $value;
+
+		if ( Text::length( $value ) <= $limit ) {
+			return $value;
+		}
+
+		$cut = Text::substring( $value, 0, max( 1, $limit - 1 ) );
+
+		if ( preg_match( '/^(.{4,}?)\s\S*$/u', $cut, $m ) ) {
+			$cut = $m[1];
+		}
+
+		return rtrim( $cut, " \t.,،" ) . '…';
+	}
+
+	/**
+	 * What was actually sent, for the failure log.
+	 *
+	 * "InvalidData" on its own tells a shopkeeper nothing: the panel wants the
+	 * variable count and each value's length to compare with the approved
+	 * template. This returns exactly those numbers, never the values themselves
+	 * (they contain the customer's name and the product title).
+	 *
+	 * @param string $template Template.
+	 * @param array  $context  Context.
+	 * @return string Example: "values=3,lengths=25,25,38".
+	 */
+	public static function shape( $template, array $context ) {
+		$lengths = array();
+
+		foreach ( self::indexes( $template ) as $index ) {
+			$lengths[] = Text::length( self::value( $index, $context ) );
+		}
+
+		return 'values=' . count( $lengths ) . ',lengths=' . implode( ',', $lengths );
 	}
 
 	/**

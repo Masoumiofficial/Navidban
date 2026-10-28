@@ -1065,6 +1065,50 @@ $thin = explode( ';', (string) $GLOBALS['mjy_http_calls'][0][1]['body']['text'] 
 MjyInt::same( 2, count( $thin ), 'تعداد مقدارها با تعداد متغیرها برابر می‌ماند' );
 MjyInt::same( 'کفش دویدن', $thin[1], 'مقدار موجود در جای خودش می‌نشیند' );
 
+// A long product title must not be sent as-is: the operator's per-variable
+// budget is the usual reason a "correct" pattern send answers InvalidData.
+Settings::update(
+	array(
+		'melipayamak_body_id'  => '98765',
+		'sms_pattern_template' => '{0} عزیز، {1} موجود شد — فروشگاه نمونه',
+	)
+);
+$long_context = array(
+	'context' => array(
+		'customer_name' => 'مریم',
+		'product_name'  => 'کفش دویدن نایک ایر زوم پگاسوس نسخهٔ ویژهٔ بازار ایران',
+		'site_name'     => 'فروشگاه نمونه',
+	),
+);
+$GLOBALS['mjy_http_calls'] = array();
+$plain_sms->send( '09121234567', '', 'x', $long_context );
+$long_values = explode( ';', (string) $GLOBALS['mjy_http_calls'][0][1]['body']['text'] );
+MjyInt::ok( \Mojoodyar\Support\Text::length( $long_values[1] ) <= \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH, 'نام محصول بلند پیش از ارسال کوتاه می‌شود', $long_values[1] );
+
+// The gateway's opaque rejection must arrive with the shape of the request.
+$GLOBALS['mjy_http_calls']    = array();
+$GLOBALS['mjy_http_response'] = array(
+	'response' => array( 'code' => 200 ),
+	'body'     => '{"Value":"","RetStatus":0,"StrRetStatus":"InvalidData"}',
+);
+Settings::update( array( 'sms_pattern_template' => '{0} عزیز، {1} موجود شد — فروشگاه نمونه' ) );
+$invalid = $plain_sms->send( '09121234567', '', 'x', $restock_context );
+$invalid_text = is_object( $invalid ) ? $invalid->get_error_message() : (string) $invalid;
+
+MjyInt::ok( false !== strpos( $invalid_text, 'InvalidData' ), 'متن خطای درگاه حفظ می‌شود' );
+MjyInt::ok( false !== strpos( $invalid_text, 'bodyId=98765' ), 'شناسهٔ الگو در خطا گزارش می‌شود' );
+MjyInt::ok( false !== strpos( $invalid_text, 'values=2' ), 'تعداد مقدارهای ارسالی در خطا گزارش می‌شود' );
+MjyInt::ok( false !== strpos( $invalid_text, 'lengths=' ), 'طول مقدارها در خطا گزارش می‌شود' );
+MjyInt::ok( false === strpos( $invalid_text, 'مریم' ), 'مقدارها (نام مشتری) در لاگ نمی‌آیند' );
+MjyInt::ok( false === strpos( (string) $GLOBALS['mjy_http_calls'][0][1]['body']['password'], 'مریم' ), 'رمز همان چیزی است که تنظیم شده' );
+
+$advice = \Mojoodyar\Logic\LogExplain::advice( 'delivery_failed', 'sms|failed|attempt=3|err=' . $invalid_text );
+MjyInt::ok( false !== strpos( $advice, 'الگو' ) && false !== strpos( $advice, '۲۵' ), 'راهنمای فارسی برای InvalidData سه گام واقعی دارد' );
+
+$GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"Value":"","RetStatus":0,"StrRetStatus":"InvalidUserPass"}' );
+$bad_pass = $plain_sms->send( '09121234567', '', 'x', $restock_context );
+MjyInt::ok( false !== strpos( \Mojoodyar\Logic\LogExplain::advice( 'delivery_failed', 'sms|failed|err=' . ( is_object( $bad_pass ) ? $bad_pass->get_error_message() : '' ) ), 'رمز' ), 'خطای نام کاربری/رمز راهنمای خودش را دارد' );
+
 Settings::update( array( 'melipayamak_body_id' => '', 'sms_pattern_template' => '' ) );
 $GLOBALS['mjy_http_response'] = null;
 

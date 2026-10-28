@@ -370,6 +370,11 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 							<p>
 								<strong>۴.</strong> الگوهایی مثل «<code>{0} باتشکر</code>» یا «<code>{0} گوگل</code>»
 								تأیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
+							<p>
+								<strong>۵.</strong> هر مقدار حداکثر <strong><?php echo esc_html( \Mojoodyar\Support\Persian::number( \Mojoodyar\Logic\SmsPattern::MAX_VALUE_LENGTH ) ); ?></strong>
+								کاراکتر باشد؛ این محدودیت رایج اپراتورها است و شایع‌ترین دلیل پاسخ
+								<code>InvalidData</code> از درگاه. افزونه نام مشتری و نام محصول را خودکار
+								تا همین طول کوتاه می‌کند (نشانی محصول را نه).
 							</p>
 						</div>
 					</td>

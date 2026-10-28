@@ -131,8 +131,26 @@ final class SmsMelipayamak implements ChannelInterface {
 		}
 
 		$gateway_error = Http::detect_error( $result['body'] );
+
 		if ( '' !== $gateway_error ) {
-			return Http::error( 'mojoodyar_sms_gateway', $gateway_error );
+			// "InvalidData" is all this gateway says when it dislikes the request,
+			// and the shop cannot act on it. Attach the shape of what we sent:
+			// how many values, how long each one, and whether the pattern mode was
+			// used. The values themselves never go in the log - they carry the
+			// customer's name.
+			$note = '';
+
+			if ( '' !== $body_id ) {
+				$note = 'pattern|bodyId=' . (int) $body_id . '|'
+					. \Mojoodyar\Logic\SmsPattern::shape(
+						$pattern,
+						isset( $map ) && is_array( $map ) ? $map : array()
+					);
+			} else {
+				$note = 'plain|from=' . ( '' === (string) Settings::get( 'melipayamak_from', '' ) ? 'empty' : 'set' );
+			}
+
+			return Http::error( 'mojoodyar_sms_gateway', $gateway_error . ' (' . $note . ')' );
 		}
 
 		return true;

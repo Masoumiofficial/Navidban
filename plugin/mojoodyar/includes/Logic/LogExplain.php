@@ -482,6 +482,25 @@ final class LogExplain {
 		$event = (string) $event;
 		$parts = self::parse( $context );
 
+		$raw = (string) $context;
+
+		// Gateway status strings are the only diagnosis a failed send carries.
+		// "InvalidData" is opaque, so each known token gets the real checklist.
+		$gateway = array(
+			'InvalidData' => 'ملی‌پیامک دادهٔ ارسالی را نپذیرفت. سه چیز را به ترتیب بررسی کنید: ۱) در پنل، متن الگو با همان تعداد متغیر ({0}، {1}…) ثبت شده باشد که در تنظیمات دارید — تعداد مقادیری که فرستادیم در همین خط نوشته شده؛ ۲) طول هر متغیر از محدودیت اپراتور (معمولاً ۲۵ کاراکتر) کمتر باشد — نام محصول بلند را کوتاه کنید؛ ۳) نام کاربری و رمز همان پنل پیامک باشد و خط شما «خدماتی/الگو» باشد، نه تبلیغاتی.',
+			'InvalidUserPass' => 'نام کاربری یا رمز ملی‌پیامک اشتباه است. همان اطلاعات ورود پنل را در تنظیمات → کانال‌ها وارد کنید.',
+			'UnAuthorized'    => 'دسترسی این حساب به این خط یا این الگو مسدود است؛ در پنل ملی‌پیامک بررسی کنید.',
+			'NoCredit'        => 'اعتبار پنل پیامک تمام شده است. پس از شارژ، ابزار «تلاش دوباره برای پیام‌های ناموفق» را بزنید.',
+			'CreditLow'       => 'اعتبار پنل پیامک کافی نیست. پس از شارژ، «تلاش دوباره برای پیام‌های ناموفق» را بزنید.',
+			'NotFound'        => 'درگاه شماره یا الگو را پیدا نکرد؛ شناسهٔ bodyId و نوع خط را در پنل بررسی کنید.',
+		);
+
+		foreach ( $gateway as $token => $sentence ) {
+			if ( false !== strpos( $raw, $token ) ) {
+				return $sentence;
+			}
+		}
+
 		$code = '';
 
 		foreach ( $parts as $part ) {

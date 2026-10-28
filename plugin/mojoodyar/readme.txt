@@ -4,7 +4,7 @@ Tags: woocommerce, out of stock, back in stock, waitlist, sms, persian, farsi
 Requires at least: 6.4
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 8. صفحهٔ خطای فرم
 
 == Changelog ==
+
+= 2.6.2 =
+* رفع خطای `InvalidData` ملی‌پیامک: مقدارهای الگو (نام مشتری، نام محصول) حالا حداکثر ۲۵ کاراکتر می‌شوند — شایع‌ترین دلیل رد شدن ارسال الگویی. نشانی محصول بریده نمی‌شود.
+* خطای درگاه دیگر فقط `InvalidData` نیست: تعداد مقدارها، طول هرکدام و شناسهٔ الگو در همان خط لاگ می‌آید و راهنمای فارسی سه‌مرحله‌ای زیر آن نوشته می‌شود.
 
 = 2.6.1 =
 * پیام «پردازش صف» حالا می‌گوید چقدر دیگر باید صبر کرد («۴۱ ثانیهٔ دیگر»، «۱۲ دقیقهٔ دیگر») و اگر انتظار به‌خاطر شکستِ تلاش قبلی است، متن خطای درگاه را هم نشان می‌دهد.

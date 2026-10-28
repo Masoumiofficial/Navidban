@@ -715,6 +715,30 @@ MjyTest::same( '', SmsPattern::value( 9, $pattern_ctx ), 'unknown index yields e
 // A semicolon inside a value would shift every later value by one.
 MjyTest::same( 'الف, ب', SmsPattern::value( 1, array( 'product_name' => "الف;\nب" ) ), 'semicolon and newline are neutralised' );
 
+// The operator's per-variable budget. A long product title is the usual reason
+// a correct pattern send comes back as InvalidData.
+$long_name = 'کفش دویدن نایک ایر زوم پگاسوس نسخهٔ ویژهٔ بازار ایران';
+$clipped   = SmsPattern::value( 1, array( 'product_name' => $long_name ) );
+MjyTest::ok( \Mojoodyar\Support\Text::length( $clipped ) <= SmsPattern::MAX_VALUE_LENGTH, 'نام محصول بلند به سقف کاراکتر کوتاه می‌شود', $clipped );
+MjyTest::ok( false !== strpos( $clipped, '…' ), 'کوتاه‌سازی با نشانهٔ «…» دیده می‌شود', $clipped );
+MjyTest::ok( false === strpos( $clipped, 'ایران' ), 'بخش انتهایی حذف شده است', $clipped );
+MjyTest::same( 'کفش دویدن', SmsPattern::value( 1, array( 'product_name' => 'کفش دویدن' ) ), 'مقدار کوتاه دست‌نخورده می‌ماند' );
+MjyTest::same(
+	'https://shop.test/p/10',
+	SmsPattern::value( 2, array( 'product_url' => 'https://shop.test/p/10' ) ),
+	'نشانی محصول بریده نمی‌شود (نشانی نصفه بی‌فایده است)'
+);
+MjyTest::same( 'کوتاه…', SmsPattern::clip( 'کوتاه و بلند', 7 ), 'برش روی مرز کلمه انجام می‌شود' );
+MjyTest::same( 'abc', SmsPattern::clip( 'abc', 25 ), 'مقدار کوتاه‌تر از سقف تغییر نمی‌کند' );
+
+// The failure log needs the shape, never the values (they carry the customer's
+// name), so an opaque "InvalidData" becomes something the shop can compare.
+MjyTest::same(
+	'values=2,lengths=4,9',
+	SmsPattern::shape( '{0} عزیز، {1} آمد — فروشگاه', array( 'customer_name' => 'مریم', 'product_name' => 'کفش دویدن' ) ),
+	'shape() تعداد و طول مقدارها را می‌دهد'
+);
+
 MjyTest::same(
 	'مریم;کفش دویدن;https://shop.test/p/10',
 	SmsPattern::payload( '{0} عزیز، {1} آمد: {2} — فروشگاه نمونه', $pattern_ctx ),
