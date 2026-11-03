@@ -185,6 +185,17 @@ def audit_zip(path: str, report: Report, root: str) -> None:
             const.group(1) if const else "?",
         )
 
+        fonts = [n for n in names if f"{PLUGIN_SLUG}/assets/fonts/" in n]
+        report.check(
+            len([n for n in fonts if n.endswith(".woff2")]) >= 3,
+            "قلم Vazirmatn در بسته است (بدون درخواست از CDN)",
+            str(len(fonts)) + " فایل",
+        )
+        report.check(
+            any(n.endswith("OFL.txt") for n in fonts),
+            "مجوز قلم (SIL OFL) در بسته است",
+        )
+
         report.check(f"{PLUGIN_SLUG}/license.txt" in names, "license.txt در بسته است")
         license_text = texts.get(f"{PLUGIN_SLUG}/license.txt", "")
         report.check(

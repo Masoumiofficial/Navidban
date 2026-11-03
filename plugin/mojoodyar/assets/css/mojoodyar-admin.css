@@ -6,10 +6,40 @@
  *
  * Rules this file follows:
  *  - no external font/image request: the panel must work on an offline host;
+ *    Vazirmatn ships inside assets/fonts (SIL OFL 1.1, see assets/fonts/OFL.txt)
+ *    and is served from the plugin directory, never from a CDN;
  *  - every glass surface keeps a solid fallback colour, so the layout is still
  *    readable in browsers without backdrop-filter (Firefox < 103, old Safari);
  *  - contrast is checked against the *light* fallback, not against the blur.
  */
+
+/* Vazirmatn — Arabic/Persian subset, three weights, bundled. A clean install
+ * with a Latin-only admin font otherwise falls back to Tahoma and the panel
+ * looks like a different product from the screenshots. font-display: swap
+ * keeps the first paint immediate. */
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-700-normal.woff2") format("woff2");
+}
 
 .mjy-wrap {
 	--mjy-primary: #0e5c55;

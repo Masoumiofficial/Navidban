@@ -107,7 +107,7 @@ final class Activator {
 			return;
 		}
 
-		// 2.0 renamed the product (Navidban -> Mojoodyar) and with it the table
+		// The product was renamed before the public release and with it the table
 		// prefix. Upgrading an old install must move the rows, not orphan them.
 		Migration::from_legacy_brand();
 

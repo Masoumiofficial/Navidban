@@ -28,7 +28,12 @@ admin_js="assets/js/mojoodyar-admin.js"
 
 echo "=== Mojoodyar asset check ==="
 
-for f in "$front_css" "$front_js" "$admin_css" "$admin_js"; do
+fonts=(assets/fonts/vazirmatn-arabic-400-normal.woff2
+       assets/fonts/vazirmatn-arabic-500-normal.woff2
+       assets/fonts/vazirmatn-arabic-700-normal.woff2
+       assets/fonts/OFL.txt)
+
+for f in "$front_css" "$front_js" "$admin_css" "$admin_js" "${fonts[@]}"; do
 	if [ ! -f "$f" ]; then
 		echo "[FAIL] missing $f"
 		fail=1

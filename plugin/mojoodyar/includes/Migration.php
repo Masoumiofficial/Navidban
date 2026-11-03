@@ -1,11 +1,15 @@
 <?php
 /**
- * One-way migration from the pre-2.0 brand (Navidban) to Mojoodyar.
+ * One-way migration from the early pre-release build to 1.0.0.
  *
- * Why this file exists: the product shipped as "Navidban" up to version 1.0.10,
- * so a site that upgrades carries four tables named wp_nvb_*, one option named
- * navidban_settings and a handful of cron hooks with the old prefix. Renaming
- * the code without moving that data would look exactly like data loss.
+ * Why this file exists: before the public release the product was tested on a
+ * real shop under an earlier internal prefix, so that site carries four tables
+ * named wp_nvb_*, one option named with the old prefix and a handful of cron
+ * hooks with it. Moving the code without moving that data would look exactly
+ * like data loss on the one shop that already has records.
+ *
+ * Nothing else in the product refers to the old prefix; a clean install never
+ * enters this file (every step is guarded by a "does it exist" check).
  *
  * Rules this routine follows:
  *  - it never drops anything: tables are RENAMEd, options are copied only when

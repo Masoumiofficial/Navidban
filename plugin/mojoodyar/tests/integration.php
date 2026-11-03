@@ -2318,7 +2318,7 @@ MjyInt::same( 0, CallLog::attempt_count( $follow_id ), 'حذف ردیف، تار
 
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . CallLog::table() );
 
-MjyInt::group( 'مهاجرت از برند قدیم (۱.۰.x)' );
+MjyInt::group( 'مهاجرت از نسخهٔ آزمایشی' );
 
 // 2.0 renamed the product and with it the table prefix (nvb_ -> mjy_). An
 // existing install must keep its rows: the migration renames tables and copies
