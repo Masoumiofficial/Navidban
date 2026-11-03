@@ -59,6 +59,7 @@ node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php
 | پاسخ به بازبینی راست‌چین | `plugin/mojoodyar/docs/dev/SUBMISSION-RTL-THEME.md` |
 | آزمون‌هایی که فقط صاحب محصول می‌تواند اجرا کند | `plugin/mojoodyar/docs/dev/LIVE-TESTS-FA.md` |
 | چک‌لیست ارسال به ژاکت | `plugin/mojoodyar/docs/dev/JACKET-SUBMISSION-FA.md` |
+| پرامت مادر ساخت لندینگ و دمو | `plugin/mojoodyar/docs/dev/APEX-INFINITY-MASTER-PROMPT-FA.md` |
 
 ## قاعدهٔ حاکم
 

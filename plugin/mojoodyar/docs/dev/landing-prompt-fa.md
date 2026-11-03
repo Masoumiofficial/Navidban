@@ -1,6 +1,12 @@
 # پرامپت APEX PRO ∞ — صفحهٔ فرود (Landing Page) موجودیار
 
 > پروندهٔ توسعه — در بستهٔ انتشار نمی‌آید.
+>
+> **این پرونده نسخهٔ قبلی است. برای ساخت لندینگ + دموی تعاملی از
+> `APEX-INFINITY-MASTER-PROMPT-FA.md` استفاده کنید** (چهار فراخوان، اعداد
+> به‌روز، و دموی شش‌سناریویی). این فایل فقط برای مرجع کپی فارسی نگه داشته
+> شده است.
+>
 > این پرونده سه بخش دارد: پرامپت ساخت (بخش ۲)، کارت متن آمادهٔ کپی (بخش ۴)،
 > و چک‌لیست پذیرش (بخش ۱۰). بخش ۳ اعداد مجاز و ممنوع است و **قبل از هر
 > ویرایشی** باید خوانده شود.
@@ -77,9 +83,9 @@ FACTS (the only allowed quantitative claims)
   (measured with tools/har-audit.sh — a HAR audit against a real WordPress)
 - Out-of-stock product page: 2 assets (1 CSS + 1 JS), 1,984 bytes of form HTML.
 - Front CSS+JS weight: 13,577 bytes raw → 4,495 bytes gzipped (budget 12,288).
-- PHP: runs and is tested on 7.4.33 and 8.3.33. No Composer, no npm, no build,
+- PHP: runs and is tested on 7.4.33 and 8.3.33 (range 7.4–8.3). No Composer, no npm, no build,
   no ionCube, no license server, no call to our servers.
-- Test suite: 292 unit + 188 integration + 105 admin-render assertions, green on
+- Test suite: 411 unit + 444 integration + 173 admin-render assertions, green on
   both PHP 7.4.33 and 8.3.33.
 - Restock of N units notifies at most N people — the oldest waiting first.
 - Two-layer stock detection: WooCommerce hooks + reconcile cron every 15 min,
