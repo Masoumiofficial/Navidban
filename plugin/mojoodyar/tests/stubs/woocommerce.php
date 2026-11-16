@@ -51,7 +51,16 @@ class WC_Product {
 	}
 
 	public function is_in_stock() {
-		return 'instock' === $this->get_stock_status();
+		// WooCommerce treats onbackorder as in stock for purchasing purposes.
+		return 'outofstock' !== $this->get_stock_status();
+	}
+
+	public function get_status() {
+		return (string) ( $this->data['post_status'] ?? 'publish' );
+	}
+
+	public function exists() {
+		return (bool) ( $this->data['exists'] ?? true );
 	}
 
 	public function is_type( $type ) {
@@ -71,7 +80,12 @@ class WC_Product {
 	}
 
 	public function variation_is_active() {
-		return true;
+		return (bool) apply_filters( 'woocommerce_variation_is_active', (bool) ( $this->data['active'] ?? true ), $this );
+	}
+
+	public function variation_is_visible() {
+		$visible = (bool) ( $this->data['visible'] ?? true ) && 'publish' === $this->get_status();
+		return (bool) apply_filters( 'woocommerce_variation_is_visible', $visible, $this->id, $this->get_parent_id(), $this );
 	}
 
 	public function get_attribute_summary() {
@@ -130,12 +144,18 @@ function wc_get_products( $args = array() ) {
 	return $result;
 }
 
+function wc_get_formatted_variation( $variation, $flat = false, $include_names = true, $skip_attributes_in_name = false ) {
+	return $variation->get_attribute_summary();
+}
+
 function wc_get_orders( $args = array() ) {
 	return $GLOBALS['mjy_orders'] ?? array();
 }
 
 function get_post_type( $id ) {
-	unset( $id );
+	return ( $GLOBALS['mjy_products'][ (int) $id ]['type'] ?? 'simple' ) === 'variation' ? 'product_variation' : 'product';
+}
 
-	return 'product';
+function wp_get_post_parent_id( $id ) {
+	return (int) ( $GLOBALS['mjy_products'][ (int) $id ]['parent'] ?? 0 );
 }

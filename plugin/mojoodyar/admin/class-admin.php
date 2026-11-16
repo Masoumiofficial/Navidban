@@ -939,6 +939,10 @@ final class Admin {
 	 * @return string
 	 */
 	protected static function queue_reason( $skipped ) {
+		if ( 'schema' === $skipped ) {
+			return 'پردازش صف متوقف است؛ به‌روزرسانی جدول‌های افزونه کامل نشده است. مجوز پایگاه داده را بررسی و صفحه را دوباره بارگذاری کنید.';
+		}
+
 		$diagnosis = Queue::diagnose();
 
 		$reasons = array(
@@ -996,6 +1000,10 @@ final class Admin {
 
 		switch ( $tool ) {
 			case 'rebuild_snapshots':
+				if ( ! Database::schema_ready() ) {
+					$message = 'تصویر بازسازی نشد؛ ابتدا به‌روزرسانی جدول‌های افزونه را کامل کنید.';
+					break;
+				}
 				$watcher = new StockWatcher();
 				$count   = $watcher->rebuild_snapshots();
 				$message = sprintf( 'تصویر موجودی برای %s ردیف بازسازی شد. هیچ اعلانی ارسال نشد.', Persian::number( $count ) );
@@ -1004,6 +1012,10 @@ final class Admin {
 			case 'run_reconcile':
 				$watcher = new StockWatcher();
 				$result  = $watcher->reconcile( true );
+				if ( isset( $result['skipped'] ) && 'schema' === $result['skipped'] ) {
+					$message = 'پایش انجام نشد؛ ابتدا به‌روزرسانی جدول‌های افزونه را کامل کنید.';
+					break;
+				}
 				$message = sprintf(
 					'پایش انجام شد: %s محصول بررسی، %s گذار شناسایی و %s اعلان در صف قرار گرفت.%s',
 					Persian::number( $result['scanned'] ),
@@ -1034,6 +1046,12 @@ final class Admin {
 				break;
 
 			case 'send_due_now':
+				// Do not change future schedules when delivery is paused for an
+				// incomplete upgrade; the tool must either act or leave them intact.
+				if ( ! Database::schema_ready() ) {
+					$message = self::queue_reason( 'schema' );
+					break;
+				}
 				$pulled  = Queue::pull_forward();
 				$stats   = Queue::process( 200 );
 				$message = sprintf(
@@ -1083,11 +1101,11 @@ final class Admin {
 				$message = sprintf( 'همهٔ لاگ‌ها پاک شد (%s ردیف).', Persian::number( $removed ) );
 				break;
 
-			case 'test_email':
 			case 'pattern_probe':
 				$message = $this->send_pattern_probe();
 				break;
 
+			case 'test_email':
 			case 'test_sms':
 				$message = $this->send_test( 'test_email' === $tool ? 'email' : 'sms' );
 				break;
@@ -1241,7 +1259,7 @@ final class Admin {
 
 		if ( true === $result ) {
 			if ( 'email' !== $channel ) {
-				return 'پیام آزمایشی ارسال شد.';
+				return 'درگاه پیامک پیام را پذیرفت؛ رسیدن به گوشی تضمین نمی‌شود.';
 			}
 
 			// wp_mail() returning true means "the local mail transport accepted
@@ -1250,8 +1268,8 @@ final class Admin {
 			// says exactly what was verified.
 			$to_note = '' !== $email ? ' به ' . $email : '';
 
-			return 'wp_mail پیام را پذیرفت' . $to_note . ' و به میل سرور تحویل داد. '
-				. 'این یعنی وردپرس خطا نگرفت؛ ولی رسیدن به صندوق ورودی را تضمین نمی‌کند. '
+			return 'wp_mail پیام را برای ارسال پذیرفت' . $to_note . ' و خطایی گزارش نکرد؛ '
+				. 'رسیدن به صندوق ورودی تضمین نمی‌شود. '
 				. 'اگر ایمیل نیامد: پوشهٔ اسپم را ببینید، و اگر افزونهٔ SMTP فعال است تنظیماتش را بررسی کنید.';
 		}
 

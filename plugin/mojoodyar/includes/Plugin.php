@@ -138,19 +138,16 @@ final class Plugin {
 			add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 		}
 
-		// maybe_upgrade() stamps the stored version on success. It still being
-		// behind means the upgrade aborted (missing CREATE/ALTER right, a
-		// timeout on a big table, a database user that cannot write options).
-		// In that state the plugin keeps retrying the schema on every request
-		// and the tables can be half-migrated - which surfaces to the shop as
-		// "the form does nothing". Say it out loud instead of failing quietly.
+		// A mismatch can mean a schema upgrade or an option write failed. The
+		// notice distinguishes a DB version mismatch (processing is paused)
+		// from a plugin-version-only mismatch (the schema guard is still open).
 		if ( Capabilities::can_manage() && $this->upgrade_incomplete() ) {
 			add_action( 'admin_notices', array( $this, 'upgrade_incomplete_notice' ) );
 		}
 	}
 
 	/**
-	 * Whether the stored plugin version is behind the running files.
+	 * Whether a stored plugin or database version differs from the running code.
 	 *
 	 * @return bool
 	 */
@@ -159,9 +156,10 @@ final class Plugin {
 			return false;
 		}
 
-		$stored = (string) get_option( 'mojoodyar_version', '' );
+		$stored    = (string) get_option( 'mojoodyar_version', '' );
+		$stored_db = (string) get_option( 'mojoodyar_db_version', '' );
 
-		return '' !== $stored && $stored !== (string) MOJODYAR_VERSION;
+		return $stored !== (string) MOJODYAR_VERSION || $stored_db !== (string) MOJODYAR_DB_VERSION;
 	}
 
 	/**
@@ -170,11 +168,14 @@ final class Plugin {
 	 * @return void
 	 */
 	public function upgrade_incomplete_notice() {
+		$message = Database::schema_ready()
+			? 'نسخهٔ افزونه در تنظیمات پایگاه داده به‌روز نشده است. از داده‌ها پشتیبان بگیرید، مجوز نوشتن تنظیمات را بررسی و صفحه را دوباره بارگذاری کنید تا ارتقا تکرار شود.'
+			: 'نسخهٔ ساختار جدول‌ها به‌روز نشده است؛ ثبت و پردازش صف موقتاً متوقف‌اند. از داده‌ها پشتیبان بگیرید، مجوز CREATE و ALTER پایگاه داده را بررسی و صفحه را دوباره بارگذاری کنید تا ارتقا تکرار شود.';
 		printf(
 			'<div class="notice notice-error"><p><strong>%s</strong> %s</p><p><a class="button" href="%s">%s</a></p></div>',
 			esc_html_compat( 'به‌روزرسانی موجودیار کامل نشد.' ),
-			esc_html_compat( 'نسخهٔ فایل‌ها با نسخهٔ ثبت‌شده در پایگاه داده یکی نیست؛ ممکن است جدول‌ها نیمه‌ساخته باشند و فرم درخواست ثبت نکند. یک‌بار «بازسازی جدول‌ها» را بزنید.' ),
-			esc_url_compat( admin_url( 'admin.php?page=' . Admin::SLUG . '-tools' ) ),
+			esc_html_compat( $message ),
+			esc_url( admin_url( 'admin.php?page=' . Admin::SLUG . '-tools' ) ),
 			esc_html_compat( 'رفتن به ابزارها' )
 		);
 	}

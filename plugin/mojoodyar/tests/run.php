@@ -623,7 +623,7 @@ MjyTest::ok( false !== strpos( $skin, EmailSkin::TEAL ), 'رنگ برند در �
 MjyTest::ok( false !== strpos( $skin, 'کفش دویدن نایک' ), 'نام محصول نمایش داده می‌شود' );
 MjyTest::ok( false !== strpos( $skin, '۲٬۴۵۰٬۰۰۰ تومان' ), 'قیمت نمایش داده می‌شود' );
 MjyTest::ok( false !== strpos( $skin, 'https://shop.example/product/42' ), 'پیوند محصول در دکمهٔ اقدام هست' );
-MjyTest::ok( false !== strpos( $skin, 'mojoodyar_unsubscribe' ), 'پیوند لغو اشتراک در هر پیام هست' );
+MjyTest::ok( false !== strpos( $skin, 'mojoodyar_unsubscribe' ), 'پیوند لغو اشتراک در ایمیل هست' );
 MjyTest::ok( false === strpos( $skin, '<script' ), 'هیچ اسکریپتی در ایمیل نیست' );
 MjyTest::ok( false === strpos( $skin, 'display:flex' ) && false === strpos( $skin, 'display:grid' ), 'فقط چیدمان جدولی (سازگار با کلاینت‌های ایمیل)' );
 

@@ -190,7 +190,7 @@ final class StockWatcher {
 		$product_id   = (int) $product_id;
 		$variation_id = (int) $variation_id;
 
-		if ( $product_id <= 0 ) {
+		if ( $product_id <= 0 || ! Database::schema_ready() ) {
 			return 0;
 		}
 
@@ -242,6 +242,10 @@ final class StockWatcher {
 	 * @return array{count:int,baseline:int}
 	 */
 	public function announce( $product_id, $variation_id, $qty ) {
+		if ( ! Database::schema_ready() ) {
+			return array( 'count' => 0, 'baseline' => 0 );
+		}
+
 		$snapshot = WaitlistRepository::snapshot_get( $product_id, $variation_id );
 		$previous = ( null !== $snapshot ) ? (int) $snapshot['announced_qty'] : 0;
 
@@ -274,7 +278,9 @@ final class StockWatcher {
 				array(
 					'product_id'   => $product_id,
 					'variation_id' => $variation_id,
-				)
+				),
+				null,
+				(int) $row['registration_cycle']
 			);
 
 			// Count what actually landed in the table, not what we asked for:
@@ -310,7 +316,7 @@ final class StockWatcher {
 	 * @return void
 	 */
 	private function record( $product_id, $variation_id, $status, $qty, $is_managed ) {
-		if ( (int) $product_id <= 0 || '' === (string) $status ) {
+		if ( (int) $product_id <= 0 || '' === (string) $status || ! Database::schema_ready() ) {
 			return;
 		}
 
@@ -324,6 +330,10 @@ final class StockWatcher {
 	 * @return array{transitions:int,queued:int,scanned:int,first_run:bool}
 	 */
 	public function reconcile( $force = false ) {
+		if ( ! Database::schema_ready() ) {
+			return array( 'transitions' => 0, 'queued' => 0, 'scanned' => 0, 'first_run' => false, 'skipped' => 'schema' );
+		}
+
 		$last_run = (int) get_option( 'mojoodyar_last_reconcile', 0 );
 
 		if ( ! $force && ! Scheduler::reconcile_due( $last_run, time() ) ) {
@@ -509,6 +519,10 @@ final class StockWatcher {
 	 */
 	public function rebuild_snapshots() {
 		global $wpdb;
+
+		if ( ! Database::schema_ready() ) {
+			return 0;
+		}
 
 		$table = WaitlistRepository::snapshots();
 		$wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL

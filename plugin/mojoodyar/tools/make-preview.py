@@ -150,6 +150,9 @@ def main() -> int:
             )
             import re as _re
             page = _re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + note, markup, count=1)
+        # View templates leave indentation tabs on lines whose PHP block prints
+        # nothing; strip trailing whitespace so generated files stay clean.
+        page = "\n".join(line.rstrip() for line in page.split("\n"))
         (target / f"{key}.html").write_text(page, encoding="utf-8")
         print(f"wrote {target / (key + '.html')}")
 

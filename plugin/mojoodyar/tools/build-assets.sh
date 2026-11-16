@@ -53,7 +53,7 @@ gz_total=0
 for f in "$front_css" "$front_js"; do
 	[ -f "$f" ] || continue
 	raw=$(wc -c < "$f" | tr -d ' ')
-	gz=$(gzip -9 -c "$f" | wc -c | tr -d ' ')
+	gz=$(gzip -9 -n -c "$f" | wc -c | tr -d ' ')
 	raw_total=$((raw_total + raw))
 	gz_total=$((gz_total + gz))
 	printf '  %-34s %7s B raw  %7s B gzip\n' "$f" "$raw" "$gz"

@@ -30,7 +30,7 @@
 | مخاطب | چه می‌خواهد بداند |
 |---|---|
 | مدیر فروشگاه ووکامرس (غیرفنی) | «ساده است؟ خودم نصب می‌کنم؟» |
-| توسعه‌دهنده/فریلنسر | «چی به هستهٔ من اضافه می‌کند؟ صفر بایت واقعی است؟» |
+| توسعه‌دهنده/فریلنسر | «چه زمانی دارایی فرم بار می‌شود و چه چیزی اندازه‌گیری نشده است؟» |
 | صاحب فروشگاه با هاست اشتراکی | «PHP 7.4 من را نمی‌شکند؟ کندم نمی‌کند؟» |
 
 لحن: **مهندسی، آرام، بی‌اغراق.** نه «انقلابی»، نه «بهترین افزونهٔ ایران»، نه
@@ -70,8 +70,9 @@ NON-NEGOTIABLE RULES (read before writing any code)
 5. HONESTY IS THE BRAND. Every claim on the page must be something the product
    demonstrably does. Where something is untested, say "داده در دسترس نیست"
    instead of a green tick.
-6. The page must work with JavaScript disabled: all sections readable, FAQ
-   usable (<details>/<summary>), pricing visible, links clickable.
+6. The landing page must work with JavaScript disabled: all sections readable,
+   FAQ usable (<details>/<summary>), pricing visible, links clickable. This does
+   NOT apply to the real plugin form, which requires JavaScript to submit.
 7. This is Persian copy, not translated English. Keep every Persian string in
    COPY below byte-for-byte, including ZWNJ (نیم‌فاصله), «» quotes and Persian
    digits. Do not rewrite, shorten, or "improve" the copy. Do not transliterate.
@@ -79,17 +80,21 @@ NON-NEGOTIABLE RULES (read before writing any code)
 =============================================================
 FACTS (the only allowed quantitative claims)
 =============================================================
-- Off-target pages: 0 extra HTTP requests, 0 bytes, 0 plugin DB queries.
-  (measured with tools/har-audit.sh — a HAR audit against a real WordPress)
-- Out-of-stock product page: 2 assets (1 CSS + 1 JS), 1,984 bytes of form HTML.
-- Front CSS+JS weight: 13,577 bytes raw → 4,495 bytes gzipped (budget 12,288).
-- PHP: runs and is tested on 7.4.33 and 8.3.33 (range 7.4–8.3). No Composer, no npm, no build,
-  no ionCube, no license server, no call to our servers.
-- Test suite: 411 unit + 460 integration + 179 admin-render assertions, green on
-  both PHP 7.4.33 and 8.3.33.
-- Restock of N units notifies at most N people — the oldest waiting first.
-- Two-layer stock detection: WooCommerce hooks + reconcile cron every 15 min,
-  so stock changed by Excel import / ERP / direct SQL is still detected.
+- Stub harness: home and in-stock product without a shortcode enqueued 0 form
+  assets; eligible product/shortcode scenarios enqueued 2. A shortcode can
+  enqueue assets on another page. Real network transfer and SQL were not measured.
+- Front CSS+JS: 18,884 bytes raw → 6,129 bytes simulated local gzip (budget
+  12,288), not a real HAR. See docs/PERFORMANCE.md.
+- PHP-WASM 7.4.33 / 8.3.36: 411 unit + 549 stub/SQLite integration + 179
+  admin-render assertions, 0 failures on each. DOM/jsdom: 85 checks.
+- Limited WordPress 6.4.5 / WooCommerce 9.0.0 Playground with SQLite and
+  jsdom: 87 checks, 0 failures; not a real browser, MySQL, SMTP, SMS or all themes.
+- No Composer, npm, build, ionCube, license server or call to our servers.
+- With fair sending enabled and managed stock, queue selection is limited to
+  available units from confirmed subscribers, oldest first. Unmanaged stock or
+  disabled fairness has no such quantity cap; queueing is not delivery.
+- Two-layer stock detection: WooCommerce hooks + scheduled reconcile, default
+  15 min, subject to WP-Cron execution; supports detecting direct stock changes.
 - SMS gateways: Melipayamak (including pattern/bodyId lines), IPPanel,
   Kavenegar, plus one generic REST adapter. SMS goes straight from the shop to
   the gateway — we are in the middle of nothing.
@@ -107,8 +112,9 @@ DO NOT use these numbers anywhere: any percentage, any "X thousand stores",
 FACTS THAT ARE UNTESTED — how to present them
 =============================================================
 For a compatibility table use these exact cells:
-- WordPress 6.x  → "تست‌شده"
-- PHP 7.4.33 / 8.3.33 → "تست‌شده"
+- WordPress 6.4.5 / WooCommerce 9.0.0 → "آزمون محدود Playground با SQLite و jsdom"
+- Other WordPress/WooCommerce versions → "داده در دسترس نیست"
+- PHP 7.4.33 / 8.3.36 → "آزمون PHP-WASM با stub"
 - PHP 8.4 → "داده در دسترس نیست"
 - WooCommerce HPOS → "داده در دسترس نیست"
 - Multilingual / WPML → "داده در دسترس نیست"
@@ -125,13 +131,14 @@ PAGE STRUCTURE (in this order, 12 sections)
    Hero visual: a glass panel mockup built in pure HTML/CSS (not an image):
    a product page card with «ناموجود» badge + the «خبرم کن» form + a toast
    «دوباره موجود شد». It must be built from divs so it stays sharp on retina
-   and costs ~0 bytes. Do not fake a dashboard screenshot with lorem text.
+   and needs no separate image file. Do not fake a dashboard screenshot with lorem text.
 2. PAIN — three short lines about the real problem (visitor leaves, no address
    captured, restock happens silently). No numbers.
 3. HOW IT WORKS — 4 numbered steps.
 4. FEATURES — 6 cards with inline SVG icons.
-5. PERFORMANCE PROOF — the 0/0/0 claim with a small measured table and a
-   footnote «اندازه‌گیری با tools/har-audit.sh؛ خروجی در docs/PERFORMANCE.md».
+5. PERFORMANCE PROOF — the scoped stub asset scenarios and local gzip only,
+   with the explicit limitations in docs/PERFORMANCE.md. No universal zero
+   requests, bytes or DB queries and no unsupported real-HAR claim.
 6. COMPATIBILITY — the table from the previous block, with a visible legend
    separating «تست‌شده» from «داده در دسترس نیست».
 7. PRICING — 3 tiers, middle tier visually featured. Prices in Persian digits
@@ -155,12 +162,12 @@ NAV: چطور کار می‌کند · امکانات · عملکرد · قیمت
 HEADER CTA: خرید افزونه
 
 H1: مشتریِ ناموجود را برنمی‌گرداند — مگر کسی خبرش کند
-HERO SUB: موجودیار فرم «خبرم کن» را فقط روی صفحهٔ همان محصول ناموجود می‌گذارد.
-روی بقیهٔ سایت، صفر بایت. و وقتی کالا برگشت، به همان تعداد که موجود شد نفر
-خبردار می‌شوند — قدیمی‌ترین منتظر، اول.
+HERO SUB: موجودیار فرم «خبرم کن» را نزدیک وضعیت ناموجود می‌گذارد؛
+با شورت‌کد می‌توانید جای آن را انتخاب کنید. ارسال منصفانه، منتظران
+تأییدشده را از قدیمی‌ترین درخواست انتخاب می‌کند.
 HERO CTA 1: خرید افزونه
 HERO CTA 2: دیدن پنل
-CHIP 1: ۰ بایت روی بقیهٔ سایت
+CHIP 1: فرم خودکار + شورت‌کد
 CHIP 2: PHP 7.4 تا 8.3
 CHIP 3: بدون Composer، بدون build
 HERO FOOTNOTE: قیمت‌ها و ادعاهای این صفحه اندازه‌گیری‌شده‌اند؛ هر جا اندازه‌گیری
@@ -178,31 +185,31 @@ PAIN 3 BODY: بار جدید می‌رسد، موجودی را عوض می‌ک�
 
 HOW TITLE: چطور کار می‌کند
 STEP 1 TITLE: فرم، فقط جایی که لازم است
-STEP 1 BODY: روی صفحهٔ محصول ناموجود — و برای هر تنوع، جداگانه. روی هیچ
-صفحهٔ دیگری نه فایلی، نه اسکریپتی.
+STEP 1 BODY: نزدیک وضعیت ناموجود یا با شورت‌کد در جای دلخواه؛ با انتخاب‌گر
+مستقل تنوع ناموجود. نمایش و ثبت به JavaScript و wp_footer نیاز دارند.
 STEP 2 TITLE: مشتری، با نام خودش
 STEP 2 BODY: نام و نام خانوادگی و شمارهٔ موبایل. همان نام در پیامک می‌آید،
 نه «همراه گرامی».
 STEP 3 TITLE: موجودی که برمی‌گردد، دیده می‌شود
-STEP 3 BODY: هوک‌های ووکامرس، به‌علاوهٔ یک پایش تطبیقی هر ۱۵ دقیقه — پس
-موجودی‌ای که با اکسل یا ERP عوض شده هم از دست نمی‌رود.
-STEP 4 TITLE: به تعداد موجودی، نه به تعداد لیست
-STEP 4 BODY: ۵ واحد برگشت؟ ۵ نفر اول خبر می‌شوند. بعداً ۳ واحد دیگر؟ ۳ نفر
-بعدی. بقیه در صف می‌مانند تا نوبتشان برسد.
+STEP 3 BODY: هوک‌های ووکامرس و پایش تطبیقی با فاصلهٔ پیش‌فرض ۱۵ دقیقه؛
+عملکرد پایش به اجرای WP-Cron وابسته است.
+STEP 4 TITLE: انتخاب منصفانهٔ منتظران
+STEP 4 BODY: با موجودی مدیریت‌شده و تنظیم منصفانه، حداکثر به تعداد موجودی
+قابل تخصیص از قدیمی‌ترین منتظران تأییدشده در صف اعلان قرار می‌گیرند.
 
 FEATURES TITLE: داخل افزونه
 F1: ارسال با صف و محدودیت نرخ
-F1 BODY: ارسال‌ها در پس‌زمینه و پله‌پله انجام می‌شوند؛ هیچ صفحه‌ای وسط کار
-قفل نمی‌کند و درگاه پیامک هم بلاک نمی‌شود.
+F1 BODY: ارسال‌ها در پس‌زمینه و دسته‌های قابل تنظیم انجام می‌شوند؛ تحویل
+به اجرای زمان‌بندی و شرایط درگاه بستگی دارد.
 F2: پیامک ایرانی، مستقیم
 F2 BODY: ملی‌پیامک (با خطوط الگویی و bodyId)، آی‌پی‌پنل، کاوه‌نگار و یک درگاه
 عمومی REST. پیام از فروشگاه شما به درگاه می‌رود؛ سروری وسط نیست.
 F3: تشخیص دولایهٔ موجودی
-F3 BODY: هوک ووکامرس برای تغییرهای عادی، و پایش تطبیقی هر ۱۵ دقیقه برای
-تغییرهایی که از راه اکسل، ERP یا SQL مستقیم آمده‌اند.
+F3 BODY: هوک ووکامرس برای تغییرهای عادی و پایش تطبیقی با فاصلهٔ پیش‌فرض
+۱۵ دقیقه برای تغییر وضعیت بیرون از هوک؛ اجرا به WP-Cron وابسته است.
 F4: ارسال منصفانه
-F4 BODY: به تعداد واحدهای برگشته اعلان می‌رود، از قدیمی‌ترین منتظر شروع
-می‌شود. لیست هزارنفره با ۲ واحد موجود، هزار پیامک نمی‌فرستد.
+F4 BODY: برای موجودی مدیریت‌شده و با تنظیم منصفانه، حداکثر به تعداد موجودی
+قابل تخصیص از قدیمی‌ترین منتظران تأییدشده در صف اعلان قرار می‌گیرند.
 F5: پنل فارسی، راست‌به‌چپ، با تاریخ شمسی
 F5 BODY: داشبورد، لیست انتظارها با فیلتر و تیک «تماس گرفته شد»، تنظیمات،
 ابزارها و راهنما. خروجی CSV با BOM، مستقیم بازشدنی در اکسل.
@@ -210,13 +217,13 @@ F6: امنیت و نگهداری داده
 F6 BODY: جدول‌های InnoDB، کوئری‌های آماده‌شده، آی‌پی فقط به‌صورت هش SHA-256
 نمک‌دار. حذف داده‌ها هنگام حذف افزونه، به‌صورت پیش‌فرض خاموش است.
 
-PERF TITLE: روی بقیهٔ سایت، هیچ
-PERF LEAD: این ادعا شعار نیست؛ خروجی یک بازرسی HAR روی وردپرس واقعی است.
-PERF ROW 1: صفحهٔ خانه و محصول موجود → ۰ درخواست · ۰ بایت · ۰ کوئری
-PERF ROW 2: صفحهٔ محصول ناموجود → ۱ CSS + ۱ JS = ۱۳٬۵۷۷ بایت خام
-PERF ROW 3: همان دارایی‌ها با gzip → ۴٬۴۹۵ بایت (بودجه: ۱۲٬۲۸۸)
-PERF NOTE: اندازه‌گیری با tools/har-audit.sh؛ عددها در docs/PERFORMANCE.md
-نگه‌داری می‌شوند. زمان پاسخ روی هاست شما اندازه‌گیری نشده است.
+PERF TITLE: بارگذاری شرطی و اندازه‌گیری
+PERF LEAD: نتیجهٔ هارنس stub، نه ضبط شبکه یا کوئری نصب واقعی:
+PERF ROW 1: خانه و محصول موجود بدون شورت‌کد → ۰ دارایی فرم در هارنس
+PERF ROW 2: محصول یا شورت‌کد واجد شرایط → ۱ CSS و ۱ JS در هارنس
+PERF ROW 3: جمع دو فایل → ۱۸٬۸۸۴ بایت خام و ۶٬۱۲۹ بایت gzip محلی
+PERF NOTE: شورت‌کد در صفحهٔ دیگر هم دارایی را بار می‌کند. شبکه، SQL واقعی و
+TTFB اندازه‌گیری نشده‌اند؛ جزئیات در docs/PERFORMANCE.md.
 
 COMPAT TITLE: سازگاری
 COMPAT LEAD: فقط چیزهایی که واقعاً تست شده‌اند سبز هستند. بقیه را نمی‌دانیم و
@@ -231,7 +238,7 @@ TIER 3: با نصب و راه‌اندازی — ۱٬۱۹۸٬۰۰۰ تومان �
 PRICING NOTE: پاسخ اولیهٔ پشتیبانی حداکثر ۲۴ ساعت کاری، هدف ۴ ساعت.
 LICENSE NOTE: لایسنس GPLv2 یا بالاتر. بدون سرور لایسنس، بدون قفل.
 
-NOTS TITLE: چیزهایی که موجودیار ندارد
+NOTS TITLE: ⭐ چیزهایی که موجودیار ندارد
 N1: اعلان تغییر وضعیت سفارش
 N2: پیام واتساپ
 N3: نوبت‌دهی و لیست انتظار خدمات (آرایشگاه، کلینیک)
@@ -256,7 +263,7 @@ CTA BODY: نصب، تنظیم درگاه پیامک، و اولین فرم «خ�
 افزونه، بدون یک خط کد.
 CTA BUTTON: خرید افزونه
 
-FOOTER LEFT: موجودیار · نسخهٔ ۲.۰.۰ · لایسنس GPLv2+
+FOOTER LEFT: موجودیار · نسخهٔ ۱.۰.۰ · لایسنس GPLv2+
 FOOTER NOTE: این افزونه هیچ داده‌ای به سرور ما نمی‌فرستد و به هیچ سرور
 بیرونی‌ای جز درگاه پیامکی که خودتان تنظیم می‌کنید وصل نمی‌شود.
 
@@ -323,8 +330,8 @@ SEO / META
 <title>موجودیار — افزونهٔ لیست انتظار و اعلان بازگشت موجودی برای ووکامرس</title>
 (≤ 60 Persian characters if possible; if not, drop the brand suffix.)
 <meta name="description"> exactly:
-«فرم «خبرم کن» فقط روی صفحهٔ محصول ناموجود؛ روی بقیهٔ سایت صفر بایت. پیامک
-ایرانی مستقیم، PHP 7.4 تا 8.3، بدون Composer و بدون سرور واسط.»
+«فرم خودکار و شورت‌کد «خبرم کن» برای محصول و تنوع ناموجود، همراه با پیامک
+ایرانی مستقیم و پنل فارسی.»
 Open Graph + Twitter card with og:image 1200×630 (placeholder path
 /assets/og.png, with width/height set), og:locale fa_IR, og:type product.
 Canonical link. <html lang="fa-IR">.
@@ -380,12 +387,11 @@ Write the full files. No placeholders like "TODO", no lorem ipsum, no
 
 | مجاز (اندازه‌گیری‌شده) | منبع |
 |---|---|
-| ۰ درخواست / ۰ بایت / ۰ کوئری روی صفحات غیرهدف | `docs/PERFORMANCE.md` §۳ |
-| ۱۳٬۵۷۷ بایت خام → ۴٬۴۹۵ بایت gzip (بودجه ۱۲٬۲۸۸) | `docs/PERFORMANCE.md` §۲ |
-| ۱٬۹۸۴ بایت HTML فرم روی محصول ساده، ۲٬۲۳۶ روی متغیر | `docs/PERFORMANCE.md` §۳ |
-| PHP 7.4.33 و 8.3.33 | `docs/TEST-REPORT.md` |
-| ۲۹۲ + ۱۸۸ + ۱۰۵ بررسی | `tests/*-results*.json` |
-| ۵ واحد → حداکثر ۵ نفر | `docs/SCHEDULER-POLICY.md` |
+| خانه و محصول موجودِ بدون شورت‌کد: ۰ دارایی فرم در stub | `docs/PERFORMANCE.md` §۳ |
+| ۱۸٬۸۸۴ بایت خام → ۶٬۱۲۹ بایت gzip محلی (بودجه ۱۲٬۲۸۸) | `docs/PERFORMANCE.md` §۲ |
+| PHP-WASM 7.4.33 و 8.3.36؛ ۴۱۱ + ۶۲۵ + ۱۸۰ بررسی با stub | `docs/TEST-REPORT.md` |
+| ۸۷ بررسی DOM و ۱۳۷ Playground محدود | `tests/*-results*.json` |
+| ۵ واحد → حداکثر ۵ نفر در حالت منصفانه و موجودی مدیریت‌شده | `docs/SCHEDULER-POLICY.md` |
 | ۴ درگاه پیامک (۳ اختصاصی + REST) | `includes/Channels/` |
 | قیمت‌ها ۴۴۹ / ۹۹۸ / ۱٬۱۹۸ هزار تومان | `docs/dev/listing-fa.md` |
 | SLA پاسخ اولیه ۲۴ ساعت کاری (هدف ۴) | تعهد پشتیبانی |
@@ -445,7 +451,7 @@ landing/
 | همهٔ ادعاهای عددی | — |
 
 ماکاپ قهرمان (hero mockup) را **با CSS** بسازید، نه تصویر: هم روی رتینا تیز
-است، هم ۰ بایت اضافه، هم متنش برای گوگل خواناست. این تصمیم را در README
+است، هم فایل تصویر جدا لازم ندارد، هم متنش برای گوگل خواناست. این تصمیم را در README
 توضیح بدهید.
 
 ---
@@ -461,7 +467,7 @@ landing/
 ## ۸) دو نسخهٔ تیتر برای تست A/B
 
 1. `مشتریِ ناموجود را برنمی‌گرداند — مگر کسی خبرش کند` (پیشنهاد اول، درد)
-2. `۵ واحد برگشت؟ فقط ۵ نفر خبردار می‌شوند` (مکانیزم، برای مخاطب فنی)
+2. `موجودی مدیریت‌شده و صف منصفانه، برای منتظران قدیمی‌تر` (مکانیزم، برای مخاطب فنی)
 
 تست را روی ۳۰۰ بازدید یا ۲ هفته اجرا کنید و **هر بار فقط یک متغیر** عوض شود.
 نتیجه را در همین پرونده ثبت کنید، نه در حافظه.

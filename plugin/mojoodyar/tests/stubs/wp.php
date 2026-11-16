@@ -26,7 +26,11 @@ define(
 	'MOJODYAR_VERSION',
 	preg_match( '~^[ \t/*#@]*Version:\s*([0-9][0-9.\-a-zA-Z]*)~mi', $mjy_header_source, $mjy_header_match ) ? trim( $mjy_header_match[1] ) : '0.0.0'
 );
-define( 'MOJODYAR_DB_VERSION', '2' );
+$mjy_db_match = array();
+define(
+	'MOJODYAR_DB_VERSION',
+	preg_match( "/define\\(\\s*'MOJODYAR_DB_VERSION',\\s*'([^']+)'/", $mjy_header_source, $mjy_db_match ) ? $mjy_db_match[1] : '0'
+);
 define( 'AUTH_SALT', 'test-salt' );
 define( 'ARRAY_A', 'ARRAY_A' );
 
@@ -82,7 +86,7 @@ class MjyWpdb {
 		$index = 0;
 
 		return preg_replace_callback(
-			'/%[sdf]/',
+			'/%[sdfi]/',
 			function ( $match ) use ( $args, &$index ) {
 				$value = $args[ $index ] ?? '';
 				$index++;
@@ -92,6 +96,10 @@ class MjyWpdb {
 				}
 				if ( '%f' === $match[0] ) {
 					return (string) (float) $value;
+				}
+				if ( '%i' === $match[0] ) {
+					// Mirror core: an identifier is backtick-quoted, never a string.
+					return '`' . str_replace( '`', '', (string) $value ) . '`';
 				}
 
 				return $this->pdo->quote( (string) $value );
@@ -266,6 +274,9 @@ class MjyWpdb {
 $GLOBALS['mjy_options']    = array();
 $GLOBALS['mjy_transients'] = array();
 $GLOBALS['mjy_actions']    = array();
+$GLOBALS['mjy_action_args'] = array();
+$GLOBALS['mjy_current_hooks'] = array();
+$GLOBALS['mjy_shortcodes'] = array();
 $GLOBALS['mjy_cron']       = array();
 $GLOBALS['mjy_enqueued']   = array();
 $GLOBALS['mjy_mails']      = array();
@@ -315,6 +326,8 @@ function delete_transient( $name ) {
 
 function add_action( $hook, $callback, $priority = 10, $args = 1 ) {
 	$GLOBALS['mjy_actions'][ $hook ][ $priority ][] = $callback;
+	$index = array_key_last( $GLOBALS['mjy_actions'][ $hook ][ $priority ] );
+	$GLOBALS['mjy_action_args'][ $hook ][ $priority ][ $index ] = (int) $args;
 
 	return true;
 }
@@ -327,7 +340,7 @@ function remove_action( $hook, $callback, $priority = 10 ) {
 	foreach ( $GLOBALS['mjy_actions'][ $hook ][ $priority ] as $index => $existing ) {
 		if ( $existing === $callback ) {
 			unset( $GLOBALS['mjy_actions'][ $hook ][ $priority ][ $index ] );
-			$GLOBALS['mjy_actions'][ $hook ][ $priority ] = array_values( $GLOBALS['mjy_actions'][ $hook ][ $priority ] );
+			unset( $GLOBALS['mjy_action_args'][ $hook ][ $priority ][ $index ] );
 
 			return true;
 		}
@@ -337,29 +350,81 @@ function remove_action( $hook, $callback, $priority = 10 ) {
 }
 
 function remove_all_actions( $hook ) {
-	unset( $GLOBALS['mjy_actions'][ $hook ] );
+	unset( $GLOBALS['mjy_actions'][ $hook ], $GLOBALS['mjy_action_args'][ $hook ] );
 }
 
 function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {
 	return add_action( $hook, $callback, $priority, $args );
 }
 
-function apply_filters( $hook, $value ) {
+function remove_filter( $hook, $callback, $priority = 10 ) {
+	return remove_action( $hook, $callback, $priority );
+}
+
+function apply_filters( $hook, $value, ...$args ) {
+	if ( empty( $GLOBALS['mjy_actions'][ $hook ] ) ) {
+		return $value;
+	}
+
+	ksort( $GLOBALS['mjy_actions'][ $hook ] );
+	$GLOBALS['mjy_current_hooks'][] = $hook;
+	try {
+		foreach ( $GLOBALS['mjy_actions'][ $hook ] as $priority => $callbacks ) {
+			foreach ( $callbacks as $index => $callback ) {
+				$accepted = $GLOBALS['mjy_action_args'][ $hook ][ $priority ][ $index ] ?? 1;
+				$value = call_user_func_array( $callback, array_slice( array_merge( array( $value ), $args ), 0, $accepted ) );
+			}
+		}
+	} finally {
+		array_pop( $GLOBALS['mjy_current_hooks'] );
+	}
+
 	return $value;
 }
 
 function do_action( $hook, ...$args ) {
-	if ( empty( $GLOBALS['mjy_actions'][ $hook ] ) ) {
-		return;
-	}
-
-	ksort( $GLOBALS['mjy_actions'][ $hook ] );
-
-	foreach ( $GLOBALS['mjy_actions'][ $hook ] as $callbacks ) {
-		foreach ( $callbacks as $callback ) {
-			call_user_func_array( $callback, $args );
+	$GLOBALS['mjy_current_hooks'][] = $hook;
+	try {
+		if ( ! empty( $GLOBALS['mjy_actions'][ $hook ] ) ) {
+			ksort( $GLOBALS['mjy_actions'][ $hook ] );
+			foreach ( $GLOBALS['mjy_actions'][ $hook ] as $priority => $callbacks ) {
+				foreach ( $callbacks as $index => $callback ) {
+					$accepted = $GLOBALS['mjy_action_args'][ $hook ][ $priority ][ $index ] ?? 1;
+					call_user_func_array( $callback, array_slice( $args, 0, $accepted ) );
+				}
+			}
 		}
+	} finally {
+		array_pop( $GLOBALS['mjy_current_hooks'] );
 	}
+}
+
+function doing_action( $hook = null ) {
+	return null === $hook ? ! empty( $GLOBALS['mjy_current_hooks'] ) : in_array( $hook, $GLOBALS['mjy_current_hooks'], true );
+}
+
+function add_shortcode( $tag, $callback ) {
+	$GLOBALS['mjy_shortcodes'][ $tag ] = $callback;
+}
+
+// Only the small, quoted shortcode syntax used by these tests is modelled.
+function do_shortcode( $content ) {
+	return preg_replace_callback(
+		'/\[([a-z0-9_]+)(?:\s+([^\]]*))?\]/i',
+		function ( $match ) {
+			$tag = strtolower( $match[1] );
+			if ( ! isset( $GLOBALS['mjy_shortcodes'][ $tag ] ) ) {
+				return $match[0];
+			}
+			$atts = array();
+			preg_match_all( '/([a-z0-9_]+)\s*=\s*"([^"]*)"/i', $match[2] ?? '', $pairs, PREG_SET_ORDER );
+			foreach ( $pairs as $pair ) {
+				$atts[ strtolower( $pair[1] ) ] = $pair[2];
+			}
+			return call_user_func( $GLOBALS['mjy_shortcodes'][ $tag ], $atts, null, $tag );
+		},
+		$content
+	);
 }
 
 function has_action( $hook ) {
@@ -533,11 +598,23 @@ function is_product() {
 }
 
 function is_feed() {
-	return false;
+	return (bool) ( $GLOBALS['mjy_is_feed'] ?? false );
 }
 
 function is_robots() {
-	return false;
+	return (bool) ( $GLOBALS['mjy_is_robots'] ?? false );
+}
+
+function wp_is_json_request() {
+	return (bool) ( $GLOBALS['mjy_is_json'] ?? false );
+}
+
+function wp_doing_cron() {
+	return (bool) ( $GLOBALS['mjy_is_cron'] ?? false );
+}
+
+function post_password_required( $id ) {
+	return (bool) ( $GLOBALS['mjy_products'][ (int) $id ]['password_required'] ?? false );
 }
 
 function get_queried_object_id() {

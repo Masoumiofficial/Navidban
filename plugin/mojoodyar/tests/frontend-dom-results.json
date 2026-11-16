@@ -1,0 +1,7 @@
+{
+  "assertions": 87,
+  "failures": 0,
+  "jsdom": "26.1.0",
+  "jquery": "3.7.1",
+  "note": "PHP-rendered fixtures, jsdom and WooCommerce/WordPress stubs; not a live installation"
+}

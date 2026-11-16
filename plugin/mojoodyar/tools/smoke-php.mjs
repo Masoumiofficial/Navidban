@@ -179,11 +179,18 @@ if (options.jsonOut) {
 	const start = output.indexOf('{');
 	const end = output.lastIndexOf('}');
 	if (start !== -1 && end > start) {
-		fs.writeFileSync(target, output.slice(start, end + 1).trim() + '\n');
+		const json = output.slice(start, end + 1).trim();
+		try {
+			JSON.parse(json);
+		} catch (error) {
+			console.error('[smoke-php] --json-out requested but output is not valid JSON; existing result preserved');
+			process.exit(exitCode || 1);
+		}
+		fs.writeFileSync(target, json + '\n');
 		console.error(`[smoke-php] wrote ${path.relative(process.cwd(), target)}`);
 	} else {
-		console.error('[smoke-php] --json-out requested but stdout contained no JSON object');
-		process.exit(1);
+		console.error('[smoke-php] --json-out requested but stdout contained no JSON object; existing result preserved');
+		process.exit(exitCode || 1);
 	}
 }
 

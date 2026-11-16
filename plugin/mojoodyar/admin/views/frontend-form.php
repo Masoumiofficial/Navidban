@@ -5,14 +5,17 @@
  * Escaped output only; no inline event handlers (the JS file binds behaviour).
  *
  * @var array  $settings Form settings.
- * @var int    $product_id
- * @var array  $variations Variation list with stock state.
+ * @var int    $product_id Product ID.
+ * @var array  $variations Selectable, unavailable variations.
+ * @var string $form_id Unique ID for this instance.
+ * @var bool   $is_variable Whether the product is variable.
+ * @var string $placement automatic|shortcode.
+ * @var bool   $sync_with_product Whether WooCommerce events may update this form.
  * @var string $default_channel Default channel in "both" mode.
- * @var int    $user_id
- * @var string $prefill_email
- * @var string $prefill_phone
- * @var string $prefill_name
- * @var string $notice One-shot notice code.
+ * @var int    $user_id Current user.
+ * @var string $prefill_email Prefilled email.
+ * @var string $prefill_phone Prefilled phone.
+ * @var string $prefill_name Prefilled name.
  *
  * @package Mojoodyar
  */
@@ -27,16 +30,22 @@ $mjy_notice_text = array(
 	'unsubscribed' => 'اشتراک شما لغو شد. دیگر پیامی دریافت نمی‌کنید.',
 );
 
-$mjy_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
+$mjy_mode          = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
+$form_id           = isset( $form_id ) ? (string) $form_id : 'mjy-form-preview';
+$is_variable       = ! empty( $is_variable );
+$placement         = isset( $placement ) ? (string) $placement : 'shortcode';
+$sync_with_product = ! empty( $sync_with_product );
 ?>
 <section
 	class="mjy-form"
-	id="mjy-form"
+	id="<?php echo esc_attr( $form_id ); ?>"
 	dir="rtl"
 	data-product="<?php echo esc_attr( (string) $product_id ); ?>"
 	data-mode="<?php echo esc_attr( $mjy_mode ); ?>"
 	data-consent="<?php echo ! empty( $settings['consent_req'] ) ? '1' : '0'; ?>"
-	data-variations="<?php echo esc_attr( wp_json_encode( $variations ) ); ?>"
+	data-variable="<?php echo $is_variable ? '1' : '0'; ?>"
+	data-placement="<?php echo esc_attr( $placement ); ?>"
+	data-sync-product="<?php echo $sync_with_product ? '1' : '0'; ?>"
 >
 	<h3 class="mjy-form__title"><?php echo esc_html( (string) $settings['heading'] ); ?></h3>
 
@@ -48,9 +57,22 @@ $mjy_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 
 	<p class="mjy-form__intro"><?php echo esc_html( (string) $settings['intro'] ); ?></p>
 
-	<form class="mjy-form__body" novalidate>
+	<form class="mjy-form__body" method="post" novalidate>
 		<input type="hidden" name="product_id" value="<?php echo esc_attr( (string) $product_id ); ?>" />
-		<input type="hidden" name="variation_id" value="0" data-mjy="variation-id" />
+
+		<?php if ( $is_variable ) : ?>
+			<p class="mjy-form__field mjy-form__variation">
+				<label for="<?php echo esc_attr( $form_id . '-variation' ); ?>">تنوع ناموجود</label>
+				<select id="<?php echo esc_attr( $form_id . '-variation' ); ?>" name="variation_id" data-mjy="variation-id" required>
+					<option value="0">تنوع مورد نظر را انتخاب کنید</option>
+					<?php foreach ( $variations as $variation ) : ?>
+						<option value="<?php echo esc_attr( (string) $variation['id'] ); ?>"><?php echo esc_html( (string) $variation['label'] ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</p>
+		<?php else : ?>
+			<input type="hidden" name="variation_id" value="0" data-mjy="variation-id" />
+		<?php endif; ?>
 
 		<?php if ( 'both' === $mjy_mode ) : ?>
 			<fieldset class="mjy-form__channels">
@@ -71,10 +93,10 @@ $mjy_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 		<div class="mjy-form__fields">
 			<?php if ( ! empty( $settings['name_field'] ) ) : ?>
 				<p class="mjy-form__field" data-mjy="name-field">
-					<label for="mjy-name">نام و نام خانوادگی</label>
+					<label for="<?php echo esc_attr( $form_id . '-name' ); ?>">نام و نام خانوادگی</label>
 					<input
 						type="text"
-						id="mjy-name"
+						id="<?php echo esc_attr( $form_id . '-name' ); ?>"
 						name="name"
 						maxlength="120"
 						autocomplete="name"
@@ -87,10 +109,10 @@ $mjy_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 
 			<?php if ( 'sms' !== $mjy_mode ) : ?>
 				<p class="mjy-form__field" data-mjy="email-field">
-					<label for="mjy-email">ایمیل</label>
+					<label for="<?php echo esc_attr( $form_id . '-email' ); ?>">ایمیل</label>
 					<input
 						type="email"
-						id="mjy-email"
+						id="<?php echo esc_attr( $form_id . '-email' ); ?>"
 						name="email"
 						dir="ltr"
 						inputmode="email"
@@ -103,10 +125,10 @@ $mjy_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 
 			<?php if ( 'email' !== $mjy_mode ) : ?>
 				<p class="mjy-form__field" data-mjy="phone-field">
-					<label for="mjy-phone">شمارهٔ موبایل</label>
+					<label for="<?php echo esc_attr( $form_id . '-phone' ); ?>">شمارهٔ موبایل</label>
 					<input
 						type="tel"
-						id="mjy-phone"
+						id="<?php echo esc_attr( $form_id . '-phone' ); ?>"
 						name="phone"
 						dir="ltr"
 						inputmode="tel"
@@ -120,8 +142,8 @@ $mjy_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 		</div>
 
 		<div class="mjy-form__hp" aria-hidden="true">
-			<label for="mjy-website">این فیلد را خالی بگذارید</label>
-			<input type="text" id="mjy-website" name="website" tabindex="-1" autocomplete="off" />
+			<label for="<?php echo esc_attr( $form_id . '-website' ); ?>">این فیلد را خالی بگذارید</label>
+			<input type="text" id="<?php echo esc_attr( $form_id . '-website' ); ?>" name="website" tabindex="-1" autocomplete="off" />
 		</div>
 
 		<?php if ( ! empty( $settings['consent_req'] ) ) : ?>
@@ -137,7 +159,7 @@ $mjy_mode = isset( $settings['mode'] ) ? $settings['mode'] : 'email';
 		<?php endif; ?>
 
 		<p class="mjy-form__actions">
-			<button type="submit" class="mjy-button"><?php echo esc_html( (string) $settings['button'] ); ?></button>
+			<button type="submit" class="mjy-button" disabled><?php echo esc_html( (string) $settings['button'] ); ?></button>
 		</p>
 
 		<p class="mjy-form__message" role="status" aria-live="polite" data-mjy="message"></p>

@@ -35,8 +35,8 @@ body {
 /* --- the real plugin stylesheet, verbatim --- */
 /*
  * Mojoodyar — storefront form.
- * Loaded only on a single product page whose product (or a variation) is
- * unavailable. No !important: the theme must always be able to override it.
+ * Loaded for eligible product pages and explicitly placed shortcode forms.
+ * No !important: the theme must always be able to override it.
  *
  * Everything is scoped to .mjy-form and written with logical properties, so a
  * theme with dir="rtl" on <html> gets the same layout we design for.
@@ -166,7 +166,8 @@ body {
 	color: var(--mjy-ink-soft);
 }
 
-.mjy-form__field input {
+.mjy-form__field input,
+.mjy-form__field select {
 	width: 100%;
 	max-width: 22rem;
 	padding: 0.65rem 0.85rem;
@@ -184,13 +185,15 @@ body {
 	color: #9aa8a4;
 }
 
-.mjy-form__field input:focus {
+.mjy-form__field input:focus,
+.mjy-form__field select:focus {
 	border-color: var(--mjy-primary-hover);
 	box-shadow: 0 0 0 3px rgba(20, 133, 123, 0.18);
 	outline: 0;
 }
 
 .mjy-form__field input:focus-visible,
+.mjy-form__field select:focus-visible,
 .mjy-form__channels input:focus-visible,
 .mjy-button:focus-visible {
 	outline: 3px solid var(--mjy-accent);
@@ -270,7 +273,7 @@ body {
 	color: var(--mjy-ok);
 }
 
-/* A variation is selected and it is available: the form is not relevant. */
+/* Hide when the selected variation is available and the cart exposes all choices. */
 .mjy-form.is-hidden {
 	display: none;
 }
@@ -286,7 +289,8 @@ body {
 		border-radius: 16px;
 	}
 
-	.mjy-form__field input {
+	.mjy-form__field input,
+	.mjy-form__field select {
 		max-width: 100%;
 	}
 
@@ -321,30 +325,33 @@ body {
 </p>
 <div class="mjy-demo"><section
 	class="mjy-form"
-	id="mjy-form"
+	id="mjy-form-preview"
 	dir="rtl"
 	data-product="501"
 	data-mode="email"
 	data-consent="0"
-	data-variations="[]"
+	data-variable="0"
+	data-placement="shortcode"
+	data-sync-product="0"
 >
 	<h3 class="mjy-form__title">خبرم کن</h3>
 
-	
+
 	<p class="mjy-form__intro">این کالا فعلاً موجود نیست. شمارهٔ خود را بگذارید تا به‌محض بازگشت موجودی خبرتان کنیم.</p>
 
-	<form class="mjy-form__body" novalidate>
+	<form class="mjy-form__body" method="post" novalidate>
 		<input type="hidden" name="product_id" value="501" />
-		<input type="hidden" name="variation_id" value="0" data-mjy="variation-id" />
+
+					<input type="hidden" name="variation_id" value="0" data-mjy="variation-id" />
 
 					<input type="hidden" name="channel" value="email" />
-		
+
 		<div class="mjy-form__fields">
 							<p class="mjy-form__field" data-mjy="name-field">
-					<label for="mjy-name">نام و نام خانوادگی</label>
+					<label for="mjy-form-preview-name">نام و نام خانوادگی</label>
 					<input
 						type="text"
-						id="mjy-name"
+						id="mjy-form-preview-name"
 						name="name"
 						maxlength="120"
 						autocomplete="name"
@@ -352,12 +359,12 @@ body {
 						value=""
 						required					/>
 				</p>
-			
+
 							<p class="mjy-form__field" data-mjy="email-field">
-					<label for="mjy-email">ایمیل</label>
+					<label for="mjy-form-preview-email">ایمیل</label>
 					<input
 						type="email"
-						id="mjy-email"
+						id="mjy-form-preview-email"
 						name="email"
 						dir="ltr"
 						inputmode="email"
@@ -365,17 +372,17 @@ body {
 						value=""
 						required					/>
 				</p>
-			
+
 					</div>
 
 		<div class="mjy-form__hp" aria-hidden="true">
-			<label for="mjy-website">این فیلد را خالی بگذارید</label>
-			<input type="text" id="mjy-website" name="website" tabindex="-1" autocomplete="off" />
+			<label for="mjy-form-preview-website">این فیلد را خالی بگذارید</label>
+			<input type="text" id="mjy-form-preview-website" name="website" tabindex="-1" autocomplete="off" />
 		</div>
 
-		
+
 		<p class="mjy-form__actions">
-			<button type="submit" class="mjy-button">خبرم کن</button>
+			<button type="submit" class="mjy-button" disabled>خبرم کن</button>
 		</p>
 
 		<p class="mjy-form__message" role="status" aria-live="polite" data-mjy="message"></p>

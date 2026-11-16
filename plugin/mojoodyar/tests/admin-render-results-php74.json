@@ -1,8 +1,8 @@
 {
     "plugin_version": "1.0.0",
     "php_version": "7.4.33",
-    "generated_at": "2026-11-16T08:19:47+00:00",
-    "assertions": 179,
+    "generated_at": "2026-11-16T10:34:26+00:00",
+    "assertions": 180,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -39,7 +39,7 @@
             "failures": 0
         },
         "صفحهٔ تشخیص محصول": {
-            "assertions": 6,
+            "assertions": 7,
             "failures": 0
         },
         "سلامت اجرا": {

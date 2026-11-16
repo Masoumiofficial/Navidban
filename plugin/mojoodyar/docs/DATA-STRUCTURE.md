@@ -22,6 +22,7 @@
 | `full_name` | VARCHAR(120) NOT NULL DEFAULT '' | نامی که خودِ مشتری در فرم نوشته؛ خالی = بی‌نام |
 | `user_id` | BIGINT UNSIGNED (0) | ۰ = مهمان |
 | `status` | VARCHAR(16) | `pending` / `confirmed` / `unsubscribed` / `notified` / `expired` |
+| `registration_cycle` | BIGINT UNSIGNED (0) | شمارهٔ دورهٔ ثبت؛ در ثبت مجدد ردیف غیرفعال افزایش می‌یابد |
 | `consent_at` | DATETIME NULL | زمان رضایت |
 | `confirmed_at` | DATETIME NULL | زمان تأیید دومرحله‌ای |
 | `notified_at` | DATETIME NULL | آخرین اعلان |
@@ -35,7 +36,7 @@
 | `call_closed_by` | BIGINT UNSIGNED (0) | کاربری که پیگیری را بست |
 | `call_close_reason` | VARCHAR(32) NOT NULL DEFAULT '' | کد دلیل خاتمه (کلیدهای `CallLog::CLOSE_REASONS`) |
 | `call_close_note` | VARCHAR(190) NOT NULL DEFAULT '' | توضیح خاتمه |
-| `created_at` | DATETIME | مبنای ترتیب «قدیمی‌تر اول» |
+| `created_at` | DATETIME | زمان ثبت دورهٔ جاری؛ در ثبت مجدد تازه می‌شود و مبنای نوبت و نگهداشت است |
 
 کلیدها:
 
@@ -67,10 +68,11 @@
 
 کلیدها: `PRIMARY KEY (product_id, variation_id)`، `KEY idx_status (stock_status, checked_at)`.
 
-نقش `announced_qty`/`announced_at`: **ضد تکرار**. اگر ۵ واحد اعلام شد و بعد
-ادمین ۳ واحد دیگر اضافه کرد (۸ = ۵+۳)، منطق می‌فهمد ۳ واحد جدید است و فقط
-۳ اعلان تازه می‌فرستد؛ اگر دو هوک پشت‌سرهم برای همان تغییر شلیک شوند،
-به‌روزرسانی اتمی اجازهٔ اعلان دوم را نمی‌دهد.
+`announced_qty` پایهٔ محاسبهٔ تعداد قابل تخصیص در حالت منصفانه است. اعلان
+خودکار به گذار وضعیت از ناموجود به موجود وابسته است؛ افزایش تعداد در حالی که
+وضعیت همچنان موجود مانده، الزاماً اعلان تازه ایجاد نمی‌کند. به‌روزرسانی اتمی
+snapshot برای هوک تکراری همان گذار از ساخت دوبارهٔ صف جلوگیری می‌کند؛ رقابت
+واقعی MySQL/InnoDB در این محیط آزمایش نشده است.
 
 ## ۳) `mjy_queue` — صف ارسال
 
@@ -78,11 +80,12 @@
 |---|---|---|
 | `id` | BIGINT UNSIGNED AI | کلید اصلی |
 | `waitlist_id` | BIGINT UNSIGNED | ارجاع به اشتراک |
+| `registration_cycle` | BIGINT UNSIGNED (0) | دوره‌ای که پیام به آن تعلق دارد؛ پیام دورهٔ قدیمی ارسال نمی‌شود |
 | `channel` | VARCHAR(16) | `email` / `sms` |
 | `event_key` | VARCHAR(100) | `confirm` یا `restock:<ts>:<rand>` |
-| `payload_hash` | CHAR(64) | هش محتوای پیام |
+| `payload_hash` | CHAR(64) | هش شناسه، کانال، رویداد، داده و دوره برای جلوگیری از درج تکراری |
 | `attempts` | TINYINT UNSIGNED | تعداد تلاش |
-| `status` | VARCHAR(16) | `queued` / `processing` / `sent` / `failed` / `skipped` |
+| `status` | VARCHAR(16) | `queued` / `processing` / `sent` / `failed` / `blocked` / `skipped` |
 | `next_run_at` | DATETIME | زمان مجاز تلاش بعدی |
 | `last_error` | VARCHAR(255) NULL | آخرین خطا (`unsubscribed`, `not_confirmed`, …) |
 | `locked_at` | DATETIME NULL | **قفل نرم** برای جلوگیری از پردازش هم‌زمان |
@@ -139,16 +142,18 @@
 
 | داده | سیاست |
 |---|---|
-| ردیف‌های `notified`/`expired` قدیمی‌تر از `retention_days` (پیش‌فرض ۱۸۰) | حذف روزانه با cron |
-| لاگ‌های قدیمی‌تر از ۳۰ روز | حذف روزانه |
-| ردیف‌های صف `sent` قدیمی‌تر از ۳۰ روز | حذف روزانه |
+| ردیف‌های `notified`/`expired`/`unsubscribed` با `created_at` قدیمی‌تر از `retention_days` (پیش‌فرض ۱۸۰) | پاک‌سازی زمان‌بندی‌شده؛ در ثبت مجدد `created_at` تازه می‌شود |
+| لاگ‌های قدیمی‌تر از ۹۰ روز | پاک‌سازی زمان‌بندی‌شده |
+| صف مربوط به ردیف حذف‌شده | همراه حذف ردیف انتظار پاک می‌شود؛ حذف جداگانهٔ همهٔ `sent`های ۳۰روزه پیاده‌سازی نشده است |
 | حذف افزونه | فقط اگر مدیر `delete_data_on_uninstall` را روشن کرده باشد |
 
 ## ۷) مهاجرت
 
-`MOJODYAR_DB_VERSION = '1'`. روی هر بارگذاری، `Database::maybe_upgrade()`
-نسخهٔ ذخیره‌شده در آپشن `mojoodyar_db_version` را با ثابت مقایسه می‌کند و
-در صورت اختلاف `install()` را صدا می‌زند (idempotent).
+`MOJODYAR_DB_VERSION = '5'` نسخهٔ داخلی ساختار است و شمارهٔ عمومی افزونه
+همچنان ۱.۰.۰ است. `Activator::maybe_upgrade()` نسخهٔ ذخیره‌شده را مقایسه
+می‌کند و در صورت اختلاف `Database::install()` را با `dbDelta` فراخوانی می‌کند.
+داده‌های پیشین در دورهٔ صفر باقی می‌مانند. اگر دو ستون دوره در دسترس نباشند،
+نسخهٔ ساختار موفق ثبت نمی‌شود و ثبت، پردازش صف و پایش تا ارتقای موفق متوقف‌اند.
 
 `dbDelta` گاهی موتور جدول موجود را تغییر نمی‌دهد؛ `Database::force_innodb()`
 پس از هر نصب، `SHOW TABLE STATUS` می‌گیرد و در صورت نیاز
@@ -157,7 +162,7 @@
 
 ## ۸) آنچه اندازه‌گیری نشد
 
-- کارایی این چهار جدول روی MySQL با ۱۰۰٬۰۰۰+ ردیف واقعی. `tests/load.php`
+- کارایی این پنج جدول روی MySQL با ۱۰۰٬۰۰۰+ ردیف واقعی. `tests/load.php`
   ده‌هزار ردیف را روی SQLite می‌آزماید و صریحاً می‌گوید «بنچمارک MySQL نیست».
 - رفتار `ALTER TABLE … ENGINE=InnoDB` روی جدولی که حجم زیادی داده دارد
   (می‌تواند کند باشد؛ روی فروشگاه‌های بزرگ یک بار اجرا می‌شود و تمام).

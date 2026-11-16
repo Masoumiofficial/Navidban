@@ -24,7 +24,7 @@ $mjy_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $
 
 	<?php if ( ! $mjy_healthy ) : ?>
 		<div class="notice notice-error inline">
-			<p><strong>ساختار پایگاه داده کامل نیست.</strong> صفحهٔ «ابزارها» را باز کنید و «بازسازی جدول‌ها» را بزنید.</p>
+			<p><strong>ساختار پایگاه داده کامل نیست.</strong> از داده‌ها پشتیبان بگیرید و وضعیت جدول‌ها و مجوزهای پایگاه داده را بررسی کنید؛ فعال‌سازی دوبارهٔ افزونه ساخت جدول‌ها را تکرار می‌کند.</p>
 		</div>
 	<?php endif; ?>
 

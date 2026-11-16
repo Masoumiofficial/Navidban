@@ -137,9 +137,10 @@ final class Notifier {
 			)
 		);
 
-		// Only a restock message advances the subscriber to "notified".
+		// A delivery already in flight cannot be recalled, but must not overwrite
+		// an unsubscribe or a new registration made during the provider call.
 		if ( true === $result && ! $is_confirmation ) {
-			WaitlistRepository::set_status( (int) $waitlist['id'], 'notified' );
+			WaitlistRepository::mark_notified_current( $waitlist );
 		}
 
 		if ( true === $result ) {

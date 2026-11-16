@@ -117,7 +117,9 @@ final class WaitlistRepository {
 			$row['confirmed_at'] = gmdate( 'Y-m-d H:i:s' );
 		}
 
-		$wpdb->query( 'START TRANSACTION' );
+		if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
+			return array( 'ok' => false, 'id' => 0, 'duplicate' => false, 'reason' => 'db' );
+		}
 
 		$inserted = $wpdb->insert(
 			self::table(),
@@ -143,10 +145,12 @@ final class WaitlistRepository {
 		);
 
 		if ( false === $inserted ) {
+			// ROLLBACK itself clears wpdb's last_error; preserve the insert error.
+			$insert_error = (string) $wpdb->last_error;
 			$wpdb->query( 'ROLLBACK' );
 
 			// A concurrent request won the unique key race: treat it as duplicate.
-			if ( ! empty( $wpdb->last_error ) && false !== strpos( $wpdb->last_error, 'Duplicate' ) ) {
+			if ( false !== stripos( $insert_error, 'duplicate' ) ) {
 				$existing = self::find_existing( $row['product_id'], $row['variation_id'], (string) $row['email'], (string) $row['phone'] );
 
 				return array( 'ok' => false, 'id' => (int) $existing, 'duplicate' => true, 'reason' => 'duplicate' );
@@ -167,17 +171,21 @@ final class WaitlistRepository {
 				array(
 					'waitlist_id' => $id,
 				),
-				time()
+				time(),
+				0
 			);
 
-			if ( ! $queued ) {
+			if ( ! $queued || Queue::last_insert_count() !== 1 ) {
 				$wpdb->query( 'ROLLBACK' );
 
 				return array( 'ok' => false, 'id' => 0, 'duplicate' => false, 'reason' => 'queue' );
 			}
 		}
 
-		$wpdb->query( 'COMMIT' );
+		if ( false === $wpdb->query( 'COMMIT' ) ) {
+			$wpdb->query( 'ROLLBACK' );
+			return array( 'ok' => false, 'id' => 0, 'duplicate' => false, 'reason' => 'db' );
+		}
 
 		return array(
 			'ok'        => true,
@@ -258,56 +266,117 @@ final class WaitlistRepository {
 	}
 
 	/**
-	 * Put an existing subscriber back in the queue after they sign up again.
+	 * Re-register an inactive subscriber without losing their history.
 	 *
-	 * Only rows that are no longer waiting are touched: a row that is already
-	 * ``pending`` or ``confirmed`` is left exactly as it is, so a repeated
-	 * submit cannot reset a confirmation the customer already gave. Rows that
-	 * were notified, expired or unsubscribed are revived - that is the whole
-	 * point, because a shop restocking the same product twice would otherwise
-	 * keep an old "notified" row forever and never message that customer again.
+	 * A live confirmed or unexpired pending row stays unchanged. A fresh token
+	 * and cycle invalidate links and jobs from a previous registration. The
+	 * compare-and-swap update and any confirmation enqueue share a transaction;
+	 * concurrent submits cannot both revive the same inactive row.
 	 *
-	 * @param int    $id       Row ID.
-	 * @param string $name     Freshly typed name (kept empty if not provided).
-	 * @param bool   $double   Whether double opt-in is on.
+	 * @param int    $id      Row ID.
+	 * @param string $name    Freshly typed name, or empty to preserve it.
+	 * @param bool   $double  Whether the new cycle requires confirmation.
+	 * @param string $channel Selected channel, or empty to preserve it.
+	 * @param string $error   Optional error output; empty for an already-live row.
 	 * @return bool True when the row was actually revived.
 	 */
-	public static function reactivate( $id, $name = '', $double = false ) {
+	public static function reactivate( $id, $name = '', $double = false, $channel = '', &$error = null ) {
 		global $wpdb;
 
-		$id   = (int) $id;
-		$row  = self::get( $id );
-		$live = array( 'pending', 'confirmed' );
+		$error = '';
+		$id    = (int) $id;
+		$row   = self::get( $id );
 
-		if ( ! is_array( $row ) || in_array( (string) $row['status'], $live, true ) ) {
+		if ( ! is_array( $row ) ) {
+			$error = 'missing';
 			return false;
 		}
 
-		$data = array(
+		$expired_pending = 'pending' === $row['status'] && ! empty( $row['confirm_expires_at'] )
+			&& strtotime( $row['confirm_expires_at'] ) < time();
+		if ( 'confirmed' === $row['status'] || ( 'pending' === $row['status'] && ! $expired_pending ) ) {
+			return false;
+		}
+
+		if ( ! in_array( (string) $row['status'], array( 'pending', 'notified', 'expired', 'unsubscribed' ), true ) ) {
+			$error = 'status';
+			return false;
+		}
+
+		$now   = gmdate( 'Y-m-d H:i:s' );
+		$cycle = (int) $row['registration_cycle'] + 1;
+		$data  = array(
+			'token'              => Consent::generate_token(),
+			'registration_cycle' => $cycle,
 			'status'             => $double ? 'pending' : 'confirmed',
+			// This is a new request: it joins the end of the line and its
+			// retention age must not inherit an old signup's timestamp.
+			'created_at'         => $now,
 			'notified_at'        => null,
+			'confirmed_at'       => $double ? null : $now,
 			'confirm_expires_at' => $double ? gmdate( 'Y-m-d H:i:s', time() + ( max( 1, (int) Settings::get( 'confirm_ttl_hours', 48 ) ) * 3600 ) ) : null,
 		);
 
-		if ( ! $double ) {
-			$data['confirmed_at'] = gmdate( 'Y-m-d H:i:s' );
+		if ( in_array( $channel, array( 'email', 'sms' ), true ) ) {
+			$data['channel'] = $channel;
 		}
-
+		if ( Settings::enabled( 'consent_required' ) ) {
+			$data['consent_at'] = $now;
+		}
 		$name = trim( (string) $name );
-
 		if ( '' !== $name ) {
 			$data['full_name'] = substr( $name, 0, 120 );
 		}
 
-		$updated = $wpdb->update(
-			self::table(),
-			$data,
-			array( 'id' => $id ),
-			null,
-			array( '%d' )
+		$where = array(
+			'id'                 => $id,
+			'status'             => (string) $row['status'],
+			'token'              => (string) $row['token'],
+			'registration_cycle' => (int) $row['registration_cycle'],
 		);
+		if ( $expired_pending ) {
+			$where['confirm_expires_at'] = (string) $row['confirm_expires_at'];
+		}
 
-		return false !== $updated && (int) $updated > 0;
+		if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
+			$error = 'db';
+			return false;
+		}
+
+		$updated = $wpdb->update( self::table(), $data, $where );
+		if ( false === $updated || 0 === (int) $updated ) {
+			$wpdb->query( 'ROLLBACK' );
+			if ( false === $updated ) {
+				$error = 'db';
+			} else {
+				// A competing submit may have committed the renewal first.
+				$fresh = self::get( $id );
+				if ( ! is_array( $fresh ) || ! in_array( (string) $fresh['status'], array( 'pending', 'confirmed' ), true ) ) {
+					$error = 'conflict';
+				}
+			}
+			return false;
+		}
+
+		if ( $double ) {
+			$queued = Queue::enqueue( $id, (string) ( $data['channel'] ?? $row['channel'] ), 'confirm', array( 'waitlist_id' => $id ), time(), $cycle );
+			// INSERT IGNORE reports a hash collision as success with zero rows.
+			// That is not a newly queued confirmation; roll back rather than
+			// leaving a fresh pending subscription with no message.
+			if ( ! $queued || Queue::last_insert_count() !== 1 ) {
+				$wpdb->query( 'ROLLBACK' );
+				$error = 'queue';
+				return false;
+			}
+		}
+
+		if ( false === $wpdb->query( 'COMMIT' ) ) {
+			$wpdb->query( 'ROLLBACK' );
+			$error = 'db';
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -337,6 +406,38 @@ final class WaitlistRepository {
 		$updated = $wpdb->update( self::table(), $data, array( 'id' => (int) $id ), null, array( '%d' ) );
 
 		return false !== $updated;
+	}
+
+	/**
+	 * Finish a restock delivery only if the selected registration is still live.
+	 *
+	 * A send can be in flight while the customer unsubscribes or registers
+	 * again. It cannot be recalled, but it must not overwrite the newer state.
+	 *
+	 * @param array $row The subscriber snapshot selected by the queue.
+	 * @return bool True when this registration was marked notified.
+	 */
+	public static function mark_notified_current( array $row ) {
+		global $wpdb;
+
+		$updated = $wpdb->update(
+			self::table(),
+			array( 'status' => 'notified', 'notified_at' => gmdate( 'Y-m-d H:i:s' ) ),
+			array(
+				'id'                 => (int) $row['id'],
+				'token'              => (string) $row['token'],
+				'registration_cycle' => (int) $row['registration_cycle'],
+				'status'             => 'confirmed',
+			)
+		);
+
+		if ( false === $updated ) {
+			// The provider may already have accepted the message; do not imply
+			// that it is safe to resend it automatically.
+			Logger::log( 'error', 'notification_state_failed', 'id=' . (int) $row['id'] );
+		}
+
+		return false !== $updated && (int) $updated > 0;
 	}
 
 	/**
@@ -388,29 +489,52 @@ final class WaitlistRepository {
 	 * @return string "confirmed" | "already" | "expired" | "invalid" | "unsubscribed"
 	 */
 	public static function confirm_by_token( $token ) {
-		$row = self::get_by_token( $token );
+		global $wpdb;
 
+		$row = self::get_by_token( $token );
 		if ( null === $row ) {
 			return 'invalid';
 		}
-
 		if ( 'confirmed' === $row['status'] || 'notified' === $row['status'] ) {
 			return 'already';
 		}
-
 		if ( 'unsubscribed' === $row['status'] ) {
 			return 'unsubscribed';
 		}
-
-		if ( ! empty( $row['confirm_expires_at'] ) && strtotime( $row['confirm_expires_at'] ) < time() ) {
-			self::set_status( (int) $row['id'], 'expired' );
-
+		if ( 'expired' === $row['status'] ) {
 			return 'expired';
 		}
+		if ( 'pending' !== $row['status'] ) {
+			return 'invalid';
+		}
 
-		self::set_status( (int) $row['id'], 'confirmed' );
+		$expired = ! empty( $row['confirm_expires_at'] ) && strtotime( $row['confirm_expires_at'] ) < time();
+		$data = $expired
+			? array( 'status' => 'expired' )
+			: array( 'status' => 'confirmed', 'confirmed_at' => gmdate( 'Y-m-d H:i:s' ) );
+		$where = array( 'id' => (int) $row['id'], 'token' => (string) $token, 'status' => 'pending' );
+		if ( ! empty( $row['confirm_expires_at'] ) ) {
+			$where['confirm_expires_at'] = (string) $row['confirm_expires_at'];
+		}
 
-		return 'confirmed';
+		// Checking the token again in the UPDATE prevents an older link from
+		// confirming a fresh cycle if re-registration won the race after SELECT.
+		$updated = $wpdb->update( self::table(), $data, $where );
+		if ( false !== $updated && (int) $updated > 0 ) {
+			return $expired ? 'expired' : 'confirmed';
+		}
+
+		$fresh = self::get_by_token( $token );
+		if ( null === $fresh ) {
+			return 'invalid';
+		}
+		if ( in_array( (string) $fresh['status'], array( 'confirmed', 'notified' ), true ) ) {
+			return 'already';
+		}
+		if ( 'unsubscribed' === $fresh['status'] || 'expired' === $fresh['status'] ) {
+			return (string) $fresh['status'];
+		}
+		return 'invalid';
 	}
 
 	/**
@@ -420,27 +544,35 @@ final class WaitlistRepository {
 	 * @return string "unsubscribed" | "already" | "invalid"
 	 */
 	public static function unsubscribe_by_token( $token ) {
-		$row = self::get_by_token( $token );
+		global $wpdb;
 
+		$row = self::get_by_token( $token );
 		if ( null === $row ) {
 			return 'invalid';
 		}
-
 		if ( 'unsubscribed' === $row['status'] ) {
 			return 'already';
 		}
 
-		self::set_status( (int) $row['id'], 'unsubscribed' );
+		$updated = $wpdb->update(
+			self::table(),
+			array( 'status' => 'unsubscribed' ),
+			array( 'id' => (int) $row['id'], 'token' => (string) $token )
+		);
+		if ( false !== $updated && (int) $updated > 0 ) {
+			return 'unsubscribed';
+		}
 
-		return 'unsubscribed';
+		$fresh = self::get_by_token( $token );
+		return is_array( $fresh ) && 'unsubscribed' === $fresh['status'] ? 'already' : 'invalid';
 	}
 
 	/**
 	 * Confirmed subscribers for one product/variation, oldest first.
 	 *
-	 * Subscribers who already have a restock message queued or delivered are
-	 * excluded: a second restock that happens before the queue drains must not
-	 * put the same person in the queue twice.
+	 * A queued, processing or delivered restock from the current registration
+	 * cycle blocks a duplicate. Older cycles remain in the audit history but
+	 * must not block a customer who explicitly registered again.
 	 *
 	 * @param int $product_id   Product ID.
 	 * @param int $variation_id Variation ID.
@@ -459,6 +591,7 @@ final class WaitlistRepository {
 				AND NOT EXISTS (
 					SELECT 1 FROM {$queue} q
 					WHERE q.waitlist_id = w.id
+					AND q.registration_cycle = w.registration_cycle
 					AND q.event_key LIKE 'restock%%'
 					AND q.status IN ('queued','processing','sent')
 				)
@@ -490,6 +623,7 @@ final class WaitlistRepository {
 				AND NOT EXISTS (
 					SELECT 1 FROM {$queue} q
 					WHERE q.waitlist_id = w.id
+					AND q.registration_cycle = w.registration_cycle
 					AND q.event_key LIKE 'restock%%'
 					AND q.status IN ('queued','processing','sent')
 				)";

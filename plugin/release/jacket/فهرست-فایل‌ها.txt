@@ -1,4 +1,4 @@
-# موجودیار 1.0.0 — 81 فایل
+# موجودیار 1.0.0 — 82 فایل
 
 mojoodyar/CHANGELOG.md
 mojoodyar/admin/class-admin.php
@@ -72,6 +72,7 @@ mojoodyar/includes/Support/Csv.php
 mojoodyar/includes/Support/Jalali.php
 mojoodyar/includes/Support/Masking.php
 mojoodyar/includes/Support/Persian.php
+mojoodyar/includes/Support/ProductAvailability.php
 mojoodyar/includes/Support/Text.php
 mojoodyar/includes/Support/Validator.php
 mojoodyar/includes/WaitlistRepository.php

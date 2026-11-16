@@ -4,7 +4,7 @@
 ایرانی. بدون Composer، بدون npm، بدون build، بدون IonCube، بدون لایسنس.
 
 ```
-Mojoodyar/            پژوهش بازار، برند و پرامپت ساخت (اسناد طراحی)
+Navidban/             پژوهش و اسناد طراحی پیشین
 plugin/mojoodyar/     سورس افزونه + تست‌ها + ابزارها + مستندات
 plugin/release/      بستهٔ انتشار ساخته‌شده
 ```
@@ -15,6 +15,11 @@ plugin/release/      بستهٔ انتشار ساخته‌شده
 
 بستهٔ آمادهٔ ارسال به ژاکت (نصب + راهنمای فارسی + مجوز فونت + اطلاعات فایل):
 `plugin/release/jacket/`.
+
+فرم در صفحهٔ محصول واجد شرایط خودکار قرار می‌گیرد. برای جای‌گذاری دلخواه از
+`[mojoodyar_form]` در همان محصول یا `[mojoodyar_form product_id="123"]` در
+صفحهٔ دیگر استفاده کنید. ثبت به جاوااسکریپت و چاپ اسکریپت‌های پاورقی نیاز دارد؛
+جزئیات و محدودیت قالب‌ها در `plugin/mojoodyar/docs/USER-GUIDE.md` است.
 
 بازسازی و بازبینی:
 
@@ -29,8 +34,8 @@ python3 tools/package-jacket.py             # بستهٔ ارسال به باز�
 ```bash
 # با PHP نصب‌شده
 php tests/run.php            # ۴۱۱ assertion
-php tests/integration.php    # ۴۶۰ assertion
-php tests/admin-render.php   # ۱۷۹ assertion (رندر واقعی پنل)
+php tests/integration.php    # ۵۴۹ assertion با stub
+php tests/admin-render.php   # ۱۷۹ assertion (رندر پنل با stub)
 php tests/load.php           # ۱۰٬۰۰۰ مشترک
 python3 tests/test_release_email_audit.py  # گیت ایمیل ثابت
 
@@ -39,8 +44,10 @@ npm install --no-save @php-wasm/node @php-wasm/universal
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php
 ```
 
-نتیجهٔ آخر (نسخهٔ ۱.۰.۰): **۴۱۱/۴۱۱**، **۴۶۰/۴۶۰** و **۱۷۹/۱۷۹** روی PHP **8.3.33** و **7.4.33**.
-جزئیات: `plugin/mojoodyar/docs/TEST-REPORT.md`.
+نتایج ثبت‌شده: **۴۱۱/۴۱۱**، **۶۲۵/۶۲۵** و **۱۸۰/۱۸۰** روی PHP-WASM
+**8.3.36** و **7.4.33** با stub؛ به‌علاوهٔ ۸۷ بررسی DOM و ۱۳۷ بررسی محدود
+WordPress/WooCommerce در Playground با SQLite و jsdom. MySQL، مرورگر واقعی و
+تحویل پیام آزمایش نشده‌اند. جزئیات: `plugin/mojoodyar/docs/TEST-REPORT.md`.
 
 ## مستندات
 

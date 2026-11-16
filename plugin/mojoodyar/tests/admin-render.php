@@ -571,7 +571,8 @@ $_GET['diag_product'] = 424242;
 $empty_html           = mjy_render( array( $admin, 'render_tools' ) );
 unset( $_GET['diag_product'] );
 
-MjyAdmin::ok( false !== strpos( $empty_html, 'علت اصلی همین است' ), 'محصول بدون مشترک تأییدشده، علت را صریح می‌گوید' );
+MjyAdmin::ok( false !== strpos( $empty_html, 'مشترک واجد شرایطی یافت نشد' ), 'محصول بدون مشترک تأییدشده، وضعیت را صریح می‌گوید' );
+MjyAdmin::ok( false !== strpos( $empty_html, 'به‌تنهایی علت قطعی نیست' ), 'پنل تشخیص از ادعای علت قطعی پرهیز می‌کند' );
 
 // Hostile input: a non-numeric id must not reach a query or the output.
 $_GET['diag_product'] = '<script>alert(1)</script>';
