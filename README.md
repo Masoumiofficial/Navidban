@@ -20,7 +20,7 @@ plugin/release/      بستهٔ انتشار ساخته‌شده
 
 ```bash
 cd plugin/mojoodyar
-python3 tools/verify-release.py --build     # ۲۸ بررسی، باید ۰ خطا باشد
+python3 tools/verify-release.py --build     # ۲۹ بررسی، باید ۰ خطا باشد
 python3 tools/package-jacket.py             # بستهٔ ارسال به بازار
 ```
 
@@ -29,16 +29,17 @@ python3 tools/package-jacket.py             # بستهٔ ارسال به باز�
 ```bash
 # با PHP نصب‌شده
 php tests/run.php            # ۴۱۱ assertion
-php tests/integration.php    # ۴۴۴ assertion
-php tests/admin-render.php   # ۱۷۳ assertion (رندر واقعی پنل)
+php tests/integration.php    # ۴۶۰ assertion
+php tests/admin-render.php   # ۱۷۹ assertion (رندر واقعی پنل)
 php tests/load.php           # ۱۰٬۰۰۰ مشترک
+python3 tests/test_release_email_audit.py  # گیت ایمیل ثابت
 
 # بدون PHP (wasm)
 npm install --no-save @php-wasm/node @php-wasm/universal
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php
 ```
 
-نتیجهٔ آخر (نسخهٔ ۱.۰.۰): **۴۱۱/۴۱۱**، **۴۴۴/۴۴۴** و **۱۷۳/۱۷۳** روی PHP **8.3.33** و **7.4.33**.
+نتیجهٔ آخر (نسخهٔ ۱.۰.۰): **۴۱۱/۴۱۱**، **۴۶۰/۴۶۰** و **۱۷۹/۱۷۹** روی PHP **8.3.33** و **7.4.33**.
 جزئیات: `plugin/mojoodyar/docs/TEST-REPORT.md`.
 
 ## مستندات

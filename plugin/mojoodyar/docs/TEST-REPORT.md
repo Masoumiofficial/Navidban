@@ -1,4 +1,4 @@
-# گزارش آزمون — موجودیار ۲.۵.۰
+# گزارش آزمون — موجودیار ۱.۰.۰
 
 > این پرونده از خروجی **واقعی** سه هارنس ساخته شده است. هیچ عددی دستی وارد
 > نشده. بازتولید در بخش ۷.
@@ -8,14 +8,14 @@
 | مجموعه | PHP 8.3.33 | PHP 7.4.33 |
 |---|---|---|
 | `tests/run.php` (منطق خالص) | ۴۱۱ assertion · ۰ خطا · ۱۰۰٪ | ۴۱۱ assertion · ۰ خطا · ۱۰۰٪ |
-| `tests/integration.php` (با stub وردپرس/ووکامرس + SQLite) | ۴۴۴ assertion · ۰ خطا · ۱۰۰٪ | ۴۴۴ assertion · ۰ خطا · ۱۰۰٪ |
-| `tests/admin-render.php` (رندر واقعی ۷ صفحهٔ پنل) | ۱۷۳ assertion · ۰ خطا · ۱۰۰٪ | ۱۷۳ assertion · ۰ خطا · ۱۰۰٪ |
+| `tests/integration.php` (با stub وردپرس/ووکامرس + SQLite) | ۴۶۰ assertion · ۰ خطا · ۱۰۰٪ | ۴۶۰ assertion · ۰ خطا · ۱۰۰٪ |
+| `tests/admin-render.php` (رندر واقعی ۷ صفحهٔ پنل) | ۱۷۹ assertion · ۰ خطا · ۱۰۰٪ | ۱۷۹ assertion · ۰ خطا · ۱۰۰٪ |
 | `tests/load.php` (۱۰٬۰۰۰ مشترک، صف دسته‌ای) | ۷ بررسی · ۰ خطا | اجرا نشد (به بخش ۶) |
 
 منابع خام: `tests/results.json`, `tests/results-php74.json`,
 `tests/integration-results.json`, `tests/integration-results-php74.json`,
 `tests/admin-render-results.json`, `tests/admin-render-results-php74.json`,
-`tests/load-results.json`.
+`tests/load-results.json`, `tests/release-email-audit-results.txt`.
 
 ## ۲) آزمون واحد — ۲۲ گروه، ۴۱۱ assertion
 
@@ -57,11 +57,12 @@
 ۱۵/۶۰/۳۶۰ دقیقه backoff؛ مرزهای پنجرهٔ ارسال (۰۸:۰۰ و ۲۲:۰۰)؛
 بلاک `169.254.169.254`, `localhost`, `file://`, `http://` (غیر https).
 
-## ۳) آزمون یکپارچه — ۲۶ گروه، ۴۴۴ assertion
+## ۳) آزمون یکپارچه — ۲۷ گروه، ۴۶۰ assertion
 
 | گروه | assertion | چه چیزی اجرا می‌شود |
 |---|---|---|
-| نصب و چیدمان پایگاه داده | ۱۲ | `Activator::activate()` واقعی، چهار جدول InnoDB، کلیدهای یکتا، زمان‌بندی cron |
+| نصب و چیدمان پایگاه داده | ۱۲ | `Activator::activate()` واقعی، پنج جدول InnoDB، کلیدهای یکتا، زمان‌بندی cron |
+| فرستندهٔ مستقل هر سایت | ۱۶ | دو پیکربندی مستقل شبیه‌سازی‌شده، فرستندهٔ خالی، هدرهای ارسالی، تغییر ایمیل مدیریت، اولویت نشانی سفارشی و حفظ تنظیم قبلی |
 | بارگذاری شرطی | ۸ | خانه/فید/ادمین/محصول موجود/محصول ناموجود/متغیر — صفر یا دو دارایی |
 | ثبت درخواست | ۲۰ | مسیر کامل REST/AJAX با stub: nonce، هانی‌پات، rate limit، consent، کدهای خطا (با تأیید دومرحله‌ای روشن) |
 | ثبت یک‌مرحله‌ای (پیش‌فرض تازه) | ۱۰ | ردیف مستقیماً `confirmed`، نبود پیام تأیید در صف، نبود `confirm_expires_at` |
@@ -101,12 +102,14 @@
 نمی‌شدند: `max_attempts` وصل شد و `cooldown_minutes`، `ippanel_pattern` و
 `generic_method` حذف شدند.
 
-## ۳.۵) رندر پنل مدیریت — ۱۷۳ assertion
+## ۳.۵) رندر پنل مدیریت — ۱۷۹ assertion
 
-`tests/admin-render.php` هر پنج صفحه (داشبورد، لیست انتظارها، تنظیمات،
-ابزارها، راهنما) را واقعاً رندر می‌کند و خروجی HTML را بازرسی می‌کند:
+`tests/admin-render.php` هفت صفحه (داشبورد، آمار، گزارش رویدادها، لیست انتظارها،
+تنظیمات، ابزارها و راهنما) را در هارنس رندر می‌کند و خروجی HTML را بازرسی می‌کند:
 
-- ۶ فایل/صفحه: منوی اصلی + چهار زیرمنوی درست ثبت شده‌اند؛
+- ۸ بررسی منو: منوی اصلی و شش زیرمنوی صفحه ثبت شده‌اند؛
+- ۶ بررسی فرستنده: راهنمای عمومی، کادر خالی، نبود نمایش نشانی دو مدیر
+  فرضی در راهنما، و نمایش‌پذیری نشانی انتخابی برای ویرایش؛
 - ۲۰ بررسی رندر: خروجی غیرخالی، نشانگر متن درست، پوشش `mjy-wrap`،
   نبود `<script>` تزریقی؛
 - ۹ بررسی پوسته: نوار بالای صفحه، SVG درون‌خطی برند، دقیقاً یک زبانهٔ
@@ -163,10 +166,11 @@
 
 | ابزار | نتیجه |
 |---|---|
-| `tools/lint-php.js` (گرامر 7.4 + 8.3 روی ۵۶ فایل) | ۱۱۲ parse، ۰ خطا |
-| `tools/check-methods.js` (۳۲۲ فراخوانی متد، ۴۵ کلاس) | ۰ ارجاع شکسته |
+| `tools/lint-php.js` (گرامر 7.4 + 8.3 روی ۶۶ فایل) | ۱۳۲ parse، ۰ خطا |
+| `tools/check-methods.js` (۴۷۰ فراخوانی متد، ۵۱ کلاس/واسط/trait) | ۰ ارجاع شکسته |
 | `tools/har-audit.sh` | CSS+JS فشرده ۴٬۴۹۵ بایت (بودجه ۱۲٬۲۸۸) |
-| `tools/verify-release.py` | بخش ۸ |
+| `tools/verify-release.py` | ۲۹ بررسی، ۰ خطا؛ بخش ۸ |
+| `tests/test_release_email_audit.py` | ۴ آزمون، ۰ خطا |
 
 `check-methods.js` خودش هم اعتبارسنجی شده است: با افزودن یک فایل موقت حاوی
 `$this->no_such_method()` و `Settings::also_missing()` هر دو را گرفت و با
@@ -194,7 +198,10 @@ node tools/smoke-php.mjs --engine=wasm --php=8.3 tests/run.php --json --json-out
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/run.php --json --json-out=tests/results-php74.json
 node tools/smoke-php.mjs --engine=wasm --php=8.3 tests/integration.php --json --json-out=tests/integration-results.json
 node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/integration.php --json --json-out=tests/integration-results-php74.json
+node tools/smoke-php.mjs --engine=wasm --php=8.3 tests/admin-render.php --json --json-out=tests/admin-render-results.json
+node tools/smoke-php.mjs --engine=wasm --php=7.4 tests/admin-render.php --json --json-out=tests/admin-render-results-php74.json
 node tools/smoke-php.mjs --engine=wasm tests/load.php --json --json-out=tests/load-results.json
+python3 tests/test_release_email_audit.py
 
 # با PHP نصب‌شده:
 php tests/run.php
@@ -207,4 +214,7 @@ php tests/load.php
 `python3 tools/verify-release.py --build` بسته را می‌سازد و می‌سنجد:
 نبود `tests/`/`tools/`/`docs/dev/`/`.github/`، تطابق `Version:` با
 CHANGELOG، وجود `license.txt`، نبود `MyISAM`/`eval`/`base64_decode`،
-نبود نام‌های تجاری ممنوع، و نبود `$wpdb` بدون `prepare`.
+نبود نام‌های تجاری ممنوع، نبود `$wpdb` بدون `prepare` و بررسی نشانی ایمیل ثابت
+در فایل‌های متنی بسته. دامنه‌های نمونه و جای‌نگهدار استاندارد POT مستثنا هستند.
+این بررسی متنِ آشکار را می‌سنجد، نه تصاویر، دادهٔ کدگذاری‌شده یا همهٔ انواع
+اطلاعات شخصی؛ نبود داده در سایر قالب‌ها نیازمند بررسی جداگانه است.

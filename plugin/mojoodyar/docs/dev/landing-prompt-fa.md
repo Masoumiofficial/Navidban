@@ -85,7 +85,7 @@ FACTS (the only allowed quantitative claims)
 - Front CSS+JS weight: 13,577 bytes raw → 4,495 bytes gzipped (budget 12,288).
 - PHP: runs and is tested on 7.4.33 and 8.3.33 (range 7.4–8.3). No Composer, no npm, no build,
   no ionCube, no license server, no call to our servers.
-- Test suite: 411 unit + 444 integration + 173 admin-render assertions, green on
+- Test suite: 411 unit + 460 integration + 179 admin-render assertions, green on
   both PHP 7.4.33 and 8.3.33.
 - Restock of N units notifies at most N people — the oldest waiting first.
 - Two-layer stock detection: WooCommerce hooks + reconcile cron every 15 min,

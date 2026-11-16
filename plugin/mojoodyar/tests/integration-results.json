@@ -1,13 +1,17 @@
 {
     "plugin_version": "1.0.0",
     "php_version": "8.3.33",
-    "generated_at": "2026-11-16T07:44:32+00:00",
-    "assertions": 444,
+    "generated_at": "2026-11-16T08:19:49+00:00",
+    "assertions": 460,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
         "نصب و چیدمان پایگاه داده": {
             "assertions": 12,
+            "failures": 0
+        },
+        "فرستندهٔ مستقل هر سایت": {
+            "assertions": 16,
             "failures": 0
         },
         "بارگذاری شرطی": {

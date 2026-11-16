@@ -41,7 +41,32 @@ EXCLUDE_FILES = ("node_modules", "composer.json", "composer.lock", "package.json
 BANNED_BRANDS = ("خبرم کنید", "دیجی‌کالا", "دیجیکالا", "YITH", "yith")
 PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789")
 
-TEXT_SUFFIXES = (".php", ".css", ".js", ".md", ".txt", ".pot", ".json")
+TEXT_SUFFIXES = (".php", ".css", ".js", ".md", ".txt", ".pot", ".json", ".html", ".htm", ".xml", ".svg")
+EMAIL_LITERAL = re.compile(r"(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,63}(?![A-Za-z0-9-])")
+
+
+def unreviewed_email_literals(texts: dict[str, str]) -> list[str]:
+    """Locate non-example email literals without printing addresses in reports.
+
+    Example domains are reserved for documentation. The standard gettext
+    language-team placeholder is allowed only in the POT header. Any other
+    address needs explicit review before it is shipped. This is a literal text
+    scan, not an OCR, encoded-data or complete personal-data scanner.
+    """
+    findings = set()
+    for name, body in texts.items():
+        for match in EMAIL_LITERAL.finditer(body):
+            address = match.group(0).lower()
+            domain = address.rsplit("@", 1)[1]
+            reserved = domain in ("example.com", "example.org", "example.net") or any(
+                domain.endswith("." + suffix)
+                for suffix in ("example.com", "example.org", "example.net", "example", "test")
+            )
+            pot_placeholder = name == f"{PLUGIN_SLUG}/languages/mojoodyar.pot" and address == "ll@li.org"
+            if not reserved and not pot_placeholder:
+                line = body.count("\n", 0, match.start()) + 1
+                findings.add(f"{name}:{line}")
+    return sorted(findings)
 
 
 class Report:
@@ -231,6 +256,13 @@ def audit_zip(path: str, report: Report, root: str) -> None:
         brands = [word for word in BANNED_BRANDS if word in joined]
         report.check(not brands, "نام‌های ممنوعه در بسته نیست", ", ".join(brands))
 
+        email_literals = unreviewed_email_literals(texts)
+        report.check(
+            not email_literals,
+            "ایمیل ثابتِ بررسی‌نشده در متن بسته نیست",
+            ", ".join(email_literals[:5]),
+        )
+
         domain_wrong = []
         for name, body in texts.items():
             if not name.endswith(".php"):
@@ -264,7 +296,8 @@ def audit_zip(path: str, report: Report, root: str) -> None:
         )
 
         total = sum(len(body.encode("utf-8")) for body in texts.values())
-        digest = hashlib.sha256(open(path, "rb").read()).hexdigest()
+        with open(path, "rb") as handle:
+            digest = hashlib.sha256(handle.read()).hexdigest()
         report.info("اندازهٔ بسته", f"{os.path.getsize(path):,} بایت")
         report.info("SHA-256", digest)
 

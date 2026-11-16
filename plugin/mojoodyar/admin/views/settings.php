@@ -130,7 +130,7 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 					<th scope="row">ایمیل</th>
 					<td>
 						<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[email_enabled]" value="1" <?php checked( ! empty( $settings['email_enabled'] ) ); ?> /> فعال</label>
-						<p class="description">از تابع ایمیل وردپرس (wp_mail) استفاده می‌شود؛ هیچ سرویس بیرونی در میان نیست.</p>
+						<p class="description">برای ارسال از تابع ایمیل وردپرس (wp_mail) استفاده می‌شود؛ افزونهٔ SMTP فعال می‌تواند سرویس ارسال را تعیین کند.</p>
 					</td>
 				</tr>
 				<tr>
@@ -138,9 +138,10 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 					<td>
 						<input id="mjy-from-email" class="regular-text" dir="ltr" name="<?php echo esc_attr( Settings::OPTION ); ?>[from_email]" value="<?php echo esc_attr( (string) $settings['from_email'] ); ?>" placeholder="noreply@example.com" />
 						<p class="description">
-							بهتر است دامنهٔ همین نشانی با دامنهٔ سایت یکی باشد؛ فرستندهٔ ناهم‌خوان، رایج‌ترین
-							دلیل «ارسال شد ولی ایمیل نیامد» است. خالی بگذارید تا ایمیل مدیر سایت
-							(<code dir="ltr"><?php echo esc_html( (string) get_option( 'admin_email', '' ) ); ?></code>) استفاده شود.
+							اگر این کادر خالی باشد، ایمیل مدیریت همین سایت در «تنظیمات ← عمومی» وردپرس،
+							در صورت معتبر بودن به‌عنوان فرستنده به کار می‌رود؛ در غیر این صورت وردپرس فرستنده را تعیین می‌کند.
+							برای بهبود تحویل، از نشانی تأییدشدهٔ سرویس ایمیل خود استفاده کنید؛
+							تنظیمات یا افزونهٔ SMTP ممکن است فرستنده را تغییر دهد.
 						</p>
 					</td>
 				</tr>

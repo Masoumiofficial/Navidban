@@ -180,6 +180,72 @@ MjyInt::ok( ! empty( $GLOBALS['mjy_cron']['mojoodyar_process_queue'] ), 'cron ص
 MjyInt::ok( ! empty( $GLOBALS['mjy_cron']['mojoodyar_reconcile_stock'] ), 'cron پایش زمان‌بندی شد' );
 
 /* -------------------------------------------------------------------------
+ * Sender isolation across independent site configurations
+ * ---------------------------------------------------------------------- */
+MjyInt::group( 'فرستندهٔ مستقل هر سایت' );
+
+// Simulate two fresh site option sets and inspect the real channel's wp_mail
+// headers. All addresses below are reserved examples, not real inboxes.
+$original_settings = get_option( Settings::OPTION, array() );
+$original_admin    = get_option( 'admin_email', null );
+update_option( 'admin_email', 'owner-a@example.com' );
+delete_option( Settings::OPTION );
+Settings::flush_cache();
+Activator::activate( false );
+$stored_a = get_option( Settings::OPTION, array() );
+MjyInt::same( '', $stored_a['from_email'] ?? null, 'نصب تازهٔ سایت اول فرستنده را خالی ذخیره می‌کند' );
+MjyInt::same( 'owner-a@example.com', \Mojoodyar\Channels\EmailChannel::from_address(), 'فرستنده از ایمیل مدیر سایت اول گرفته می‌شود' );
+
+$sender_channel = new \Mojoodyar\Channels\EmailChannel();
+$GLOBALS['mjy_mails'] = array();
+MjyInt::same( true, $sender_channel->send( 'buyer@example.com', 'موضوع', 'متن' ), 'ارسال آزمایشی سایت اول به wp_mail سپرده می‌شود' );
+$headers_a = implode( "\n", (array) ( $GLOBALS['mjy_mails'][0]['headers'] ?? array() ) );
+MjyInt::ok( false !== strpos( $headers_a, '<owner-a@example.com>' ), 'هدر From سایت اول به مدیر همان سایت اشاره دارد' );
+MjyInt::ok( false !== strpos( $headers_a, 'Reply-To: owner-a@example.com' ), 'هدر Reply-To سایت اول با فرستنده یکی است' );
+MjyInt::same( 'buyer@example.com', $GLOBALS['mjy_mails'][0]['to'] ?? '', 'گیرنده همان مخاطب است، نه فرستنده' );
+
+// When the administrator changes their address, an empty setting follows it
+// without requiring a settings save or an in-request cache flush.
+update_option( 'admin_email', 'owner-b@example.com' );
+MjyInt::same( 'owner-b@example.com', \Mojoodyar\Channels\EmailChannel::from_address(), 'تغییر ایمیل مدیریت با فرستندهٔ خالی فوراً اعمال می‌شود' );
+
+// A fresh installation on another site starts with its own empty setting.
+delete_option( Settings::OPTION );
+Settings::flush_cache();
+Activator::activate( false );
+$stored_b = get_option( Settings::OPTION, array() );
+MjyInt::same( '', $stored_b['from_email'] ?? null, 'نصب تازهٔ سایت دوم نیز فرستنده را خالی ذخیره می‌کند' );
+MjyInt::same( 'owner-b@example.com', \Mojoodyar\Channels\EmailChannel::from_address(), 'فرستندهٔ سایت دوم از ایمیل مدیر سایت دوم است' );
+$GLOBALS['mjy_mails'] = array();
+$sender_channel->send( 'buyer@example.com', 'موضوع', 'متن' );
+$headers_b = implode( "\n", (array) ( $GLOBALS['mjy_mails'][0]['headers'] ?? array() ) );
+MjyInt::ok( false !== strpos( $headers_b, '<owner-b@example.com>' ), 'هدر From سایت دوم به مدیر همان سایت اشاره دارد' );
+MjyInt::ok( false === strpos( $headers_b, 'owner-a@example.com' ), 'نشانی سایت اول وارد هدر سایت دوم نمی‌شود' );
+
+Settings::update( array( 'from_email' => 'sender@shop.example' ) );
+MjyInt::same( 'sender@shop.example', \Mojoodyar\Channels\EmailChannel::from_address(), 'فرستندهٔ انتخابی بر ایمیل مدیریت اولویت دارد' );
+Activator::activate( false );
+Settings::flush_cache();
+MjyInt::same( 'sender@shop.example', Settings::get( 'from_email' ), 'فعال‌سازی مجدد فرستندهٔ قبلی را پاک نمی‌کند' );
+Settings::update( array( 'from_email' => '' ) );
+MjyInt::same( 'owner-b@example.com', \Mojoodyar\Channels\EmailChannel::from_address(), 'پاک‌کردن فرستنده به ایمیل مدیریت فعلی برمی‌گردد' );
+update_option( 'admin_email', 'invalid-address' );
+MjyInt::same( '', \Mojoodyar\Channels\EmailChannel::from_address(), 'ایمیل مدیریت نامعتبر به‌عنوان فرستنده استفاده نمی‌شود' );
+$GLOBALS['mjy_mails'] = array();
+$sender_channel->send( 'buyer@example.com', 'موضوع', 'متن' );
+$headers_invalid = implode( "\n", (array) ( $GLOBALS['mjy_mails'][0]['headers'] ?? array() ) );
+MjyInt::ok( false === strpos( $headers_invalid, 'From:' ) && false === strpos( $headers_invalid, 'Reply-To:' ), 'در نبود نشانی معتبر، تعیین فرستنده به وردپرس سپرده می‌شود' );
+
+update_option( Settings::OPTION, $original_settings );
+if ( null === $original_admin ) {
+	delete_option( 'admin_email' );
+} else {
+	update_option( 'admin_email', $original_admin );
+}
+Settings::flush_cache();
+$GLOBALS['mjy_mails'] = array();
+
+/* -------------------------------------------------------------------------
  * Conditional asset loading
  * ---------------------------------------------------------------------- */
 MjyInt::group( 'بارگذاری شرطی' );

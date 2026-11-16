@@ -144,12 +144,13 @@ Measured (may be stated as numbers):
   • Out-of-stock product page: 2 assets (1 CSS + 1 JS); form HTML 1,984 bytes
     (2,236 bytes on a variable product).
   • Front CSS+JS: 13,577 bytes raw → 4,495 bytes gzipped (budget 12,288).
-  • Test suite: 411 unit + 444 integration + 173 admin-render assertions,
+  • Test suite: 411 unit + 460 integration + 179 admin-render assertions,
     0 failures, on PHP 7.4.33 and PHP 8.3.33.
-  • Release gate: 28 automated checks.
-  • Release archive: 81 files, 301,599 bytes.
-  • Runs on PHP 7.4–8.3 (tested on 7.4.33 and 8.3.33), WordPress 6.4+,
-    WooCommerce 9.0+, declared tested up to WC 10.4.
+  • Release gate: 29 automated checks.
+  • Release archive: 81 files, 302,912 bytes.
+  • Minimum requirements: PHP 7.4, WordPress 6.4 and WooCommerce 9.0.
+    Only PHP 7.4.33 and 8.3.33 were exercised in the test harness; actual
+    WordPress/WooCommerce installs and intermediary PHP versions were not tested.
   • Four SMS adapters: Melipayamak (plain + pattern/bodyId), Kavenegar,
     IPPanel, one generic REST adapter. Messages go from the shop to the
     customer's own gateway; there is no server in the middle.
@@ -541,8 +542,8 @@ If a fix would require a claim we cannot measure, delete the claim instead.
 |---|---|
 | ۰ فایل / ۰ کوئری خارج از صفحهٔ هدف · ۱٬۹۸۴ و ۲٬۲۳۶ بایت فرم | `tests/queries.php` |
 | ۱۳٬۵۷۷ خام / ۴٬۴۹۵ فشرده · بودجه ۱۲٬۲۸۸ | `tools/build-assets.sh` → `docs/PERFORMANCE.md` |
-| ۴۱۱ / ۴۴۴ / ۱۷۳ assertion | `tests/*.json` → `docs/TEST-REPORT.md` |
-| ۲۸ بررسی انتشار · ۸۱ فایل · ۳۰۱٬۵۹۹ بایت | `tools/verify-release.py` |
+| ۴۱۱ / ۴۶۰ / ۱۷۹ assertion | `tests/*.json` → `docs/TEST-REPORT.md` |
+| ۲۹ بررسی انتشار · ۸۱ فایل · ۳۰۲٬۹۱۲ بایت | `tools/verify-release.py` |
 | ۲۵/۲۸/۲۲/۵۳ کاراکتر نشانی | `docs/TROUBLESHOOTING.md` |
 | ۱۵ دقیقه پایش · ۵ دقیقه صف · ۱۵/۶۰/۳۶۰ عقب‌نشینی · تلاش ۱–۵ | `docs/SCHEDULER-POLICY.md` |
 
