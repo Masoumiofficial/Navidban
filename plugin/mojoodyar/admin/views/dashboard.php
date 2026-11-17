@@ -30,11 +30,11 @@ $mjy_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $
 
 	<div class="mjy-grid">
 		<div class="mjy-card">
-			<span class="mjy-card__label">در انتظار تأیید</span>
+			<span class="mjy-card__label">در انتظار تآیید</span>
 			<strong class="mjy-card__value"><?php echo esc_html( Persian::number( $counts['pending'] ) ); ?></strong>
 		</div>
 		<div class="mjy-card">
-			<span class="mjy-card__label">تأییدشده و در صف</span>
+			<span class="mjy-card__label">تآییدشده و در صف</span>
 			<strong class="mjy-card__value"><?php echo esc_html( Persian::number( $counts['confirmed'] ) ); ?></strong>
 		</div>
 		<div class="mjy-card">
@@ -59,7 +59,7 @@ $mjy_healthy = ! in_array( 'missing', $tables, true ) && ! in_array( 'MyISAM', $
 				<tr><th>در حال ارسال</th><td><?php echo esc_html( Persian::number( $queue['processing'] ) ); ?></td></tr>
 				<tr><th>ارسال‌شده</th><td><?php echo esc_html( Persian::number( $queue['sent'] ) ); ?></td></tr>
 				<tr><th>ناموفق (پس از ۳ تلاش)</th><td><?php echo esc_html( Persian::number( $queue['failed'] ) ); ?></td></tr>
-				<tr><th>ردشده (لغو/تأییدنشده)</th><td><?php echo esc_html( Persian::number( $queue['skipped'] ) ); ?></td></tr>
+				<tr><th>ردشده (لغو/تآییدنشده)</th><td><?php echo esc_html( Persian::number( $queue['skipped'] ) ); ?></td></tr>
 				<?php if ( ! empty( $queue['blocked'] ) ) : ?>
 					<tr>
 						<th>متوقف‌شده (ایراد تنظیمات)</th>

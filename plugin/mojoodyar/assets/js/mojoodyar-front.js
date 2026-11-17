@@ -123,7 +123,7 @@
 		}
 
 		if (payload.consent === 0 && root.getAttribute('data-consent') === '1') {
-			setMessage(messageNode, (data.strings && data.strings.consent) || 'برای ادامه باید رضایت خود را تأیید کنید.', 'error');
+			setMessage(messageNode, (data.strings && data.strings.consent) || 'برای ادامه باید رضایت خود را تآیید کنید.', 'error');
 			return;
 		}
 

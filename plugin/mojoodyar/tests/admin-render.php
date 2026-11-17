@@ -408,7 +408,7 @@ MjyAdmin::ok( false !== strpos( $settings_html, 'نشانی کوتاه محصو�
 MjyAdmin::ok( false !== strpos( $settings_html, 'value="site"' ), 'گزینهٔ «نشانی اصلی سایت» هست' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'به صفحهٔ اصلی می‌برد نه به همان محصول' ), 'هزینهٔ انتخاب نشانی سایت توضیح داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, '?p=12' ), 'طول واقعی نشانی کوتاه در صفحه نوشته می‌شود' );
-MjyAdmin::ok( false !== strpos( $settings_html, 'mjy-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تأیید می‌گیرد' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'mjy-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تآیید می‌گیرد' );
 MjyAdmin::ok( false === strpos( $settings_html, 'mjy-pattern-findings' ), 'برای الگوی پیش‌فرض هیچ ایرادی رندر نمی‌شود' );
 
 // ---------------------------------------------------------------- name field
@@ -562,7 +562,7 @@ $diag_html            = mjy_render( array( $admin, 'render_tools' ) );
 unset( $_GET['diag_product'] );
 
 MjyAdmin::ok( false !== strpos( $diag_html, 'نتیجه برای محصول' ), 'پنل تشخیص برای شناسهٔ داده‌شده رندر می‌شود' );
-MjyAdmin::ok( false !== strpos( $diag_html, 'تأییدشده' ), 'تعداد تأییدشده نمایش داده می‌شود' );
+MjyAdmin::ok( false !== strpos( $diag_html, 'تآییدشده' ), 'تعداد تآییدشده نمایش داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $diag_html, 'snapshot' ) || false !== strpos( $diag_html, 'تصویر موجودی' ), 'وضعیت تصویر موجودی نمایش داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $diag_html, 'صف ارسال' ), 'وضعیت صف نمایش داده می‌شود' );
 
@@ -571,7 +571,7 @@ $_GET['diag_product'] = 424242;
 $empty_html           = mjy_render( array( $admin, 'render_tools' ) );
 unset( $_GET['diag_product'] );
 
-MjyAdmin::ok( false !== strpos( $empty_html, 'مشترک واجد شرایطی یافت نشد' ), 'محصول بدون مشترک تأییدشده، وضعیت را صریح می‌گوید' );
+MjyAdmin::ok( false !== strpos( $empty_html, 'مشترک واجد شرایطی یافت نشد' ), 'محصول بدون مشترک تآییدشده، وضعیت را صریح می‌گوید' );
 MjyAdmin::ok( false !== strpos( $empty_html, 'به‌تنهایی علت قطعی نیست' ), 'پنل تشخیص از ادعای علت قطعی پرهیز می‌کند' );
 
 // Hostile input: a non-numeric id must not reach a query or the output.

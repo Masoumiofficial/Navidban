@@ -29,8 +29,8 @@ $mjy_peak_s = (int) $report['peak']['signups'];
 $mjy_peak_n = (int) $report['peak']['notified'];
 
 $mjy_status_labels = array(
-	'pending'      => 'در انتظار تأیید',
-	'confirmed'    => 'تأییدشده',
+	'pending'      => 'در انتظار تآیید',
+	'confirmed'    => 'تآییدشده',
 	'notified'     => 'اعلان‌شده',
 	'unsubscribed' => 'لغو اشتراک',
 	'expired'      => 'منقضی',
@@ -86,7 +86,7 @@ $mjy_day_label = static function ( $key ) {
 			<span class="mjy-card__hint">میانگین روزانه <?php echo esc_html( Persian::digits( number_format( (float) $mjy_sum['per_day'], 1, '.', '' ) ) ); ?></span>
 		</div>
 		<div class="mjy-card">
-			<span class="mjy-card__label">تأییدشده یا اعلان‌شده</span>
+			<span class="mjy-card__label">تآییدشده یا اعلان‌شده</span>
 			<strong class="mjy-card__value"><?php echo esc_html( Persian::number( $mjy_sum['confirm_rate'] ) ); ?>٪</strong>
 			<span class="mjy-card__hint">از <?php echo esc_html( Persian::number( $mjy_sum['total'] ) ); ?> ثبت این بازه</span>
 		</div>

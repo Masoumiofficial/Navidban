@@ -140,7 +140,7 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 						<p class="description">
 							اگر این کادر خالی باشد، ایمیل مدیریت همین سایت در «تنظیمات ← عمومی» وردپرس،
 							در صورت معتبر بودن به‌عنوان فرستنده به کار می‌رود؛ در غیر این صورت وردپرس فرستنده را تعیین می‌کند.
-							برای بهبود تحویل، از نشانی تأییدشدهٔ سرویس ایمیل خود استفاده کنید؛
+							برای بهبود تحویل، از نشانی تآییدشدهٔ سرویس ایمیل خود استفاده کنید؛
 							تنظیمات یا افزونهٔ SMTP ممکن است فرستنده را تغییر دهد.
 						</p>
 					</td>
@@ -210,10 +210,10 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 
 		</div>
 		<div class="mjy-panel">
-			<h2>رضایت و تأیید دومرحله‌ای</h2>
+			<h2>رضایت و تآیید دومرحله‌ای</h2>
 			<p class="description" style="max-width:640px;">
-				پیش‌فرض تازه: تأیید دومرحله‌ای <strong>خاموش</strong> است؛ مشتری یک‌بار ثبت می‌کند و اعلان موجودی مستقیم می‌رسد.
-				اگر روی این سایت ثبت‌نام الکی زیاد شده، روشنش کنید. هزینه‌اش این است که تا وقتی مشتری پیوند تأیید را باز نکند،
+				پیش‌فرض تازه: تآیید دومرحله‌ای <strong>خاموش</strong> است؛ مشتری یک‌بار ثبت می‌کند و اعلان موجودی مستقیم می‌رسد.
+				اگر روی این سایت ثبت‌نام الکی زیاد شده، روشنش کنید. هزینه‌اش این است که تا وقتی مشتری پیوند تآیید را باز نکند،
 				اعلانی برایش نمی‌رود؛ بعضی مشتری‌ها این را «پیام نیامد» برداشت می‌کنند.
 			</p>
 			<table class="form-table" role="presentation">
@@ -235,17 +235,17 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row">تأیید دومرحله‌ای</th>
+					<th scope="row">تآیید دومرحله‌ای</th>
 					<td>
 						<label><input type="checkbox" name="<?php echo esc_attr( Settings::OPTION ); ?>[double_opt_in]" value="1" <?php checked( ! empty( $settings['double_opt_in'] ) ); ?> /> فعال</label>
 						<p class="description">
 							خاموش (پیش‌فرض): ثبت یک‌مرحله‌ای است و اعلان موجودی مستقیم ارسال می‌شود — کم‌ترین اصطکاک برای مشتری.
-							روشن: تا وقتی مشتری پیوند تأیید را باز نکند، هیچ اعلانی برایش نمی‌رود؛ جلوی ثبت‌نام الکی را می‌گیرد.
+							روشن: تا وقتی مشتری پیوند تآیید را باز نکند، هیچ اعلانی برایش نمی‌رود؛ جلوی ثبت‌نام الکی را می‌گیرد.
 						</p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="mjy-ttl">اعتبار پیوند تأیید (ساعت)</label></th>
+					<th scope="row"><label for="mjy-ttl">اعتبار پیوند تآیید (ساعت)</label></th>
 					<td><input id="mjy-ttl" type="number" min="1" max="168" name="<?php echo esc_attr( Settings::OPTION ); ?>[confirm_ttl_hours]" value="<?php echo esc_attr( (string) $settings['confirm_ttl_hours'] ); ?>" /></td>
 				</tr>
 			</table>
@@ -350,11 +350,11 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 			<h3>متن الگو (برای خطوط خدماتی)</h3>
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row">متن تأییدشدهٔ الگو</th>
+					<th scope="row">متن تآییدشدهٔ الگو</th>
 					<td>
 						<textarea id="mjy-sms-pattern" class="large-text" rows="3" dir="rtl" name="<?php echo esc_attr( Settings::OPTION ); ?>[sms_pattern_template]" placeholder="<?php echo esc_attr( \Mojoodyar\Logic\SmsPattern::default_template( (string) $settings['site_name'] ) ); ?>"><?php echo esc_textarea( $mjy_pattern_stored ); ?></textarea>
 						<p class="description">
-							همان متنی را بگذارید که در پنل ملی‌پیامک تأیید شده است. اگر خالی بماند، متن پیشنهادی پایین
+							همان متنی را بگذارید که در پنل ملی‌پیامک تآیید شده است. اگر خالی بماند، متن پیشنهادی پایین
 							استفاده می‌شود. جای هر مقدار متغیر، <code>{0}</code>، <code>{1}</code> … بگذارید —
 							نه نام متغیر.
 						</p>
@@ -437,7 +437,7 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 						<div class="mjy-pattern-help">
 							<p>
 								<strong>۱.</strong> در پنل ملی‌پیامک → «ارسال الگو» → «متن‌های من» یک متن بسازید و همان را
-								تأیید بگیرید. متن نهایی همان چیزی است که مشتری می‌بیند؛ کد افزونه فقط مقدارها را پر می‌کند.
+								تآیید بگیرید. متن نهایی همان چیزی است که مشتری می‌بیند؛ کد افزونه فقط مقدارها را پر می‌کند.
 							</p>
 							<p>
 								<strong>۲.</strong> برای هر مقداری که می‌خواهید در پیام بیاید، یک متغیر بگذارید: <code>{0}</code>، <code>{1}</code>، <code>{2}</code> …
@@ -449,7 +449,7 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 							</p>
 							<p>
 								<strong>۴.</strong> الگوهایی مثل «<code>{0} باتشکر</code>» یا «<code>{0} گوگل</code>»
-								تأیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
+								تآیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
 							<p>
 								<strong>۴.۵.</strong> اگر <code>{2}</code> (نشانی محصول) در الگوست، حتماً «نشانی کوتاه» را
 							روشن بگذارید و اگر باز هم از سقف بیشتر بود، یا دامنهٔ کوتاه بگذارید یا <code>{2}</code> را
@@ -469,7 +469,7 @@ $mjy_secret = function ( $key ) use ( $settings ) {
 					<td>
 						<code class="mjy-pattern-sample" dir="rtl"><?php echo esc_html( \Mojoodyar\Logic\SmsPattern::default_template( (string) $settings['site_name'] ) ); ?></code>
 						<p class="description">
-							این متن را عیناً در پنل درگاه ثبت کنید (نام فروشگاه خودتان در انتهایش هست)، تأیید بگیرید و
+							این متن را عیناً در پنل درگاه ثبت کنید (نام فروشگاه خودتان در انتهایش هست)، تآیید بگیرید و
 							شناسهٔ آن را در فیلد <code>bodyId</code> بالا بگذارید.
 						</p>
 						<p class="description">

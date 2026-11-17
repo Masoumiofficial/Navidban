@@ -1,7 +1,7 @@
 {
     "plugin_version": "1.0.0",
-    "php_version": "8.3.36",
-    "generated_at": "2026-11-16T10:36:07+00:00",
+    "php_version": "8.3.33",
+    "generated_at": "2026-11-17T13:14:57+00:00",
     "assertions": 625,
     "failures": 0,
     "pass_rate": 100,
@@ -42,7 +42,7 @@
             "assertions": 10,
             "failures": 0
         },
-        "تأیید و لغو اشتراک": {
+        "تآیید و لغو اشتراک": {
             "assertions": 7,
             "failures": 0
         },
@@ -114,11 +114,11 @@
             "assertions": 22,
             "failures": 0
         },
-        "تأیید دومرحله‌ای در ثبت دوباره": {
+        "تآیید دومرحله‌ای در ثبت دوباره": {
             "assertions": 17,
             "failures": 0
         },
-        "بازگشت امن خطای صف و تأیید منقضی": {
+        "بازگشت امن خطای صف و تآیید منقضی": {
             "assertions": 20,
             "failures": 0
         },

@@ -12,7 +12,7 @@
 | ستون | نوع | توضیح |
 |---|---|---|
 | `id` | BIGINT UNSIGNED AI | کلید اصلی |
-| `token` | CHAR(64) | توکن تأیید/لغو؛ یکتا |
+| `token` | CHAR(64) | توکن تآیید/لغو؛ یکتا |
 | `product_id` | BIGINT UNSIGNED | محصول |
 | `variation_id` | BIGINT UNSIGNED (0) | تنوع، یا ۰ برای محصول ساده |
 | `event_type` | VARCHAR(32) | پیش‌فرض `restock` (باز برای رویدادهای آینده) |
@@ -24,7 +24,7 @@
 | `status` | VARCHAR(16) | `pending` / `confirmed` / `unsubscribed` / `notified` / `expired` |
 | `registration_cycle` | BIGINT UNSIGNED (0) | شمارهٔ دورهٔ ثبت؛ در ثبت مجدد ردیف غیرفعال افزایش می‌یابد |
 | `consent_at` | DATETIME NULL | زمان رضایت |
-| `confirmed_at` | DATETIME NULL | زمان تأیید دومرحله‌ای |
+| `confirmed_at` | DATETIME NULL | زمان تآیید دومرحله‌ای |
 | `notified_at` | DATETIME NULL | آخرین اعلان |
 | `confirm_expires_at` | DATETIME NULL | انقضای توکن (پیش‌فرض +۴۸ ساعت) |
 | `stock_at_signup` | INT | موجودی لحظهٔ ثبت (۰ = ناموجود) |
@@ -44,7 +44,7 @@
 - `UNIQUE uniq_subscriber (product_id, variation_id, email, phone)` — یک نفر
   برای یک محصول/تنوع دو بار ثبت نمی‌شود. چون NULL در MySQL یکتا نیست،
   ستون‌های ایمیل/موبایل `NOT NULL DEFAULT ''` هستند.
-- `KEY idx_status_product (status, product_id, variation_id)` — کوئری اصلی
+- `KEY idx_status_product (status, product_id, variation_id)` — کویری اصلی
   fair sending.
 - `KEY idx_status_created (status, created_at)` — پیمایش «قدیمی‌تر اول».
 - `KEY idx_phone`, `KEY idx_email`, `KEY idx_name` — جست‌وجوی ادمین (ایمیل،

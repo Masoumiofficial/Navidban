@@ -103,7 +103,7 @@ final class Notifier {
 		$context         = self::build_context( $waitlist, $is_confirmation );
 
 		if ( $is_confirmation ) {
-			$subject = 'تأیید درخواست اعلان — ' . $context['site_name'];
+			$subject = 'تآیید درخواست اعلان — ' . $context['site_name'];
 			$body    = "سلام،\n\nبرای تکمیل ثبت درخواست اعلان «{$context['product_name']}» روی پیوند زیر بزنید:\n{$context['confirm_url']}\n\nاین پیوند تا {$context['ttl_hours']} ساعت معتبر است.";
 			if ( 'sms' === $channel ) {
 				$body = "تایید اعلان {$context['product_name']}: {$context['confirm_url']}";

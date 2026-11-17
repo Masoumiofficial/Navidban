@@ -479,12 +479,12 @@ final class Admin {
 		$rows = array(
 			array( 'بازه', 'روز', (string) $range ),
 			array( 'ثبت‌ها', 'ثبت تازه', (string) $report['summary']['total'] ),
-			array( 'ثبت‌ها', 'در انتظار تأیید', (string) $report['summary']['pending'] ),
-			array( 'ثبت‌ها', 'تأییدشده', (string) $report['summary']['confirmed'] ),
+			array( 'ثبت‌ها', 'در انتظار تآیید', (string) $report['summary']['pending'] ),
+			array( 'ثبت‌ها', 'تآییدشده', (string) $report['summary']['confirmed'] ),
 			array( 'ثبت‌ها', 'اعلان‌شده', (string) $report['summary']['notified'] ),
 			array( 'ثبت‌ها', 'لغو اشتراک', (string) $report['summary']['unsubscribed'] ),
 			array( 'ثبت‌ها', 'منقضی', (string) $report['summary']['expired'] ),
-			array( 'ثبت‌ها', 'درصد تأیید', (string) $report['summary']['confirm_rate'] ),
+			array( 'ثبت‌ها', 'درصد تآیید', (string) $report['summary']['confirm_rate'] ),
 			array( 'صف', 'ارسال‌شده در بازه', (string) $report['summary']['sent'] ),
 			array( 'صف', 'ناموفق در بازه', (string) $report['summary']['failed'] ),
 			array( 'کانال', 'پیامک', (string) ( isset( $report['channels']['sms'] ) ? $report['channels']['sms'] : 0 ) ),
@@ -901,7 +901,7 @@ final class Admin {
 				'تاریخ تماس (شمسی)',
 				'تاریخ ثبت (میلادی)',
 				'تاریخ ثبت (شمسی)',
-				'تاریخ تأیید (میلادی)',
+				'تاریخ تآیید (میلادی)',
 				'تاریخ اعلان (میلادی)',
 			)
 		);

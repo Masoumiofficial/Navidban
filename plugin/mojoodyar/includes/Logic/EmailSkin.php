@@ -61,8 +61,8 @@ final class EmailSkin {
 		$unsub    = isset( $context['unsubscribe_url'] ) ? (string) $context['unsubscribe_url'] : '';
 		$price    = self::text( isset( $context['price'] ) ? $context['price'] : '' );
 		$confirm  = ! empty( $context['is_confirmation'] ) && '0' !== (string) $context['is_confirmation'];
-		$eyebrow  = $confirm ? 'تأیید اشتراک' : 'بازگشت موجودی';
-		$cta_text = $confirm ? 'تأیید اشتراک' : 'مشاهدهٔ محصول و خرید';
+		$eyebrow  = $confirm ? 'تآیید اشتراک' : 'بازگشت موجودی';
+		$cta_text = $confirm ? 'تآیید اشتراک' : 'مشاهدهٔ محصول و خرید';
 		$cta_url  = $confirm && '' !== (string) self::raw( $context, 'confirm_url' ) ? (string) self::raw( $context, 'confirm_url' ) : $url;
 
 		$paragraphs = self::paragraphs( $body );

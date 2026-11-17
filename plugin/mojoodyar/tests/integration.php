@@ -444,7 +444,7 @@ $show_invisible = function ( $hide, $parent_id, $variation ) {
 };
 add_filter( 'woocommerce_hide_invisible_variations', $show_invisible, 10, 3 );
 $filter_html = ( new Frontend() )->shortcode( array( 'product_id' => '6100' ) );
-MjyInt::ok( false !== strpos( $filter_html, 'value="6105"' ), 'فیلتر صریح ووکامرس برای تنوع نامرئی رعایت می‌شود' );
+MjyInt::ok( false !== strpos( $filter_html, 'value="6105"' ), 'فیلتر صریح ووکامرس برای تنوع نامریی رعایت می‌شود' );
 MjyInt::ok( false === strpos( $filter_html, 'value="6103"' ) && false === strpos( $filter_html, 'value="6104"' ), 'فیلتر نمایش، تنوع غیرفعال یا خصوصی را وارد نمی‌کند' );
 remove_filter( 'woocommerce_hide_invisible_variations', $show_invisible, 10 );
 
@@ -453,7 +453,7 @@ $GLOBALS['mjy_enqueued'] = array();
 $hidden_frontend = new Frontend();
 $hidden_html = $hidden_frontend->shortcode( array( 'product_id' => '6100' ) );
 MjyInt::ok( false !== strpos( $hidden_html, 'value="6102"' ), 'تنوع ناموجود در انتخاب‌گر مستقل انتظار هست، حتی وقتی در گزینه‌های خرید پنهان است' );
-MjyInt::ok( false === strpos( $hidden_html, 'value="6103"' ) && false === strpos( $hidden_html, 'value="6104"' ) && false === strpos( $hidden_html, 'value="6105"' ), 'تنوع غیرفعال، خصوصی یا نامرئی در انتخاب‌گر انتظار عرضه نمی‌شود' );
+MjyInt::ok( false === strpos( $hidden_html, 'value="6103"' ) && false === strpos( $hidden_html, 'value="6104"' ) && false === strpos( $hidden_html, 'value="6105"' ), 'تنوع غیرفعال، خصوصی یا نامریی در انتخاب‌گر انتظار عرضه نمی‌شود' );
 $hidden_frontend->maybe_enqueue();
 MjyInt::same( 1, count( $GLOBALS['mjy_enqueued']['style'] ?? array() ), 'برای انتخاب‌گر انتظار استایل صف می‌شود' );
 MjyInt::same( 1, count( $GLOBALS['mjy_enqueued']['script'] ?? array() ), 'برای انتخاب‌گر انتظار اسکریپت صف می‌شود' );
@@ -493,18 +493,18 @@ $result = Subscribe::handle(
 	)
 );
 MjyInt::ok( $result['ok'], 'ثبت ایمیل معتبر' );
-MjyInt::same( 'confirmation_sent', $result['code'], 'تأیید دومرحله‌ای فعال است' );
-MjyInt::ok( false !== strpos( $result['message'], 'صف' ), 'پاسخ تأیید، صف‌شدن را از تحویل جدا می‌کند' );
+MjyInt::same( 'confirmation_sent', $result['code'], 'تآیید دومرحله‌ای فعال است' );
+MjyInt::ok( false !== strpos( $result['message'], 'صف' ), 'پاسخ تآیید، صف‌شدن را از تحویل جدا می‌کند' );
 
 $row = WaitlistRepository::get( (int) $result['data']['id'] );
 MjyInt::same( 'pending', $row['status'], 'وضعیت اولیه pending است' );
 MjyInt::same( 'maryam@example.com', $row['email'], 'ایمیل نرمال‌شده ذخیره شد' );
 MjyInt::ok( 64 === strlen( $row['token'] ), 'توکن ۶۴ کاراکتری' );
 MjyInt::ok( '' !== $row['ip_hash'] && false === strpos( $row['ip_hash'], '127.0.0.1' ), 'IP خام ذخیره نشده، فقط هش' );
-MjyInt::ok( ! empty( $row['confirm_expires_at'] ), 'انقضای پیوند تأیید ثبت شد' );
+MjyInt::ok( ! empty( $row['confirm_expires_at'] ), 'انقضای پیوند تآیید ثبت شد' );
 
 $queue_rows = $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() );
-MjyInt::same( 1, count( $queue_rows ), 'یک پیام تأیید در صف قرار گرفت' );
+MjyInt::same( 1, count( $queue_rows ), 'یک پیام تآیید در صف قرار گرفت' );
 MjyInt::same( 'confirm', $queue_rows[0]['event_key'], 'نوع پیام صف: confirm' );
 
 // Duplicate.
@@ -518,9 +518,9 @@ $duplicate = Subscribe::handle(
 );
 MjyInt::ok( $duplicate['ok'], 'ثبت تکراری خطای سرور نمی‌دهد' );
 MjyInt::same( 'already_subscribed', $duplicate['code'], 'ثبت تکراری تشخیص داده شد' );
-MjyInt::same( true, $duplicate['data']['needs_confirm'], 'ثبت تکراری در انتظار تأیید به‌اشتباه تأییدشده گزارش نمی‌شود' );
+MjyInt::same( true, $duplicate['data']['needs_confirm'], 'ثبت تکراری در انتظار تآیید به‌اشتباه تآییدشده گزارش نمی‌شود' );
 MjyInt::same( 1, count( $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . WaitlistRepository::table() ) ), 'ردیف تکراری ساخته نشد' );
-MjyInt::same( 1, count( $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() ) ), 'ثبت تکراریِ فعال پیام تأیید دیگری نمی‌سازد' );
+MjyInt::same( 1, count( $GLOBALS['wpdb']->get_results( 'SELECT * FROM ' . Queue::table() ) ), 'ثبت تکراریِ فعال پیام تآیید دیگری نمی‌سازد' );
 
 // Invalid email.
 mjy_reset_rate_limit();
@@ -596,7 +596,7 @@ $invalid_variants = array(
 	array( 42, 45, 'product_available', 'تنوعی که موجود شده' ),
 	array( 42, 46, 'invalid_variation', 'تنوع غیرفعال' ),
 	array( 42, 47, 'invalid_variation', 'تنوع خصوصی' ),
-	array( 42, 48, 'invalid_variation', 'تنوع نامرئی طبق تنظیم پیش‌فرض ووکامرس' ),
+	array( 42, 48, 'invalid_variation', 'تنوع نامریی طبق تنظیم پیش‌فرض ووکامرس' ),
 	array( 42, 49, 'invalid_variation', 'تنوع حذف‌شده از فرزندان محصول' ),
 	array( 42, 9999, 'invalid_variation', 'تنوع ناموجود در پایگاه داده' ),
 	array( 40, 43, 'invalid_variation', 'شناسهٔ تنوع روی محصول ساده' ),
@@ -683,7 +683,7 @@ Settings::flush_cache();
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . WaitlistRepository::table() );
 
-MjyInt::ok( false === Settings::enabled( 'double_opt_in' ), 'پیش‌فرض: تأیید دومرحله‌ای خاموش است' );
+MjyInt::ok( false === Settings::enabled( 'double_opt_in' ), 'پیش‌فرض: تآیید دومرحله‌ای خاموش است' );
 MjyInt::same( 'sms_first', (string) Settings::get( 'channel_choice', '' ), 'پیش‌فرض: پیامک اولویت اول است' );
 
 mjy_reset_rate_limit();
@@ -698,13 +698,13 @@ $one_step = Subscribe::handle(
 
 MjyInt::ok( $one_step['ok'], 'ثبت یک‌مرحله‌ای موفق است' );
 MjyInt::same( 'subscribed', $one_step['code'], 'پاسخ subscribed است، نه confirmation_sent' );
-MjyInt::same( false, $one_step['data']['needs_confirm'], 'نیاز به تأیید گزارش نمی‌شود' );
+MjyInt::same( false, $one_step['data']['needs_confirm'], 'نیاز به تآیید گزارش نمی‌شود' );
 
 $one_row = WaitlistRepository::get( (int) $one_step['data']['id'] );
-MjyInt::same( 'confirmed', $one_row['status'], 'ردیف مستقیماً تأییدشده است' );
-MjyInt::ok( ! empty( $one_row['confirmed_at'] ), 'زمان تأیید ثبت شده است' );
-MjyInt::ok( empty( $one_row['confirm_expires_at'] ), 'هیچ انقضای تأییدی ساخته نشد' );
-MjyInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queue::table() ), 'هیچ پیام تأییدی در صف نیست' );
+MjyInt::same( 'confirmed', $one_row['status'], 'ردیف مستقیماً تآییدشده است' );
+MjyInt::ok( ! empty( $one_row['confirmed_at'] ), 'زمان تآیید ثبت شده است' );
+MjyInt::ok( empty( $one_row['confirm_expires_at'] ), 'هیچ انقضای تآییدی ساخته نشد' );
+MjyInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queue::table() ), 'هیچ پیام تآییدی در صف نیست' );
 
 // Without the click, the subscriber is already eligible for a restock message.
 mjy_reset_rate_limit();
@@ -716,9 +716,9 @@ $one_restock = Subscribe::handle(
 		'name'       => 'مریم احمدی',
 	)
 );
-MjyInt::same( 'confirmed', WaitlistRepository::get( (int) $one_restock['data']['id'] )['status'], 'مشترک دوم هم مستقیماً تأیید شد' );
+MjyInt::same( 'confirmed', WaitlistRepository::get( (int) $one_restock['data']['id'] )['status'], 'مشترک دوم هم مستقیماً تآیید شد' );
 
-MjyInt::group( 'تأیید و لغو اشتراک' );
+MjyInt::group( 'تآیید و لغو اشتراک' );
 
 // Back to the opt-in path for the token tests.
 $GLOBALS['mjy_options']['mojoodyar_settings'] = array_merge(
@@ -740,8 +740,8 @@ $fresh = WaitlistRepository::create(
 );
 $fresh_row = WaitlistRepository::get( (int) $fresh['id'] );
 
-MjyInt::same( 'confirmed', WaitlistRepository::confirm_by_token( (string) $fresh_row['token'] ), 'تأیید با توکن' );
-MjyInt::same( 'already', WaitlistRepository::confirm_by_token( (string) $fresh_row['token'] ), 'تأیید دوباره، بدون تغییر' );
+MjyInt::same( 'confirmed', WaitlistRepository::confirm_by_token( (string) $fresh_row['token'] ), 'تآیید با توکن' );
+MjyInt::same( 'already', WaitlistRepository::confirm_by_token( (string) $fresh_row['token'] ), 'تآیید دوباره، بدون تغییر' );
 MjyInt::same( 'invalid', WaitlistRepository::confirm_by_token( 'not-a-token' ), 'توکن نامعتبر رد می‌شود' );
 MjyInt::same( 'invalid', WaitlistRepository::confirm_by_token( str_repeat( 'z', 64 ) ), 'توکن با قالب درست ولی ناشناس' );
 
@@ -883,7 +883,7 @@ MjyInt::ok( false !== strpos( $form_both, 'type="radio"' ), 'حالت both: ان
 
 // The one-step default applies here too: nothing about the form asks for a
 // confirmation click.
-MjyInt::ok( false === strpos( $form_both, 'confirm' ), 'فرم هیچ اشاره‌ای به مرحلهٔ تأیید ندارد' );
+MjyInt::ok( false === strpos( $form_both, 'confirm' ), 'فرم هیچ اشاره‌ای به مرحلهٔ تآیید ندارد' );
 
 MjyInt::group( 'موتور موجودی' );
 MjyInt::group( 'موتور موجودی' );
@@ -911,7 +911,7 @@ for ( $i = 1; $i <= 200; $i++ ) {
 	WaitlistRepository::set_status( (int) $created['id'], 'confirmed' );
 }
 
-MjyInt::same( 200, WaitlistRepository::count_confirmed( 100, 0 ), '۲۰۰ مشترک تأییدشده ثبت شد' );
+MjyInt::same( 200, WaitlistRepository::count_confirmed( 100, 0 ), '۲۰۰ مشترک تآییدشده ثبت شد' );
 
 // First sighting of an unknown product must not announce.
 mjy_product( 200, array( 'status' => 'instock', 'qty' => 9 ) );
@@ -1140,8 +1140,8 @@ $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
 Queue::enqueue( (int) $pending['id'], 'email', 'restock:y' );
 Queue::process( 5 );
 $pending_row = $GLOBALS['wpdb']->get_row( 'SELECT * FROM ' . Queue::table() . " WHERE last_error = 'not_confirmed' LIMIT 1" );
-MjyInt::ok( is_array( $pending_row ), 'ردیف تأییدنشده رده شد' );
-MjyInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queue::table() . " WHERE status = 'sent'" ), 'به مشترک تأییدنشده پیامی نرفت' );
+MjyInt::ok( is_array( $pending_row ), 'ردیف تآییدنشده رده شد' );
+MjyInt::same( 0, (int) $GLOBALS['wpdb']->get_var( 'SELECT COUNT(*) FROM ' . Queue::table() . " WHERE status = 'sent'" ), 'به مشترک تآییدنشده پیامی نرفت' );
 Settings::update( array( 'double_opt_in' => false ) );
 
 /* -------------------------------------------------------------------------
@@ -1846,7 +1846,7 @@ $sms_signup = Subscribe::handle(
 MjyInt::ok( $sms_signup['ok'], 'ثبت با شمارهٔ موبایل موفق است' );
 $sms_row = WaitlistRepository::get( (int) $sms_signup['data']['id'] );
 MjyInt::same( 'sms', (string) $sms_row['channel'], 'کانال ردیف پیامک است' );
-MjyInt::same( 'confirmed', (string) $sms_row['status'], 'بدون تأیید دومرحله‌ای، ردیف مستقیماً تأییدشده است' );
+MjyInt::same( 'confirmed', (string) $sms_row['status'], 'بدون تآیید دومرحله‌ای، ردیف مستقیماً تآییدشده است' );
 
 // Restock: 3 units, one subscriber.
 $GLOBALS['mjy_http_response'] = array( 'response' => array( 'code' => 200 ), 'body' => '{"status":200}' );
@@ -2023,11 +2023,11 @@ foreach ( $stats_rows as $stats_row ) {
 $stats_week = Stats::report( 7 );
 
 MjyInt::same( 5, $stats_week['summary']['total'], 'آمار ۷ روز: ۵ ثبت داخل بازه، ردیف ۹ روز پیش بیرون می‌ماند' );
-MjyInt::same( 2, $stats_week['summary']['confirmed'], 'آمار ۷ روز: دو ردیف تأییدشده' );
+MjyInt::same( 2, $stats_week['summary']['confirmed'], 'آمار ۷ روز: دو ردیف تآییدشده' );
 MjyInt::same( 1, $stats_week['summary']['notified'], 'آمار ۷ روز: یک ردیف اعلان‌شده' );
-MjyInt::same( 1, $stats_week['summary']['pending'], 'آمار ۷ روز: یک ردیف در انتظار تأیید' );
+MjyInt::same( 1, $stats_week['summary']['pending'], 'آمار ۷ روز: یک ردیف در انتظار تآیید' );
 MjyInt::same( 1, $stats_week['summary']['unsubscribed'], 'آمار ۷ روز: یک لغو اشتراک' );
-MjyInt::same( 60, (int) $stats_week['summary']['confirm_rate'], 'درصد تأیید: ۳ از ۵ = ۶۰٪' );
+MjyInt::same( 60, (int) $stats_week['summary']['confirm_rate'], 'درصد تآیید: ۳ از ۵ = ۶۰٪' );
 
 $stats_month = Stats::report( 30 );
 MjyInt::same( 6, $stats_month['summary']['total'], 'آمار ۳۰ روز: ردیف ۹ روز پیش هم حساب می‌شود' );
@@ -2175,12 +2175,12 @@ $cycle_watcher->on_stock_status( 250, 'outofstock', wc_get_product( 250 ) );
 $second_cycle = Subscribe::handle( $renew_input );
 $renewed = WaitlistRepository::get( $cycle_id );
 MjyInt::same( true, $second_cycle['data']['revived'], 'درخواست قبلی برای دورهٔ تازه احیا شد' );
-MjyInt::same( false, $second_cycle['data']['needs_confirm'], 'ثبت مجدد یک‌مرحله‌ای نیاز به تأیید ندارد' );
+MjyInt::same( false, $second_cycle['data']['needs_confirm'], 'ثبت مجدد یک‌مرحله‌ای نیاز به تآیید ندارد' );
 MjyInt::ok( strtotime( (string) $renewed['created_at'] ) > time() - 60, 'دورهٔ تازه تاریخ ثبت تازه و جایگاه انتهای صف دارد' );
 MjyInt::ok( $old_token !== (string) $renewed['token'], 'پیوندهای دورهٔ قبلی در ثبت مجدد عوض می‌شوند' );
 MjyInt::same( 'invalid', WaitlistRepository::unsubscribe_by_token( $old_token ), 'پیوند لغو قدیمی اشتراک تازه را لغو نمی‌کند' );
 MjyInt::same( false, WaitlistRepository::mark_notified_current( $old_delivery_snapshot ), 'پاسخ دیررس ارسال قبلی وضعیت دورهٔ تازه را تغییر نمی‌دهد' );
-MjyInt::same( 'confirmed', WaitlistRepository::get( $cycle_id )['status'], 'دورهٔ تازه بعد از پاسخ دیررس تأییدشده می‌ماند' );
+MjyInt::same( 'confirmed', WaitlistRepository::get( $cycle_id )['status'], 'دورهٔ تازه بعد از پاسخ دیررس تآییدشده می‌ماند' );
 MjyInt::same( 1, WaitlistRepository::count_confirmed( 250, 0 ), 'سابقهٔ sent قبلی مانع شمارش دورهٔ تازه نیست' );
 MjyInt::same( 1, count( WaitlistRepository::confirmed_for( 250, 0 ) ), 'دورهٔ تازه برای انتخاب اعلان در دسترس است' );
 // Simulate a stock watcher that selected the old cycle before renewal and
@@ -2205,7 +2205,7 @@ WaitlistRepository::set_status( $cycle_id, 'confirmed' );
 MjyInt::same( 0, WaitlistRepository::count_confirmed( 250, 0 ), 'پیام sent همان دوره همچنان مانع تکرار است' );
 MjyInt::same( 0, count( WaitlistRepository::confirmed_for( 250, 0 ) ), 'انتخاب نیز sent همان دوره را مسدود می‌کند' );
 
-MjyInt::group( 'تأیید دومرحله‌ای در ثبت دوباره' );
+MjyInt::group( 'تآیید دومرحله‌ای در ثبت دوباره' );
 
 mjy_reset_state();
 mjy_reset_rate_limit();
@@ -2220,33 +2220,33 @@ $double_first = Subscribe::handle( $double_input );
 $double_id = (int) $double_first['data']['id'];
 $double_old_token = (string) WaitlistRepository::get( $double_id )['token'];
 Queue::process();
-MjyInt::same( 'confirmed', WaitlistRepository::confirm_by_token( $double_old_token ), 'تأیید دورهٔ نخست پذیرفته شد' );
+MjyInt::same( 'confirmed', WaitlistRepository::confirm_by_token( $double_old_token ), 'تآیید دورهٔ نخست پذیرفته شد' );
 WaitlistRepository::set_status( $double_id, 'notified' );
 $double_again = Subscribe::handle( $double_input );
 $double_row = WaitlistRepository::get( $double_id );
-MjyInt::same( true, $double_again['data']['revived'], 'درخواست تأییدشدهٔ قبلی دوباره فعال شد' );
-MjyInt::same( true, $double_again['data']['needs_confirm'], 'دورهٔ تازه به تأیید نیاز دارد' );
+MjyInt::same( true, $double_again['data']['revived'], 'درخواست تآییدشدهٔ قبلی دوباره فعال شد' );
+MjyInt::same( true, $double_again['data']['needs_confirm'], 'دورهٔ تازه به تآیید نیاز دارد' );
 MjyInt::ok( false !== strpos( $double_again['message'], 'صف' ), 'پاسخ دورهٔ تازه وعدهٔ تحویل قطعی نمی‌دهد' );
-MjyInt::same( 'pending', $double_row['status'], 'دورهٔ تازه در انتظار تأیید است' );
+MjyInt::same( 'pending', $double_row['status'], 'دورهٔ تازه در انتظار تآیید است' );
 MjyInt::ok( $double_old_token !== (string) $double_row['token'], 'توکن دورهٔ دوم تازه است' );
 MjyInt::ok( strtotime( (string) $double_row['confirm_expires_at'] ) > time(), 'انقضای تازه در آینده است' );
-MjyInt::same( 'invalid', WaitlistRepository::confirm_by_token( $double_old_token ), 'پیوند تأیید قدیمی دورهٔ تازه را تأیید نمی‌کند' );
+MjyInt::same( 'invalid', WaitlistRepository::confirm_by_token( $double_old_token ), 'پیوند تآیید قدیمی دورهٔ تازه را تآیید نمی‌کند' );
 MjyInt::same( 'invalid', WaitlistRepository::unsubscribe_by_token( $double_old_token ), 'پیوند لغو قدیمی دورهٔ تازه را لغو نمی‌کند' );
-MjyInt::same( 2, (int) $GLOBALS['wpdb']->get_var( "SELECT COUNT(*) FROM " . Queue::table() . " WHERE event_key = 'confirm'" ), 'با وجود پیام sent قبلی، پیام تأیید تازه در صف است' );
+MjyInt::same( 2, (int) $GLOBALS['wpdb']->get_var( "SELECT COUNT(*) FROM " . Queue::table() . " WHERE event_key = 'confirm'" ), 'با وجود پیام sent قبلی، پیام تآیید تازه در صف است' );
 $pending_duplicate = Subscribe::handle( $double_input );
-MjyInt::same( true, $pending_duplicate['data']['needs_confirm'], 'تکرار دورهٔ pending همچنان به تأیید نیاز دارد' );
+MjyInt::same( true, $pending_duplicate['data']['needs_confirm'], 'تکرار دورهٔ pending همچنان به تآیید نیاز دارد' );
 MjyInt::same( (string) $double_row['token'], (string) WaitlistRepository::get( $double_id )['token'], 'تکرار pending توکن تازه را تغییر نمی‌دهد' );
 MjyInt::same( 2, (int) $GLOBALS['wpdb']->get_var( "SELECT COUNT(*) FROM " . Queue::table() . " WHERE event_key = 'confirm'" ), 'تکرار pending پیام اضافه نمی‌سازد' );
 $second_confirmation = Queue::process();
-MjyInt::same( 1, (int) $second_confirmation['sent'], 'پیام تأیید تازه در wp_mail آزمایشی پردازش شد' );
-MjyInt::same( 'confirmed', WaitlistRepository::confirm_by_token( (string) $double_row['token'] ), 'پیوند دورهٔ تازه قابل تأیید است' );
+MjyInt::same( 1, (int) $second_confirmation['sent'], 'پیام تآیید تازه در wp_mail آزمایشی پردازش شد' );
+MjyInt::same( 'confirmed', WaitlistRepository::confirm_by_token( (string) $double_row['token'] ), 'پیوند دورهٔ تازه قابل تآیید است' );
 $double_watcher = new StockWatcher();
 mjy_product( 251, array( 'status' => 'instock', 'qty' => 1 ) );
 $double_watcher->on_stock_status( 251, 'instock', wc_get_product( 251 ) );
-MjyInt::same( 1, (int) Queue::process()['sent'], 'پس از تأیید مجدد، اعلان موجودی هم پردازش می‌شود' );
-MjyInt::same( 'notified', WaitlistRepository::get( $double_id )['status'], 'دورهٔ تأییدشده بعد از اعلان، notified است' );
+MjyInt::same( 1, (int) Queue::process()['sent'], 'پس از تآیید مجدد، اعلان موجودی هم پردازش می‌شود' );
+MjyInt::same( 'notified', WaitlistRepository::get( $double_id )['status'], 'دورهٔ تآییدشده بعد از اعلان، notified است' );
 
-MjyInt::group( 'بازگشت امن خطای صف و تأیید منقضی' );
+MjyInt::group( 'بازگشت امن خطای صف و تآیید منقضی' );
 
 mjy_product( 251, array( 'status' => 'outofstock', 'qty' => 0 ) );
 $double_watcher->on_stock_status( 251, 'outofstock', wc_get_product( 251 ) );
@@ -2281,7 +2281,7 @@ mjy_reset_rate_limit();
 $retry = Subscribe::handle( $double_input );
 $pending_row = WaitlistRepository::get( $double_id );
 MjyInt::same( true, $retry['ok'], 'پس از رفع خطای صف ثبت مجدد موفق است' );
-MjyInt::same( true, $retry['data']['needs_confirm'], 'در تلاش تازه تأیید لازم است' );
+MjyInt::same( true, $retry['data']['needs_confirm'], 'در تلاش تازه تآیید لازم است' );
 $pending_job_id = (int) $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( 'SELECT id FROM ' . $queue_table . ' WHERE waitlist_id = %d AND registration_cycle = %d', $double_id, $next_cycle ) );
 
 // An expired pending row is renewed even before the old link was clicked.
@@ -2290,13 +2290,13 @@ mjy_reset_rate_limit();
 $expired_retry = Subscribe::handle( $double_input );
 $after_expiry = WaitlistRepository::get( $double_id );
 MjyInt::same( true, $expired_retry['data']['revived'], 'pending منقضی با ثبت تازه احیا می‌شود' );
-MjyInt::same( true, $expired_retry['data']['needs_confirm'], 'درخواست پس از انقضا نیاز به تأیید تازه دارد' );
+MjyInt::same( true, $expired_retry['data']['needs_confirm'], 'درخواست پس از انقضا نیاز به تآیید تازه دارد' );
 MjyInt::ok( (string) $pending_row['token'] !== (string) $after_expiry['token'], 'توکن منقضی جایگزین شد' );
 MjyInt::ok( strtotime( (string) $after_expiry['confirm_expires_at'] ) > time(), 'انقضای جایگزین در آینده است' );
-MjyInt::same( 'invalid', WaitlistRepository::confirm_by_token( (string) $pending_row['token'] ), 'توکن منقضی نمی‌تواند دورهٔ تازه را تأیید کند' );
+MjyInt::same( 'invalid', WaitlistRepository::confirm_by_token( (string) $pending_row['token'] ), 'توکن منقضی نمی‌تواند دورهٔ تازه را تآیید کند' );
 $renewal_processing = Queue::process();
-MjyInt::same( 1, (int) $renewal_processing['sent'], 'تنها پیام تأیید دورهٔ تازه ارسال آزمایشی می‌شود' );
-MjyInt::same( 'subscription_renewed', (string) $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( 'SELECT last_error FROM ' . $queue_table . ' WHERE id = %d', $pending_job_id ) ), 'پیام تأیید منقضیِ دورهٔ قبلی کنار گذاشته می‌شود' );
+MjyInt::same( 1, (int) $renewal_processing['sent'], 'تنها پیام تآیید دورهٔ تازه ارسال آزمایشی می‌شود' );
+MjyInt::same( 'subscription_renewed', (string) $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( 'SELECT last_error FROM ' . $queue_table . ' WHERE id = %d', $pending_job_id ) ), 'پیام تآیید منقضیِ دورهٔ قبلی کنار گذاشته می‌شود' );
 MjyInt::same( 'confirmed', WaitlistRepository::confirm_by_token( (string) $after_expiry['token'] ), 'پیوند جایگزین پذیرفته می‌شود' );
 
 MjyInt::group( 'توقف ایمن هنگام ارتقای ناقص جدول‌ها' );
@@ -2306,7 +2306,7 @@ $schema_version = get_option( 'mojoodyar_db_version', '' );
 update_option( 'mojoodyar_db_version', '4', false );
 mjy_reset_rate_limit();
 $unavailable_schema = Subscribe::handle( $double_input );
-MjyInt::same( false, $unavailable_schema['ok'], 'ثبت با ساختار ارتقان‌یافته‌نشده تأیید نمی‌شود' );
+MjyInt::same( false, $unavailable_schema['ok'], 'ثبت با ساختار ارتقان‌یافته‌نشده تآیید نمی‌شود' );
 MjyInt::same( 503, (int) $unavailable_schema['status'], 'پاسخ ثبت، عدم دسترسی موقت را نشان می‌دهد' );
 MjyInt::same( 'schema_upgrade', $unavailable_schema['code'], 'دلیل خطای ثبت برای مدیر قابل تشخیص است' );
 MjyInt::same( 'schema', Queue::process()['skipped'], 'صف پیش از تغییر ردیف‌ها متوقف می‌شود' );
@@ -2600,7 +2600,7 @@ MjyInt::ok( false !== strpos( (string) $diagnosis['hint'], 'ساعت دیگر' )
 // A row waiting because its last attempt failed must say so, with the gateway's
 // own sentence: otherwise "scheduled" looks identical to "not created yet".
 $GLOBALS['wpdb']->query(
-	'UPDATE ' . Queue::table() . " SET attempts = 1, last_error = 'شمارهٔ فرستنده تأیید نشده است' WHERE id = " . $future_id
+	'UPDATE ' . Queue::table() . " SET attempts = 1, last_error = 'شمارهٔ فرستنده تآیید نشده است' WHERE id = " . $future_id
 );
 $backoff = Queue::diagnose();
 MjyInt::same( 1, (int) $backoff['nearest_tries'], 'تلاش ناموفق ردیف گزارش می‌شود' );

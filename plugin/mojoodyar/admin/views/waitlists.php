@@ -52,8 +52,8 @@ $mjy_export = wp_nonce_url(
 
 $mjy_statuses = array(
 	''             => 'همهٔ وضعیت‌ها',
-	'pending'      => 'در انتظار تأیید',
-	'confirmed'    => 'تأییدشده',
+	'pending'      => 'در انتظار تآیید',
+	'confirmed'    => 'تآییدشده',
 	'notified'     => 'اعلان‌شده',
 	'expired'      => 'منقضی',
 	'unsubscribed' => 'لغو شده',
@@ -138,7 +138,7 @@ $mjy_statuses = array(
 		<div class="mjy-bulk">
 			<select name="bulk_action">
 				<option value="">عملیات گروهی…</option>
-				<option value="confirm">تأیید دستی</option>
+				<option value="confirm">تآیید دستی</option>
 				<option value="called">علامت‌گذاری: تماس گرفته شد</option>
 				<option value="uncalled">برداشتن تیک تماس</option>
 				<option value="unsubscribe">لغو اشتراک</option>
@@ -160,7 +160,7 @@ $mjy_statuses = array(
 					<th>وضعیت</th>
 					<th>تماس</th>
 					<th>ثبت</th>
-					<th>تأیید</th>
+					<th>تآیید</th>
 					<th>اعلان</th>
 				</tr>
 			</thead>

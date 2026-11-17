@@ -650,7 +650,7 @@ MjyTest::ok( false === strpos( $evil, '<img' ), 'هیچ تگ img ساخته نم
 
 // Confirmation variant swaps the call to action.
 $confirm_skin = EmailSkin::render(
-	'تأیید اشتراک',
+	'تآیید اشتراک',
 	'برای تکمیل ثبت روی پیوند زیر بزنید.',
 	array(
 		'is_confirmation' => '1',
@@ -659,8 +659,8 @@ $confirm_skin = EmailSkin::render(
 	)
 );
 
-MjyTest::ok( false !== strpos( $confirm_skin, 'mojoodyar_confirm' ), 'پیام تأیید، دکمه را به پیوند تأیید وصل می‌کند' );
-MjyTest::ok( false !== strpos( $confirm_skin, 'تأیید اشتراک' ), 'متن دکمهٔ تأیید درست است' );
+MjyTest::ok( false !== strpos( $confirm_skin, 'mojoodyar_confirm' ), 'پیام تآیید، دکمه را به پیوند تآیید وصل می‌کند' );
+MjyTest::ok( false !== strpos( $confirm_skin, 'تآیید اشتراک' ), 'متن دکمهٔ تآیید درست است' );
 
 MjyTest::group( 'HttpGuard / SSRF' );
 
@@ -1022,9 +1022,9 @@ $pair = LogExplain::parse( '502:7|units=3|queued=2' );
 MjyTest::same( '502:7', $pair[0]['value'], 'جفت محصول:تنوع خوانده می‌شود' );
 
 $detail = LogExplain::detail( 'restock_queued', '501:0|units=2|queued=2' );
-MjyTest::ok( false !== strpos( $detail, 'محصول #501' ), 'جزئیات، شناسهٔ محصول را می‌نویسد' );
+MjyTest::ok( false !== strpos( $detail, 'محصول #501' ), 'جزییات، شناسهٔ محصول را می‌نویسد' );
 MjyTest::ok( false === strpos( $detail, 'تنوع' ), 'برای محصول ساده تنوع چاپ نمی‌شود' );
-MjyTest::ok( false !== strpos( $detail, 'تعداد واحد' ), 'جزئیات، برچسب تعداد واحد را دارد' );
+MjyTest::ok( false !== strpos( $detail, 'تعداد واحد' ), 'جزییات، برچسب تعداد واحد را دارد' );
 
 $variation = LogExplain::detail( 'restock_queued', '502:7|units=1' );
 MjyTest::ok( false !== strpos( $variation, 'تنوع #7' ), 'برای تنوع، شناسهٔ تنوع چاپ می‌شود' );
@@ -1096,7 +1096,7 @@ MjyTest::ok( false !== strpos( \Mojoodyar\Support\Masking::free_text( 'رمز ع
 MjyTest::ok( strlen( \Mojoodyar\Support\Masking::free_text( str_repeat( 'ا', 400 ), 60 ) ) < 500, 'متن طولانی بریده می‌شود' );
 
 // The reason a non-2xx answer carries: a code alone is not a diagnosis.
-$plain = \Mojoodyar\Channels\Http::failure_message( 400, 'خط الگو تأیید نشده است' );
+$plain = \Mojoodyar\Channels\Http::failure_message( 400, 'خط الگو تآیید نشده است' );
 MjyTest::ok( false !== strpos( $plain, '400' ), 'کد پاسخ در متن خطا هست' );
 MjyTest::ok( false !== strpos( $plain, 'خط الگو' ), 'متن پاسخ درگاه هم می‌آید' );
 

@@ -319,7 +319,7 @@ async function main() {
 
 	// A confirmation is queued, not yet delivered. Keep the legacy API code
 	// but show the accurate localized text in the storefront.
-	dom = await page(fixtures.simpleOther, { fetch: () => respond(201, { ok: true, code: 'confirmation_sent', message: 'پیام تأیید در صف قرار گرفت' }) });
+	dom = await page(fixtures.simpleOther, { fetch: () => respond(201, { ok: true, code: 'confirmation_sent', message: 'پیام تآیید در صف قرار گرفت' }) });
 	win = dom.window;
 	const confirmForm = win.document.querySelector('form');
 	submit(win, confirmForm);

@@ -197,7 +197,11 @@
 	overflow: hidden;
 }
 
-.mjy-button {
+/* Scoped under .mjy-form (0-2-0) so a theme's button rules — e.g.
+   `.woocommerce button` (0-1-1) — cannot recolour the label dark on the
+   dark gradient. A theme can still override with a more specific selector
+   or an important flag; the plugin itself never uses one. */
+.mjy-form .mjy-button {
 	display: inline-block;
 	padding: 0.75rem 1.6rem;
 	border: 0;
@@ -212,12 +216,12 @@
 	transition: transform 140ms ease-in, box-shadow 140ms ease-in;
 }
 
-.mjy-button:hover {
+.mjy-form .mjy-button:hover {
 	transform: translateY(-1px);
 	box-shadow: 0 14px 26px -14px rgba(14, 92, 85, 0.95);
 }
 
-.mjy-button[disabled] {
+.mjy-form .mjy-button[disabled] {
 	opacity: 0.65;
 	cursor: progress;
 	transform: none;
@@ -259,7 +263,7 @@
 		max-width: 100%;
 	}
 
-	.mjy-button {
+	.mjy-form .mjy-button {
 		width: 100%;
 	}
 }

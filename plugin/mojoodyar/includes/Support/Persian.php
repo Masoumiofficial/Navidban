@@ -58,7 +58,7 @@ final class Persian {
 	 */
 	public static function normalize( $text ) {
 		$text = (string) $text;
-		$text = str_replace( array( 'ي', 'ك', 'ۀ', 'ؤ' ), array( 'ی', 'ک', 'ه', 'و' ), $text );
+		$text = str_replace( array( 'ي', 'ك', 'ۀ', 'ؤ', 'أ', 'ئ' ), array( 'ی', 'ک', 'ه', 'و', 'آ', 'ی' ), $text );
 		$text = preg_replace( '/\s+/u', ' ', $text );
 
 		return null === $text ? '' : trim( $text );

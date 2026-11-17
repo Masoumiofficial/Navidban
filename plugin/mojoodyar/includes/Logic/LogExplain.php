@@ -50,7 +50,7 @@ final class LogExplain {
 		'admin_tool'          => 'یک ابزار از پنل اجرا شد',
 		'admin_bulk'          => 'عملیات گروهی روی لیست انتظار',
 		'admin_call'          => 'پیگیری تلفنی ثبت شد',
-		'public_confirm'      => 'مشتری اشتراک را تأیید کرد',
+		'public_confirm'      => 'مشتری اشتراک را تآیید کرد',
 		'public_unsubscribe'  => 'مشتری اشتراک را لغو کرد',
 	);
 
@@ -98,12 +98,12 @@ final class LogExplain {
 	const VALUES = array(
 		'sms'          => 'پیامک',
 		'email'        => 'ایمیل',
-		'confirm'      => 'پیام تأیید',
+		'confirm'      => 'پیام تآیید',
 		'restock'      => 'اعلان بازگشت موجودی',
 		'unmanaged'    => 'نامشخص (موجودی مدیریت نمی‌شود)',
 		'yes'          => 'بله',
 		'no'           => 'خیر',
-		'confirmed'    => 'تأیید شد',
+		'confirmed'    => 'تآیید شد',
 		'already'      => 'از قبل انجام شده بود',
 		'expired'      => 'منقضی',
 		'unsubscribed' => 'لغو شد',
@@ -293,7 +293,7 @@ final class LogExplain {
 		$context = trim( (string) $context );
 
 		if ( '' === $context ) {
-			return self::event( $event ) . ' — بدون جزئیات.';
+			return self::event( $event ) . ' — بدون جزییات.';
 		}
 
 		// Two events carry a fixed, positional shape that a generic key=value
@@ -317,7 +317,7 @@ final class LogExplain {
 
 		$pieces = array_filter( $pieces );
 
-		return empty( $pieces ) ? self::event( $event ) . ' — بدون جزئیات.' : implode( '، ', $pieces );
+		return empty( $pieces ) ? self::event( $event ) . ' — بدون جزییات.' : implode( '، ', $pieces );
 	}
 
 	/**
@@ -454,7 +454,7 @@ final class LogExplain {
 			'no_channel'        => 'هیچ کانال اعلانی تنظیم نشده بود',
 			'schema_upgrade'    => 'به‌روزرسانی ساختار جدول‌های افزونه کامل نشده بود',
 			'db'                => 'عملیات پایگاه داده انجام نشد',
-			'queue'             => 'پیام تأیید تازه در صف ثبت نشد',
+			'queue'             => 'پیام تآیید تازه در صف ثبت نشد',
 			'conflict'          => 'وضعیت درخواست هم‌زمان تغییر کرده بود',
 			'missing'           => 'ردیف قبلی پیدا نشد',
 			'status'            => 'وضعیت ردیف برای ثبت مجدد معتبر نبود',
