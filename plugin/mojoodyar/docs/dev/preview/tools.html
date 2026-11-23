@@ -207,7 +207,9 @@ body {
 	align-items: center;
 }
 
-.mjy-chip {
+.mjy-wrap .mjy-chip,
+.mjy-wrap a.mjy-chip,
+.mjy-wrap a.mjy-chip:visited {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -222,14 +224,27 @@ body {
 	text-decoration: none;
 }
 
-a.mjy-chip:hover {
+.mjy-wrap a.mjy-chip:hover,
+.mjy-wrap a.mjy-chip:focus,
+.mjy-wrap a.mjy-chip:active {
+	background: rgba(255, 255, 255, 0.22);
+	color: #fff;
 	text-decoration: underline;
 }
 
-.mjy-chip--accent {
-	border-color: rgba(242, 169, 59, 0.55);
+.mjy-wrap .mjy-chip--accent,
+.mjy-wrap a.mjy-chip--accent,
+.mjy-wrap a.mjy-chip--accent:visited {
+	border-color: rgba(242, 169, 59, 0.65);
 	background: rgba(242, 169, 59, 0.22);
-	color: #ffe9c4;
+	color: #fff4dd;
+}
+
+.mjy-wrap a.mjy-chip--accent:hover,
+.mjy-wrap a.mjy-chip--accent:focus,
+.mjy-wrap a.mjy-chip--accent:active {
+	background: rgba(242, 169, 59, 0.34);
+	color: #fff;
 }
 
 /* Tab bar. */
@@ -274,7 +289,11 @@ a.mjy-chip:hover {
 	color: var(--mjy-primary);
 }
 
-.mjy-tabs a[aria-current="page"] {
+.mjy-tabs a[aria-current="page"],
+.mjy-tabs a[aria-current="page"]:visited,
+.mjy-tabs a[aria-current="page"]:hover,
+.mjy-tabs a[aria-current="page"]:focus,
+.mjy-tabs a[aria-current="page"]:active {
 	color: #fff;
 	background: linear-gradient(135deg, #0a4741, #0f6f66);
 	box-shadow: 0 8px 18px -10px rgba(14, 92, 85, 0.9);
@@ -712,6 +731,8 @@ a.mjy-chip:hover {
 }
 
 .mjy-wrap .button-primary,
+.mjy-wrap a.button-primary,
+.mjy-wrap a.button-primary:visited,
 .mjy-wrap input[type="submit"].button-primary {
 	border-color: transparent;
 	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
@@ -720,7 +741,13 @@ a.mjy-chip:hover {
 }
 
 .mjy-wrap .button-primary:hover,
-.mjy-wrap input[type="submit"].button-primary:hover {
+.mjy-wrap .button-primary:focus,
+.mjy-wrap .button-primary:active,
+.mjy-wrap a.button-primary:hover,
+.mjy-wrap a.button-primary:focus,
+.mjy-wrap a.button-primary:active,
+.mjy-wrap input[type="submit"].button-primary:hover,
+.mjy-wrap input[type="submit"].button-primary:focus {
 	background: linear-gradient(135deg, #0b4d47, #14857b);
 	color: #fff;
 }
@@ -1743,7 +1770,9 @@ a.mjy-chip:hover {
 	margin: 0 0 18px;
 }
 
-.mjy-range {
+.mjy-wrap .mjy-range,
+.mjy-wrap a.mjy-range,
+.mjy-wrap a.mjy-range:visited {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -1762,15 +1791,22 @@ a.mjy-chip:hover {
 	transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
-.mjy-range:hover,
-.mjy-range:focus {
+.mjy-wrap .mjy-range:hover,
+.mjy-wrap .mjy-range:focus {
 	color: var(--mjy-primary);
 	transform: translateY(-1px);
 	box-shadow: var(--mjy-shadow-soft), 0 0 0 2px rgba(20, 133, 123, 0.18);
 }
 
-.mjy-range.is-active,
-.mjy-range[aria-current="page"] {
+.mjy-wrap .mjy-range.is-active,
+.mjy-wrap a.mjy-range.is-active,
+.mjy-wrap a.mjy-range.is-active:visited,
+.mjy-wrap a.mjy-range.is-active:hover,
+.mjy-wrap a.mjy-range.is-active:focus,
+.mjy-wrap .mjy-range[aria-current="page"],
+.mjy-wrap a.mjy-range[aria-current="page"]:visited,
+.mjy-wrap a.mjy-range[aria-current="page"]:hover,
+.mjy-wrap a.mjy-range[aria-current="page"]:focus {
 	background: linear-gradient(135deg, var(--mjy-primary), var(--mjy-primary-hover));
 	color: #fff;
 	border-color: transparent;
@@ -2065,7 +2101,9 @@ a.mjy-chip:hover {
 
 /* Pager: page numbers are the same glass chip as a button, without the
    drop shadow - a row of twenty shadows reads as noise. */
-.mjy-log__page {
+.mjy-wrap .mjy-log__page,
+.mjy-wrap a.mjy-log__page,
+.mjy-wrap a.mjy-log__page:visited {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -2083,12 +2121,17 @@ a.mjy-chip:hover {
 	transition: background 140ms ease, color 140ms ease;
 }
 
-.mjy-log__page:hover {
+.mjy-wrap .mjy-log__page:hover,
+.mjy-wrap .mjy-log__page:focus {
 	background: rgba(255, 255, 255, 0.9);
 	color: var(--mjy-primary);
 }
 
-.mjy-log__page--on {
+.mjy-wrap .mjy-log__page--on,
+.mjy-wrap a.mjy-log__page--on,
+.mjy-wrap a.mjy-log__page--on:visited,
+.mjy-wrap a.mjy-log__page--on:hover,
+.mjy-wrap a.mjy-log__page--on:focus {
 	background: var(--mjy-primary);
 	border-color: var(--mjy-primary);
 	color: #fff;
@@ -2242,7 +2285,7 @@ a.mjy-chip:hover {
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">ابزارهای موجودیار<small>تشخیص، بازسازی و نگهداری</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۱.۰.۰</span><a class="mjy-chip mjy-chip--accent" href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a><a class="mjy-chip" href="https://github.com/Masoumiofficial/Navidban" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools" aria-current="page">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">ابزارهای موجودیار<small>تشخیص، بازسازی و نگهداری</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۱.۰.۰</span><a class="mjy-chip mjy-chip--accent" href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools" aria-current="page">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
 
 	<p class="mjy-muted">
 		آخرین پایش: هرگز		· پیام در صف: ۰	</p>
@@ -2392,6 +2435,6 @@ a.mjy-chip:hover {
 		</table>
 
 	</div>
-	<p class="mjy-footer">موجودیار — محصولی از <a href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a> | <a href="https://github.com/Masoumiofficial/Navidban" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a></p></div>
+	<p class="mjy-footer">موجودیار — محصولی از <a href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a></p></div>
 </body>
 </html>

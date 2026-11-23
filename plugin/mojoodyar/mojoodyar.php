@@ -1,7 +1,6 @@
 <?php
 /**
  * Plugin Name:       موجودیار | لیست انتظار و اعلان بازگشت موجودی
- * Plugin URI:        https://github.com/Masoumiofficial/Navidban
  * Description:       لیست انتظار و اعلان بازگشت موجودی برای ووکامرس، با نمایش خودکار و شورت‌کد. بدون IonCube، بدون Composer، بدون تماس اجباری با سرور بیرونی.
  * Version:           1.0.0
  * Requires at least: 6.4
