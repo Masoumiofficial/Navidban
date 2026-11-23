@@ -122,9 +122,18 @@ final class Migration {
 
 			// Table names are built from $wpdb->prefix plus a class constant;
 			// no user input reaches this statement.
-			$sql = 'RENAME TABLE ' . $old_name . ' TO ' . $new_name;
+			$sql  = 'RENAME TABLE ' . $old_name . ' TO ' . $new_name;
+			$prev = method_exists( $wpdb, 'suppress_errors' ) ? $wpdb->suppress_errors( true ) : null;
 
-			$done = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			try {
+				$done = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			} catch ( \Throwable $e ) {
+				$done = false;
+			}
+
+			if ( null !== $prev ) {
+				$wpdb->suppress_errors( $prev );
+			}
 
 			$result[ $legacy ] = ( false === $done ) ? 'failed' : 'moved';
 		}

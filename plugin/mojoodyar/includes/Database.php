@@ -231,10 +231,8 @@ final class Database {
 		// dbDelta can fail silently, for example when the database user lacks
 		// ALTER privileges. Do not stamp the upgrade complete when either
 		// lifecycle column is missing: the next request must retry the upgrade.
-		// %i quotes the table identifier (WordPress 6.2+); both names come from
-		// Database::table(), never from user input.
-		if ( false === $wpdb->query( $wpdb->prepare( 'SELECT registration_cycle FROM %i LIMIT 0', $wait ) )
-			|| false === $wpdb->query( $wpdb->prepare( 'SELECT registration_cycle FROM %i LIMIT 0', $queue ) ) ) {
+		if ( ! self::has_column( $wait, 'registration_cycle' )
+			|| ! self::has_column( $queue, 'registration_cycle' ) ) {
 			return false;
 		}
 
@@ -243,6 +241,38 @@ final class Database {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check safely whether a column exists on a plugin table without
+	 * letting strict mysqli exceptions abort activation.
+	 *
+	 * @param string $table  Fully qualified table name.
+	 * @param string $column Column name.
+	 * @return bool
+	 */
+	private static function has_column( $table, $column ) {
+		global $wpdb;
+
+		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'query' ) || ! Migration::table_exists( $table ) ) {
+			return false;
+		}
+
+		$quoted_table  = '`' . str_replace( '`', '', (string) $table ) . '`';
+		$quoted_column = '`' . str_replace( '`', '', (string) $column ) . '`';
+		$prev_suppress = method_exists( $wpdb, 'suppress_errors' ) ? $wpdb->suppress_errors( true ) : null;
+
+		try {
+			$ok = false !== $wpdb->query( 'SELECT ' . $quoted_column . ' FROM ' . $quoted_table . ' LIMIT 0' );
+		} catch ( \Throwable $e ) {
+			$ok = false;
+		}
+
+		if ( null !== $prev_suppress ) {
+			$wpdb->suppress_errors( $prev_suppress );
+		}
+
+		return $ok;
 	}
 
 	/**
