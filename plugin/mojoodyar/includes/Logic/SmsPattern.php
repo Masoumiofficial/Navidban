@@ -403,7 +403,7 @@ final class SmsPattern {
 		$literal = trim( $literal, " \t\n\r\0\x0B.,،;:-—" );
 
 		if ( Text::length( $literal ) < 8 ) {
-			$findings[] = self::finding( 'warning', 'too_short', 'متن تقریباً فقط متغیر است؛ الگوهایی مثل «{0} باتشکر» تأیید نمی‌شوند. یک جمله و نام فروشگاه اضافه کنید.' );
+			$findings[] = self::finding( 'warning', 'too_short', 'متن تقریباً فقط متغیر است؛ الگوهایی مثل «{0} باتشکر» تآیید نمی‌شوند. یک جمله و نام فروشگاه اضافه کنید.' );
 		}
 
 		$site_name = trim( (string) $site_name );

@@ -9,8 +9,9 @@
  *      built (the WordPress core/WooCommerce queries are not ours and are not
  *      counted).
  *
- * The storage here is the harness SQLite stand-in. Query *counts* are
- * meaningful; query *durations* are not, and are not reported.
+ * The storage here is the harness SQLite stand-in. The counts only cover SQL
+ * issued directly to this stub $wpdb; its in-memory WordPress/WooCommerce
+ * functions do not reproduce their real database queries or cache behavior.
  *
  * Output: JSON on stdout, always. Written to docs/PERFORMANCE.md by
  * tools/har-audit.sh.
@@ -52,10 +53,11 @@ function mjy_probe_reset() {
  * @param array  $products Stub products.
  * @param bool   $is_product is_product().
  * @param int    $queried  Queried object id.
- * @param bool   $render   Also render the form markup?
+ * @param bool   $render   Also render the automatic form markup?
+ * @param int    $shortcode_id Explicit product ID for a shortcode, or 0.
  * @return array
  */
-function mjy_probe_scenario( $label, array $products, $is_product, $queried, $render ) {
+function mjy_probe_scenario( $label, array $products, $is_product, $queried, $render, $shortcode_id = 0 ) {
 	mjy_probe_reset();
 
 	foreach ( $products as $product ) {
@@ -64,7 +66,7 @@ function mjy_probe_scenario( $label, array $products, $is_product, $queried, $re
 		unset( $extra['id'] );
 		$GLOBALS['mjy_products'][ $id ] = array_merge(
 			array(
-				'type'     => 'simple',
+				'type'     => ! empty( $extra['parent'] ) ? 'variation' : 'simple',
 				'parent'   => 0,
 				'status'   => 'instock',
 				'qty'      => 10,
@@ -87,6 +89,8 @@ function mjy_probe_scenario( $label, array $products, $is_product, $queried, $re
 		ob_start();
 		$frontend->render_form();
 		$html = (string) ob_get_clean();
+	} elseif ( $shortcode_id > 0 ) {
+		$html = $frontend->shortcode( array( 'product_id' => (string) $shortcode_id ) );
 	}
 
 	$styles  = isset( $GLOBALS['mjy_enqueued']['style'] ) ? $GLOBALS['mjy_enqueued']['style'] : array();
@@ -139,12 +143,20 @@ $scenarios = array(
 		20,
 		true
 	),
+	mjy_probe_scenario(
+		'صفحهٔ غیرمحصول با شورت‌کد محصول ناموجود',
+		array( array( 'id' => 12, 'status' => 'outofstock', 'qty' => 0 ) ),
+		false,
+		0,
+		false,
+		12
+	),
 );
 
 $summary = array(
 	'php_version' => PHP_VERSION,
 	'generated_at' => gmdate( 'c' ),
-	'storage'     => 'SQLite (harness) — query counts valid, durations not reported',
+	'storage'     => 'SQLite stub; WC/WP product and option reads are in-memory, not real query counts',
 	'scenarios'   => $scenarios,
 );
 

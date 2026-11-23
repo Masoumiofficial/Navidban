@@ -51,10 +51,11 @@ final class Rest {
 	}
 
 	/**
-	 * Permission callback: a valid REST nonce plus a same-origin referer.
+	 * Permission callback: require a valid WordPress REST nonce.
 	 *
-	 * Guests are allowed (they are the majority of waitlist subscribers), but a
-	 * nonce is still required so a third-party page cannot post on their behalf.
+	 * Guests are allowed and WordPress guest nonces are shared by default; this
+	 * is not identity verification or a substitute for the rate limit/opt-in.
+	 * No separate Origin or Referer check is performed here.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return bool|\WP_Error

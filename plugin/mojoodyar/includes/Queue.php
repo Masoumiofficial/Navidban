@@ -53,11 +53,12 @@ final class Queue {
 	 * @param int    $waitlist_id Waitlist row ID.
 	 * @param string $channel     email|sms.
 	 * @param string $event_key   Event key ("confirm", "restock:<timestamp>").
-	 * @param array  $payload     Extra payload for the channel layer.
-	 * @param int    $next_run_at Unix timestamp; null = now.
+	 * @param array    $payload            Extra payload for the channel layer.
+	 * @param int|null $next_run_at        Unix timestamp; null = now.
+	 * @param int|null $registration_cycle Cycle captured when selecting the subscriber.
 	 * @return bool
 	 */
-	public static function enqueue( $waitlist_id, $channel, $event_key, array $payload = array(), $next_run_at = null ) {
+	public static function enqueue( $waitlist_id, $channel, $event_key, array $payload = array(), $next_run_at = null, $registration_cycle = null ) {
 		global $wpdb;
 
 		$waitlist_id = (int) $waitlist_id;
@@ -68,13 +69,26 @@ final class Queue {
 			return false;
 		}
 
-		$hash = QueuePolicy::payload_hash( $waitlist_id, $channel, $event_key . '|' . wp_json_encode_compat( $payload ) );
+		if ( null === $registration_cycle ) {
+			$current = WaitlistRepository::get( $waitlist_id );
+			$registration_cycle = is_array( $current ) ? (int) $current['registration_cycle'] : 0;
+		}
+		$registration_cycle = max( 0, (int) $registration_cycle );
+
+		// Cycle zero keeps existing deduplication hashes stable on upgrade.
+		// Later cycles must have distinct hashes even for the same confirm event.
+		$hash_input = $event_key . '|' . wp_json_encode_compat( $payload );
+		if ( $registration_cycle > 0 ) {
+			$hash_input .= '|cycle=' . $registration_cycle;
+		}
+		$hash = QueuePolicy::payload_hash( $waitlist_id, $channel, $hash_input );
 		$when = ( null === $next_run_at ) ? time() : (int) $next_run_at;
 
 		$sql = $wpdb->prepare(
-			'INSERT IGNORE INTO ' . self::table() . ' (waitlist_id, channel, event_key, payload_hash, attempts, status, next_run_at, created_at)
-			 VALUES (%d, %s, %s, %s, 0, %s, %s, %s)',
+			'INSERT IGNORE INTO ' . self::table() . ' (waitlist_id, registration_cycle, channel, event_key, payload_hash, attempts, status, next_run_at, created_at)
+			 VALUES (%d, %d, %s, %s, %s, 0, %s, %s, %s)',
 			$waitlist_id,
+			$registration_cycle,
 			$channel,
 			$event_key,
 			$hash,
@@ -260,7 +274,7 @@ final class Queue {
 		} elseif ( $failed > 0 ) {
 			$hint = 'همهٔ پیام‌ها ناموفق‌اند؛ ابزار «تلاش دوباره برای پیام‌های ناموفق» را بزنید.';
 		} elseif ( $skipped > 0 ) {
-			$hint = 'پیام‌ها رد شده‌اند (لغو اشتراک یا تأییدنشده)؛ لیست انتظار را ببینید.';
+			$hint = 'پیام‌ها رد شده‌اند (لغو اشتراک یا تآییدنشده)؛ لیست انتظار را ببینید.';
 		} else {
 			$hint = 'صف خالی است؛ هنوز اعلانی ساخته نشده است.';
 		}
@@ -292,6 +306,11 @@ final class Queue {
 			'skipped'   => '',
 			'reclaimed' => 0,
 		);
+
+		if ( ! Database::schema_ready() ) {
+			$stats['skipped'] = 'schema';
+			return $stats;
+		}
 
 		if ( ! self::acquire_lock() ) {
 			$stats['skipped'] = 'locked';
@@ -404,6 +423,10 @@ final class Queue {
 	public static function deliver( $queue_id ) {
 		global $wpdb;
 
+		if ( ! Database::schema_ready() ) {
+			return false;
+		}
+
 		$table = self::table();
 
 		$row = $wpdb->get_row(
@@ -423,15 +446,38 @@ final class Queue {
 			return false;
 		}
 
+		// A queued job belongs to the subscription cycle that created it. A
+		// renewal must never send an older job with the new token or recipient
+		// state, including after an admin retries a previously blocked job.
+		if ( (int) $row['registration_cycle'] !== (int) $waitlist['registration_cycle'] ) {
+			self::mark_skipped( $queue_id, 'subscription_renewed' );
+
+			return false;
+		}
+
 		if ( 'unsubscribed' === $waitlist['status'] ) {
 			self::mark_skipped( $queue_id, 'unsubscribed' );
 
 			return false;
 		}
 
-		// A pending subscriber may only receive the confirmation message.
-		if ( 'pending' === $waitlist['status'] && 0 !== strpos( (string) $row['event_key'], 'confirm' ) ) {
+		$is_confirmation = 0 === strpos( (string) $row['event_key'], 'confirm' );
+
+		// A restock job is only meaningful for a currently confirmed subscriber.
+		if ( ! $is_confirmation && 'confirmed' !== $waitlist['status'] ) {
 			self::mark_skipped( $queue_id, 'not_confirmed' );
+
+			return false;
+		}
+
+		if ( $is_confirmation && 'pending' !== $waitlist['status'] ) {
+			self::mark_skipped( $queue_id, 'confirmation_not_pending' );
+
+			return false;
+		}
+
+		if ( $is_confirmation && ! empty( $waitlist['confirm_expires_at'] ) && strtotime( $waitlist['confirm_expires_at'] ) < time() ) {
+			self::mark_skipped( $queue_id, 'confirmation_expired' );
 
 			return false;
 		}

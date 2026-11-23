@@ -37,6 +37,7 @@ final class LogExplain {
 		'subscribe_rejected'  => 'درخواست رد شد و ردیفی ساخته نشد',
 		'sent'                => 'پیام ارسال شد',
 		'delivery_failed'     => 'ارسال پیام ناموفق بود',
+		'notification_state_failed' => 'به‌روزرسانی وضعیت مشترک پس از ارسال ناموفق بود',
 		'queue_run'           => 'صف ارسال اجرا شد',
 		'queue_reclaimed'     => 'ردیفِ جامانده از اجرای نیمه‌کاره به صف برگشت',
 		'queue_pull_forward'  => 'پیام‌های زمان‌بندی‌شده به «همین حالا» منتقل شدند',
@@ -49,7 +50,7 @@ final class LogExplain {
 		'admin_tool'          => 'یک ابزار از پنل اجرا شد',
 		'admin_bulk'          => 'عملیات گروهی روی لیست انتظار',
 		'admin_call'          => 'پیگیری تلفنی ثبت شد',
-		'public_confirm'      => 'مشتری اشتراک را تأیید کرد',
+		'public_confirm'      => 'مشتری اشتراک را تآیید کرد',
 		'public_unsubscribe'  => 'مشتری اشتراک را لغو کرد',
 	);
 
@@ -97,12 +98,12 @@ final class LogExplain {
 	const VALUES = array(
 		'sms'          => 'پیامک',
 		'email'        => 'ایمیل',
-		'confirm'      => 'پیام تأیید',
+		'confirm'      => 'پیام تآیید',
 		'restock'      => 'اعلان بازگشت موجودی',
 		'unmanaged'    => 'نامشخص (موجودی مدیریت نمی‌شود)',
 		'yes'          => 'بله',
 		'no'           => 'خیر',
-		'confirmed'    => 'تأیید شد',
+		'confirmed'    => 'تآیید شد',
 		'already'      => 'از قبل انجام شده بود',
 		'expired'      => 'منقضی',
 		'unsubscribed' => 'لغو شد',
@@ -162,7 +163,6 @@ final class LogExplain {
 		'test_email'         => 'ارسال ایمیل آزمایشی',
 		'test_sms'           => 'ارسال پیامک آزمایشی',
 		'clear_logs'         => 'پاک کردن لاگ‌ها',
-		'rebuild_tables'     => 'بازسازی جدول‌ها',
 	);
 
 	/**
@@ -293,7 +293,7 @@ final class LogExplain {
 		$context = trim( (string) $context );
 
 		if ( '' === $context ) {
-			return self::event( $event ) . ' — بدون جزئیات.';
+			return self::event( $event ) . ' — بدون جزییات.';
 		}
 
 		// Two events carry a fixed, positional shape that a generic key=value
@@ -317,7 +317,7 @@ final class LogExplain {
 
 		$pieces = array_filter( $pieces );
 
-		return empty( $pieces ) ? self::event( $event ) . ' — بدون جزئیات.' : implode( '، ', $pieces );
+		return empty( $pieces ) ? self::event( $event ) . ' — بدون جزییات.' : implode( '، ', $pieces );
 	}
 
 	/**
@@ -446,10 +446,18 @@ final class LogExplain {
 			'invalid_phone'     => 'شمارهٔ موبایل معتبر نبوده',
 			'invalid_email'     => 'ایمیل معتبر نبوده',
 			'consent_required'  => 'تیک رضایت زده نشده بوده',
-			'product_available' => 'محصول در آن لحظه موجود بوده (فرم فقط برای محصول ناموجود است)',
-			'invalid_product'   => 'شناسهٔ محصول نامعتبر بوده',
+			'product_available' => 'محصول یا تنوع در آن لحظه موجود بوده است',
+			'variation_required' => 'تنوع ناموجود انتخاب نشده بوده است',
+			'invalid_variation' => 'تنوع متعلق به محصول، فعال یا قابل نمایش نبوده است',
+			'invalid_product'   => 'محصول نامعتبر یا در دسترس نبوده است',
 			'no_woocommerce'    => 'ووکامرس فعال نبوده',
 			'no_channel'        => 'هیچ کانال اعلانی تنظیم نشده بود',
+			'schema_upgrade'    => 'به‌روزرسانی ساختار جدول‌های افزونه کامل نشده بود',
+			'db'                => 'عملیات پایگاه داده انجام نشد',
+			'queue'             => 'پیام تآیید تازه در صف ثبت نشد',
+			'conflict'          => 'وضعیت درخواست هم‌زمان تغییر کرده بود',
+			'missing'           => 'ردیف قبلی پیدا نشد',
+			'status'            => 'وضعیت ردیف برای ثبت مجدد معتبر نبود',
 			'rate_limited'      => 'تعداد تلاش از یک IP در یک ساعت زیاد بوده (محدودیت نرخ)',
 			'subscribe_failed'  => 'نوشتن ردیف در پایگاه داده انجام نشد',
 			'bad_nonce'         => 'کد امنیتی فرم منقضی شده بود (صفحه از کش بارگذاری شده یا نشست تمام شده)',
@@ -520,9 +528,12 @@ final class LogExplain {
 			'duplicate'        => 'کاری لازم نیست؛ مشتری از قبل در لیست است.',
 			'invalid_name'     => 'اگر فیلد نام اجباری است، برچسب و راهنمای فرم را واضح‌تر کنید.',
 			'invalid_phone'    => 'الگوی شمارهٔ موبایل ایران (۰۹…) را در فرم بررسی کنید.',
-			'product_available' => 'فرم فقط روی محصول ناموجود نمایش داده می‌شود؛ اگر این عدد زیاد است، کش صفحهٔ محصول قدیمی است.',
+			'product_available' => 'موجودی فعلی و کش صفحهٔ محصول را بررسی کنید.',
+			'variation_required' => 'در فرم، تنوع ناموجود را پیش از ثبت انتخاب کنید.',
+			'invalid_variation' => 'تعلق تنوع به محصول، فعال‌بودن، قیمت و تنظیم پنهان‌سازی ناموجودها را بررسی کنید.',
 			'no_channel'       => 'تنظیمات → کانال‌ها: یک درگاه پیامک را پیکربندی کنید.',
-			'subscribe_failed' => 'ابزارها → «بازسازی جدول‌ها» و سپس بررسی دسترسی نوشتن پایگاه داده.',
+			'schema_upgrade'   => 'از داده‌ها پشتیبان بگیرید، مجوز CREATE و ALTER را بررسی و صفحه را دوباره بارگذاری کنید تا ارتقا تکرار شود.',
+			'subscribe_failed' => 'دسترسی نوشتن پایگاه داده و وضعیت جدول‌ها را در ابزارها بررسی کنید.',
 		);
 
 		if ( isset( $map[ $code ] ) ) {
@@ -531,6 +542,10 @@ final class LogExplain {
 
 		if ( 'delivery_failed' === $event ) {
 			return 'ابزارها → «ارسال آزمایشی» را بزنید تا متن خطای واقعی درگاه را ببینید.';
+		}
+
+		if ( 'notification_state_failed' === $event ) {
+			return 'ممکن است درگاه پیام را پذیرفته باشد. پیش از تلاش دوباره، وضعیت پیام و دسترسی نوشتن پایگاه داده را بررسی کنید.';
 		}
 
 		if ( 'queue_reclaimed' === $event ) {
@@ -542,7 +557,7 @@ final class LogExplain {
 		}
 
 		if ( 'queue_insert_failed' === $event ) {
-			return 'معمولاً یعنی جدول صف وجود ندارد یا کاربر پایگاه داده اجازهٔ نوشتن ندارد. ابزارها → «بازسازی جدول‌ها» را بزنید.';
+			return 'وجود جدول صف و مجوز نوشتن پایگاه داده را بررسی کنید. پس از پشتیبان‌گیری، غیرفعال و فعال‌کردن دوبارهٔ افزونه ساخت جدول‌ها را تکرار می‌کند.';
 		}
 
 		if ( 'restock_no_units' === $event ) {

@@ -86,9 +86,18 @@ final class Database {
 	}
 
 	/**
+	 * Whether the last schema upgrade completed successfully on this site.
+	 *
+	 * @return bool
+	 */
+	public static function schema_ready() {
+		return function_exists( 'get_option' ) && (string) get_option( 'mojoodyar_db_version', '' ) === (string) MOJODYAR_DB_VERSION;
+	}
+
+	/**
 	 * Create or upgrade the schema.
 	 *
-	 * @return void
+	 * @return bool True when the required lifecycle columns are accessible.
 	 */
 	public static function install() {
 		global $wpdb;
@@ -119,6 +128,7 @@ final class Database {
 			full_name VARCHAR(120) NOT NULL DEFAULT '',
 			user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			status VARCHAR(16) NOT NULL DEFAULT 'pending',
+			registration_cycle BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			consent_at DATETIME DEFAULT NULL,
 			confirmed_at DATETIME DEFAULT NULL,
 			notified_at DATETIME DEFAULT NULL,
@@ -161,6 +171,7 @@ final class Database {
 		$sql_queue = "CREATE TABLE {$queue} (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			waitlist_id BIGINT UNSIGNED NOT NULL,
+			registration_cycle BIGINT UNSIGNED NOT NULL DEFAULT 0,
 			channel VARCHAR(16) NOT NULL,
 			event_key VARCHAR(100) NOT NULL DEFAULT '',
 			payload_hash CHAR(64) NOT NULL,
@@ -217,9 +228,51 @@ final class Database {
 
 		self::force_innodb();
 
+		// dbDelta can fail silently, for example when the database user lacks
+		// ALTER privileges. Do not stamp the upgrade complete when either
+		// lifecycle column is missing: the next request must retry the upgrade.
+		if ( ! self::has_column( $wait, 'registration_cycle' )
+			|| ! self::has_column( $queue, 'registration_cycle' ) ) {
+			return false;
+		}
+
 		if ( function_exists( 'update_option' ) ) {
 			update_option( 'mojoodyar_db_version', MOJODYAR_DB_VERSION, false );
 		}
+
+		return true;
+	}
+
+	/**
+	 * Check safely whether a column exists on a plugin table without
+	 * letting strict mysqli exceptions abort activation.
+	 *
+	 * @param string $table  Fully qualified table name.
+	 * @param string $column Column name.
+	 * @return bool
+	 */
+	private static function has_column( $table, $column ) {
+		global $wpdb;
+
+		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'query' ) || ! Migration::table_exists( $table ) ) {
+			return false;
+		}
+
+		$quoted_table  = '`' . str_replace( '`', '', (string) $table ) . '`';
+		$quoted_column = '`' . str_replace( '`', '', (string) $column ) . '`';
+		$prev_suppress = method_exists( $wpdb, 'suppress_errors' ) ? $wpdb->suppress_errors( true ) : null;
+
+		try {
+			$ok = false !== $wpdb->query( 'SELECT ' . $quoted_column . ' FROM ' . $quoted_table . ' LIMIT 0' );
+		} catch ( \Throwable $e ) {
+			$ok = false;
+		}
+
+		if ( null !== $prev_suppress ) {
+			$wpdb->suppress_errors( $prev_suppress );
+		}
+
+		return $ok;
 	}
 
 	/**

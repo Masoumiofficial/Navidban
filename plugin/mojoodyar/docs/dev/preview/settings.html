@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.8.0 — تنظیمات</title>
+<title>موجودیار 1.0.0 — تنظیمات</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -38,10 +38,40 @@ body {
  *
  * Rules this file follows:
  *  - no external font/image request: the panel must work on an offline host;
+ *    Vazirmatn ships inside assets/fonts (SIL OFL 1.1, see assets/fonts/OFL.txt)
+ *    and is served from the plugin directory, never from a CDN;
  *  - every glass surface keeps a solid fallback colour, so the layout is still
  *    readable in browsers without backdrop-filter (Firefox < 103, old Safari);
  *  - contrast is checked against the *light* fallback, not against the blur.
  */
+
+/* Vazirmatn — Arabic/Persian subset, three weights, bundled. A clean install
+ * with a Latin-only admin font otherwise falls back to Tahoma and the panel
+ * looks like a different product from the screenshots. font-display: swap
+ * keeps the first paint immediate. */
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-700-normal.woff2") format("woff2");
+}
 
 .mjy-wrap {
 	--mjy-primary: #0e5c55;
@@ -189,6 +219,11 @@ body {
 	line-height: 1.7;
 	color: #fff;
 	white-space: nowrap;
+	text-decoration: none;
+}
+
+a.mjy-chip:hover {
+	text-decoration: underline;
 }
 
 .mjy-chip--accent {
@@ -1062,6 +1097,15 @@ body {
 	font-size: 12px;
 	color: var(--mjy-ink-soft);
 	text-align: center;
+}
+
+.mjy-footer a {
+	color: var(--mjy-primary);
+	text-decoration: none;
+}
+
+.mjy-footer a:hover {
+	text-decoration: underline;
 }
 
 /* -------------------------------------------------------------------------
@@ -2194,12 +2238,12 @@ body {
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.8.0.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">تنظیمات موجودیار<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۸.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
-	
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">تنظیمات موجودیار<small>پیش‌فرض‌ها آمادهٔ کارند؛ برای پیامک فقط یکی از درگاه‌ها را پر کنید</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۱.۰.۰</span><a class="mjy-chip mjy-chip--accent" href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a><a class="mjy-chip" href="https://github.com/Masoumiofficial/Navidban" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings" aria-current="page">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+
 	<form method="post" action="options.php">
 		<input type="hidden" name="option_page" value="mojoodyar_settings_group" />
 		<div class="mjy-panel">
@@ -2285,7 +2329,7 @@ body {
 					<th scope="row">ایمیل</th>
 					<td>
 						<label><input type="checkbox" name="mojoodyar_settings[email_enabled]" value="1"  checked="checked" /> فعال</label>
-						<p class="description">از تابع ایمیل وردپرس (wp_mail) استفاده می‌شود؛ هیچ سرویس بیرونی در میان نیست.</p>
+						<p class="description">برای ارسال از تابع ایمیل وردپرس (wp_mail) استفاده می‌شود؛ افزونهٔ SMTP فعال می‌تواند سرویس ارسال را تعیین کند.</p>
 					</td>
 				</tr>
 				<tr>
@@ -2293,9 +2337,10 @@ body {
 					<td>
 						<input id="mjy-from-email" class="regular-text" dir="ltr" name="mojoodyar_settings[from_email]" value="" placeholder="noreply@example.com" />
 						<p class="description">
-							بهتر است دامنهٔ همین نشانی با دامنهٔ سایت یکی باشد؛ فرستندهٔ ناهم‌خوان، رایج‌ترین
-							دلیل «ارسال شد ولی ایمیل نیامد» است. خالی بگذارید تا ایمیل مدیر سایت
-							(<code dir="ltr"></code>) استفاده شود.
+							اگر این کادر خالی باشد، ایمیل مدیریت همین سایت در «تنظیمات ← عمومی» وردپرس،
+							در صورت معتبر بودن به‌عنوان فرستنده به کار می‌رود؛ در غیر این صورت وردپرس فرستنده را تعیین می‌کند.
+							برای بهبود تحویل، از نشانی تآییدشدهٔ سرویس ایمیل خود استفاده کنید؛
+							تنظیمات یا افزونهٔ SMTP ممکن است فرستنده را تغییر دهد.
 						</p>
 					</td>
 				</tr>
@@ -2364,17 +2409,17 @@ body {
 							<code>{product_url}</code> نشانی صفحه، <code>{site_name}</code> نام فروشگاه.
 							اگر نام مشتری ثبت نشده باشد، جای آن «همراه گرامی» می‌آید.
 						</p>
-						<p class="description">پیوند لغو اشتراک در هر پیام اجباری است؛ آن را حذف نکنید. هر ۷۰ کاراکتر یک پیامک حساب می‌شود.</p>
+						<p class="description">در متن پیش‌فرض، پیوند لغو اشتراک با <code>{unsubscribe_url}</code> آمده است؛ اگر آن را حذف کنید، پیامک پیوند لغو نخواهد داشت. هر ۷۰ کاراکتر یک پیامک حساب می‌شود.</p>
 					</td>
 				</tr>
 			</table>
 
 		</div>
 		<div class="mjy-panel">
-			<h2>رضایت و تأیید دومرحله‌ای</h2>
+			<h2>رضایت و تآیید دومرحله‌ای</h2>
 			<p class="description" style="max-width:640px;">
-				پیش‌فرض تازه: تأیید دومرحله‌ای <strong>خاموش</strong> است؛ مشتری یک‌بار ثبت می‌کند و اعلان موجودی مستقیم می‌رسد.
-				اگر روی این سایت ثبت‌نام الکی زیاد شده، روشنش کنید. هزینه‌اش این است که تا وقتی مشتری پیوند تأیید را باز نکند،
+				پیش‌فرض تازه: تآیید دومرحله‌ای <strong>خاموش</strong> است؛ مشتری یک‌بار ثبت می‌کند و اعلان موجودی مستقیم می‌رسد.
+				اگر روی این سایت ثبت‌نام الکی زیاد شده، روشنش کنید. هزینه‌اش این است که تا وقتی مشتری پیوند تآیید را باز نکند،
 				اعلانی برایش نمی‌رود؛ بعضی مشتری‌ها این را «پیام نیامد» برداشت می‌کنند.
 			</p>
 			<table class="form-table" role="presentation">
@@ -2396,17 +2441,17 @@ body {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row">تأیید دومرحله‌ای</th>
+					<th scope="row">تآیید دومرحله‌ای</th>
 					<td>
 						<label><input type="checkbox" name="mojoodyar_settings[double_opt_in]" value="1"  /> فعال</label>
 						<p class="description">
 							خاموش (پیش‌فرض): ثبت یک‌مرحله‌ای است و اعلان موجودی مستقیم ارسال می‌شود — کم‌ترین اصطکاک برای مشتری.
-							روشن: تا وقتی مشتری پیوند تأیید را باز نکند، هیچ اعلانی برایش نمی‌رود؛ جلوی ثبت‌نام الکی را می‌گیرد.
+							روشن: تا وقتی مشتری پیوند تآیید را باز نکند، هیچ اعلانی برایش نمی‌رود؛ جلوی ثبت‌نام الکی را می‌گیرد.
 						</p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="mjy-ttl">اعتبار پیوند تأیید (ساعت)</label></th>
+					<th scope="row"><label for="mjy-ttl">اعتبار پیوند تآیید (ساعت)</label></th>
 					<td><input id="mjy-ttl" type="number" min="1" max="168" name="mojoodyar_settings[confirm_ttl_hours]" value="48" /></td>
 				</tr>
 			</table>
@@ -2429,6 +2474,17 @@ body {
 				<tr>
 					<th scope="row"><label for="mjy-batch">اندازهٔ دسته</label></th>
 					<td><input id="mjy-batch" type="number" min="1" max="500" name="mojoodyar_settings[queue_batch_size]" value="50" /> <span class="description">پیش‌فرض ۵۰، سقف ۵۰۰.</span></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="mjy-attempts">حداکثر تلاش برای هر پیام</label></th>
+					<td>
+						<input id="mjy-attempts" type="number" min="1" max="5" name="mojoodyar_settings[max_attempts]" value="3" />
+						<span class="description">
+							پیش‌فرض ۳. اگر پیام ناموفق شد، با فاصلهٔ ۱۵ دقیقه، ۱ ساعت و ۶ ساعت دوباره تلاش می‌شود
+							و بعد از این تعداد، «ناموفق» می‌ماند. خطاهای تنظیماتی (طول مقدار، الگوی نامعتبر) از
+							این شمارش جدا هستند و تلاشی مصرف نمی‌کنند.
+						</span>
+					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="mjy-rate">حداکثر ارسال در دقیقه</label></th>
@@ -2474,15 +2530,15 @@ body {
 				</tr>
 			</table>
 
-			
+
 			<h3>متن الگو (برای خطوط خدماتی)</h3>
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row">متن تأییدشدهٔ الگو</th>
+					<th scope="row">متن تآییدشدهٔ الگو</th>
 					<td>
 						<textarea id="mjy-sms-pattern" class="large-text" rows="3" dir="rtl" name="mojoodyar_settings[sms_pattern_template]" placeholder="{0} عزیز، {1} دوباره موجود شد — فروشگاه تست"></textarea>
 						<p class="description">
-							همان متنی را بگذارید که در پنل ملی‌پیامک تأیید شده است. اگر خالی بماند، متن پیشنهادی پایین
+							همان متنی را بگذارید که در پنل ملی‌پیامک تآیید شده است. اگر خالی بماند، متن پیشنهادی پایین
 							استفاده می‌شود. جای هر مقدار متغیر، <code>{0}</code>، <code>{1}</code> … بگذارید —
 							نه نام متغیر.
 						</p>
@@ -2569,7 +2625,7 @@ body {
 						<div class="mjy-pattern-help">
 							<p>
 								<strong>۱.</strong> در پنل ملی‌پیامک → «ارسال الگو» → «متن‌های من» یک متن بسازید و همان را
-								تأیید بگیرید. متن نهایی همان چیزی است که مشتری می‌بیند؛ کد افزونه فقط مقدارها را پر می‌کند.
+								تآیید بگیرید. متن نهایی همان چیزی است که مشتری می‌بیند؛ کد افزونه فقط مقدارها را پر می‌کند.
 							</p>
 							<p>
 								<strong>۲.</strong> برای هر مقداری که می‌خواهید در پیام بیاید، یک متغیر بگذارید: <code>{0}</code>، <code>{1}</code>، <code>{2}</code> …
@@ -2581,7 +2637,7 @@ body {
 							</p>
 							<p>
 								<strong>۴.</strong> الگوهایی مثل «<code>{0} باتشکر</code>» یا «<code>{0} گوگل</code>»
-								تأیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
+								تآیید نمی‌شوند؛ متن باید محتوای واقعی داشته باشد.
 							<p>
 								<strong>۴.۵.</strong> اگر <code>{2}</code> (نشانی محصول) در الگوست، حتماً «نشانی کوتاه» را
 							روشن بگذارید و اگر باز هم از سقف بیشتر بود، یا دامنهٔ کوتاه بگذارید یا <code>{2}</code> را
@@ -2601,7 +2657,7 @@ body {
 					<td>
 						<code class="mjy-pattern-sample" dir="rtl">{0} عزیز، {1} دوباره موجود شد — فروشگاه تست</code>
 						<p class="description">
-							این متن را عیناً در پنل درگاه ثبت کنید (نام فروشگاه خودتان در انتهایش هست)، تأیید بگیرید و
+							این متن را عیناً در پنل درگاه ثبت کنید (نام فروشگاه خودتان در انتهایش هست)، تآیید بگیرید و
 							شناسهٔ آن را در فیلد <code>bodyId</code> بالا بگذارید.
 						</p>
 						<p class="description">
@@ -2681,6 +2737,6 @@ body {
 		</div>
 	</form>
 
-	<p class="mjy-footer">موجودیار — محصولی از اتحاد وردپرس</p></div>
+	<p class="mjy-footer">موجودیار — محصولی از <a href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a> | <a href="https://github.com/Masoumiofficial/Navidban" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a></p></div>
 </body>
 </html>

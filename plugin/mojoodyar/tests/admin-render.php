@@ -201,6 +201,36 @@ foreach ( $screens as $key => $config ) {
 }
 
 /* -------------------------------------------------------------------------
+ * Sender settings: generic help, blank fresh value, explicit value preserved
+ * ---------------------------------------------------------------------- */
+MjyAdmin::group( 'راهنمای فرستندهٔ ایمیل' );
+
+$original_admin  = get_option( 'admin_email', null );
+$original_sender = Settings::get( 'from_email', '' );
+update_option( 'admin_email', 'owner-a@example.com' );
+Settings::update( array( 'from_email' => '' ) );
+$sender_html_a = mjy_render( array( $admin, 'render_settings' ) );
+MjyAdmin::ok( false !== strpos( $sender_html_a, 'ایمیل مدیریت همین سایت' ), 'راهنما به ایمیل مدیریت همان سایت اشاره می‌کند' );
+MjyAdmin::ok( false !== strpos( $sender_html_a, 'تنظیمات ← عمومی' ), 'مسیر تنظیم ایمیل مدیریت در راهنما هست' );
+MjyAdmin::ok( false === strpos( $sender_html_a, 'owner-a@example.com' ), 'نشانی مدیر سایت اول در متن راهنما چاپ نمی‌شود' );
+MjyAdmin::ok( false !== strpos( $sender_html_a, 'name="mojoodyar_settings[from_email]" value=""' ), 'کادر فرستندهٔ خالی، خالی رندر می‌شود' );
+
+update_option( 'admin_email', 'owner-b@example.com' );
+$sender_html_b = mjy_render( array( $admin, 'render_settings' ) );
+MjyAdmin::ok( false === strpos( $sender_html_b, 'owner-a@example.com' ) && false === strpos( $sender_html_b, 'owner-b@example.com' ), 'راهنمای سایت دوم هم نشانی شخصی نمایش نمی‌دهد' );
+
+Settings::update( array( 'from_email' => 'sender@shop.example' ) );
+$sender_html_custom = mjy_render( array( $admin, 'render_settings' ) );
+MjyAdmin::ok( false !== strpos( $sender_html_custom, 'value="sender@shop.example"' ), 'فرستنده‌ای که فروشگاه انتخاب کرده همچنان در کادر قابل ویرایش است' );
+
+Settings::update( array( 'from_email' => $original_sender ) );
+if ( null === $original_admin ) {
+	delete_option( 'admin_email' );
+} else {
+	update_option( 'admin_email', $original_admin );
+}
+
+/* -------------------------------------------------------------------------
  * Shell: app bar + tab strip
  * ---------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------
@@ -378,7 +408,7 @@ MjyAdmin::ok( false !== strpos( $settings_html, 'نشانی کوتاه محصو�
 MjyAdmin::ok( false !== strpos( $settings_html, 'value="site"' ), 'گزینهٔ «نشانی اصلی سایت» هست' );
 MjyAdmin::ok( false !== strpos( $settings_html, 'به صفحهٔ اصلی می‌برد نه به همان محصول' ), 'هزینهٔ انتخاب نشانی سایت توضیح داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $settings_html, '?p=12' ), 'طول واقعی نشانی کوتاه در صفحه نوشته می‌شود' );
-MjyAdmin::ok( false !== strpos( $settings_html, 'mjy-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تأیید می‌گیرد' );
+MjyAdmin::ok( false !== strpos( $settings_html, 'mjy-pattern-ok' ), 'الگوی پیش‌فرض سالم است و پیام تآیید می‌گیرد' );
 MjyAdmin::ok( false === strpos( $settings_html, 'mjy-pattern-findings' ), 'برای الگوی پیش‌فرض هیچ ایرادی رندر نمی‌شود' );
 
 // ---------------------------------------------------------------- name field
@@ -532,7 +562,7 @@ $diag_html            = mjy_render( array( $admin, 'render_tools' ) );
 unset( $_GET['diag_product'] );
 
 MjyAdmin::ok( false !== strpos( $diag_html, 'نتیجه برای محصول' ), 'پنل تشخیص برای شناسهٔ داده‌شده رندر می‌شود' );
-MjyAdmin::ok( false !== strpos( $diag_html, 'تأییدشده' ), 'تعداد تأییدشده نمایش داده می‌شود' );
+MjyAdmin::ok( false !== strpos( $diag_html, 'تآییدشده' ), 'تعداد تآییدشده نمایش داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $diag_html, 'snapshot' ) || false !== strpos( $diag_html, 'تصویر موجودی' ), 'وضعیت تصویر موجودی نمایش داده می‌شود' );
 MjyAdmin::ok( false !== strpos( $diag_html, 'صف ارسال' ), 'وضعیت صف نمایش داده می‌شود' );
 
@@ -541,7 +571,8 @@ $_GET['diag_product'] = 424242;
 $empty_html           = mjy_render( array( $admin, 'render_tools' ) );
 unset( $_GET['diag_product'] );
 
-MjyAdmin::ok( false !== strpos( $empty_html, 'علت اصلی همین است' ), 'محصول بدون مشترک تأییدشده، علت را صریح می‌گوید' );
+MjyAdmin::ok( false !== strpos( $empty_html, 'مشترک واجد شرایطی یافت نشد' ), 'محصول بدون مشترک تآییدشده، وضعیت را صریح می‌گوید' );
+MjyAdmin::ok( false !== strpos( $empty_html, 'به‌تنهایی علت قطعی نیست' ), 'پنل تشخیص از ادعای علت قطعی پرهیز می‌کند' );
 
 // Hostile input: a non-numeric id must not reach a query or the output.
 $_GET['diag_product'] = '<script>alert(1)</script>';

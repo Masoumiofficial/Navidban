@@ -3,15 +3,16 @@
  * Storefront: conditional asset loading, the "notify me" form and the public
  * confirm/unsubscribe handlers.
  *
- * Core differentiator: nothing is enqueued unless the visitor is on a single
- * product page whose product (or a variation of it) cannot be purchased.
- * See docs/PERFORMANCE.md for the measurement method.
+ * Assets are loaded on eligible product pages or when an eligible form is
+ * explicitly placed with the shortcode. Other pages stay untouched.
+ * See docs/PERFORMANCE.md for the measurement method and its limits.
  *
  * @package Mojoodyar
  */
 
 namespace Mojoodyar;
 
+use Mojoodyar\Support\ProductAvailability;
 use Mojoodyar\Support\Validator;
 
 defined( 'ABSPATH' ) || exit;
@@ -28,6 +29,24 @@ final class Frontend {
 	 */
 	private $should_load = null;
 
+	/** @var bool Whether the automatic form has been output in this request. */
+	private $automatic_rendered = false;
+
+	/** @var bool Whether a fallback summary position has been output. */
+	private $summary_marked = false;
+
+	/** @var bool Whether the storefront assets have already been queued. */
+	private $assets_enqueued = false;
+
+	/** @var array<int,bool> Products already rendered by an explicit shortcode. */
+	private $shortcode_products = array();
+
+	/** @var array<int,array> Cached unavailable variations, keyed by parent ID. */
+	private $unavailable_variations = array();
+
+	/** @var int Unique suffix for forms, including across multiple instances. */
+	private static $form_sequence = 0;
+
 	/**
 	 * Register hooks.
 	 *
@@ -36,7 +55,13 @@ final class Frontend {
 	public function register_hooks() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue' ), 20 );
 		add_action( 'template_redirect', array( $this, 'handle_public_actions' ), 1 );
-		add_action( 'woocommerce_single_product_summary', array( $this, 'render_form' ), 35 );
+		add_filter( 'woocommerce_get_stock_html', array( $this, 'mark_stock_position' ), 20, 2 );
+		add_action( 'woocommerce_single_product_summary', array( $this, 'mark_summary_position' ), 35 );
+		add_action( 'woocommerce_after_single_product_summary', array( $this, 'mark_summary_position' ), 1 );
+		// Render outside the purchase form and after normal page content. The
+		// script moves it to a safe position, and an explicit shortcode wins.
+		add_action( 'wp_footer', array( $this, 'render_form' ), 5 );
+		add_shortcode( 'mojoodyar_form', array( $this, 'shortcode' ) );
 	}
 
 	/**
@@ -60,74 +85,72 @@ final class Frontend {
 	 * @return bool
 	 */
 	public function evaluate_should_load() {
-		if ( is_admin() || wp_doing_ajax_compat() || is_feed() || is_robots() ) {
-			return false;
-		}
-
-		if ( ! function_exists( 'is_product' ) || ! is_product() ) {
-			return false;
-		}
-
-		if ( ! function_exists( 'wc_get_product' ) || ! function_exists( 'get_queried_object_id' ) ) {
+		if ( ! $this->is_frontend_request() || ! function_exists( 'is_product' ) || ! is_product()
+			|| ! function_exists( 'wc_get_product' ) || ! function_exists( 'get_queried_object_id' ) ) {
 			return false;
 		}
 
 		$product_id = (int) get_queried_object_id();
-		if ( $product_id <= 0 ) {
-			return false;
-		}
-
-		$product = wc_get_product( $product_id );
-		if ( ! $product ) {
-			return false;
-		}
-
-		if ( ! $product->is_in_stock() ) {
-			return true;
-		}
-
-		// A variable product can be "in stock" as a whole while single
-		// variations are sold out. Only then do we need our assets.
-		return $this->has_out_of_stock_variation( $product );
+		return $product_id > 0 && $this->product_is_eligible( wc_get_product( $product_id ) );
 	}
 
 	/**
-	 * Does the product have at least one variation that cannot be bought?
+	 * Do not render into feeds, administration or background requests.
+	 *
+	 * @return bool
+	 */
+	private function is_frontend_request() {
+		if ( is_admin() || wp_doing_ajax_compat() || is_feed() || is_robots()
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() )
+			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * A form is only useful for a public product or an unavailable variation.
+	 *
+	 * @param object|null $product Product.
+	 * @return bool
+	 */
+	private function product_is_eligible( $product ) {
+		if ( ! ProductAvailability::public_product( $product ) ) {
+			return false;
+		}
+
+		if ( $product->is_type( 'variable' ) ) {
+			return $this->has_out_of_stock_variation( $product );
+		}
+
+		return ! $product->is_in_stock();
+	}
+
+	/**
+	 * Does a variable product have any active, published sold-out variation?
 	 *
 	 * @param \WC_Product $product Product.
 	 * @return bool
 	 */
 	public function has_out_of_stock_variation( $product ) {
-		if ( ! is_object( $product ) || ! method_exists( $product, 'is_type' ) || ! $product->is_type( 'variable' ) ) {
+		if ( ! ProductAvailability::public_product( $product ) || ! $product->is_type( 'variable' )
+			|| ! method_exists( $product, 'get_children' ) || ! function_exists( 'wc_get_product' ) ) {
 			return false;
 		}
 
-		if ( ! method_exists( $product, 'get_children' ) || ! function_exists( 'wc_get_product' ) ) {
-			return false;
+		$children = (array) $product->get_children();
+		// Prime post/meta caches in bulk, as WooCommerce itself does when it
+		// builds its variations. There is deliberately no 100-item cutoff:
+		// an unavailable variation after that boundary must not be missed.
+		if ( $children && function_exists( '_prime_post_caches' ) ) {
+			_prime_post_caches( $children, false, true );
 		}
-
-		$children = $product->get_children();
-
-		if ( empty( $children ) ) {
-			return false;
-		}
-
-		// Cap the loop: a product with hundreds of variations must not turn a
-		// page view into hundreds of object loads.
-		$children = array_slice( $children, 0, 100 );
 
 		foreach ( $children as $child_id ) {
 			$variation = wc_get_product( (int) $child_id );
-
-			if ( ! $variation ) {
-				continue;
-			}
-
-			if ( method_exists( $variation, 'variation_is_active' ) && ! $variation->variation_is_active() ) {
-				continue;
-			}
-
-			if ( ! $variation->is_in_stock() ) {
+			if ( ProductAvailability::unavailable_variation( $product, $variation ) ) {
 				return true;
 			}
 		}
@@ -136,27 +159,86 @@ final class Frontend {
 	}
 
 	/**
+	 * Collect eligible choices for a standalone waitlist selector. This honors
+	 * WooCommerce's variation visibility and activity filters, but can list an
+	 * out-of-stock choice even when the purchase selector hides it.
+	 *
+	 * @param \WC_Product $product Variable product.
+	 * @return array
+	 */
+	private function unavailable_variations_for( $product ) {
+		$product_id = (int) $product->get_id();
+		if ( array_key_exists( $product_id, $this->unavailable_variations ) ) {
+			return $this->unavailable_variations[ $product_id ];
+		}
+
+		$choices  = array();
+		$children = (array) $product->get_children();
+		if ( $children && function_exists( '_prime_post_caches' ) ) {
+			_prime_post_caches( $children, false, true );
+		}
+
+		foreach ( $children as $child_id ) {
+			$variation = wc_get_product( (int) $child_id );
+			if ( ! ProductAvailability::unavailable_variation( $product, $variation ) ) {
+				continue;
+			}
+
+			$label = function_exists( 'wc_get_formatted_variation' )
+				? (string) wc_get_formatted_variation( $variation, true, true, false )
+				: '';
+			$label = trim( strip_tags( $label ) );
+			if ( '' === $label && method_exists( $variation, 'get_name' ) ) {
+				$label = trim( (string) $variation->get_name() );
+			}
+			$choices[] = array(
+				'id'    => (int) $child_id,
+				'label' => \Mojoodyar\Support\Persian::normalize( '' !== $label ? $label : ( 'تنوع #' . (int) $child_id ) ),
+			);
+		}
+
+		$this->unavailable_variations[ $product_id ] = $choices;
+		return $choices;
+	}
+
+	/**
 	 * Enqueue assets, but only when they are needed.
 	 *
 	 * @return void
 	 */
 	public function maybe_enqueue() {
-		if ( ! $this->should_load() ) {
+		if ( $this->should_load() ) {
+			$this->enqueue_assets();
+		}
+	}
+
+	/**
+	 * Also used by shortcodes rendered after wp_enqueue_scripts. WordPress
+	 * prints late styles and footer scripts at wp_footer on standard themes.
+	 *
+	 * @return void
+	 */
+	private function enqueue_assets() {
+		if ( $this->assets_enqueued ) {
 			return;
 		}
+		$this->assets_enqueued = true;
+		// The marketplace version remains 1.0.0; this revision invalidates a
+		// browser's cached pre-shortcode storefront CSS/JS after replacement.
+		$asset_version = MOJODYAR_VERSION . '-form1';
 
 		wp_enqueue_style(
 			'mojoodyar-front',
 			MOJODYAR_URL . 'assets/css/mojoodyar-front.css',
 			array(),
-			MOJODYAR_VERSION
+			$asset_version
 		);
 
 		wp_enqueue_script(
 			'mojoodyar-front',
 			MOJODYAR_URL . 'assets/js/mojoodyar-front.js',
 			array(),
-			MOJODYAR_VERSION,
+			$asset_version,
 			true
 		);
 
@@ -170,13 +252,14 @@ final class Frontend {
 				'ajaxNonce' => wp_create_nonce( 'mojoodyar_subscribe' ),
 				'channel'   => $this->channel_mode(),
 				'strings'   => array(
-					'duplicate'   => 'این شماره یا ایمیل پیش‌تر ثبت شده است. اگر پیام تأیید را دریافت نکردید، چند دقیقهٔ دیگر دوباره تلاش کنید.',
+					'duplicate'   => 'این شماره یا ایمیل پیش‌تر ثبت شده است. اگر پیام تآیید را دریافت نکردید، چند دقیقهٔ دیگر دوباره تلاش کنید.',
 					'invalid'     => 'شمارهٔ موبایل یا ایمیل را درست وارد کنید.',
 					'invalidName' => 'نام و نام خانوادگی را کامل بنویسید.',
-					'consent'     => 'برای ادامه باید رضایت خود را تأیید کنید.',
+					'variation'   => 'لطفاً تنوع ناموجود مورد نظر را انتخاب کنید.',
+					'consent'     => 'برای ادامه باید رضایت خود را تآیید کنید.',
 					'network'     => 'ارتباط برقرار نشد. لطفاً دوباره تلاش کنید.',
 					'success'     => (string) Settings::get( 'success_message', '' ),
-					'confirmSent' => 'یک پیام تأیید برای شما ارسال شد. برای تکمیل ثبت، پیوند داخل آن را باز کنید.',
+					'confirmSent' => 'پیام تآیید در صف ارسال قرار گرفت. پس از دریافت، برای تکمیل ثبت پیوند داخل آن را باز کنید.',
 				),
 			)
 		);
@@ -254,40 +337,138 @@ final class Frontend {
 	}
 
 	/**
-	 * Render the waitlist form on the product page.
+	 * Mark a stock position, never insert a form into WooCommerce's HTML. In
+	 * particular, variation stock HTML is also embedded in JSON and may later
+	 * be displayed inside the purchase form.
+	 *
+	 * @param string      $html    Original stock markup.
+	 * @param \WC_Product $product Product whose stock is being rendered.
+	 * @return string
+	 */
+	public function mark_stock_position( $html, $product ) {
+		if ( ! is_string( $html ) || '' === trim( $html ) || ! $this->is_frontend_request()
+			|| ! function_exists( 'is_product' ) || ! is_product()
+			|| ! function_exists( 'doing_action' ) || ! doing_action( 'woocommerce_single_product_summary' )
+			|| ! is_object( $product ) || ! method_exists( $product, 'get_id' )
+			|| ! method_exists( $product, 'is_in_stock' ) || $product->is_in_stock()
+			|| (int) $product->get_id() !== (int) get_queried_object_id() || ! $this->should_load() ) {
+			return $html;
+		}
+
+		return $html . '<span class="mjy-stock-anchor" data-mjy-product="' . esc_attr( (string) $product->get_id() ) . '" hidden></span>';
+	}
+
+	/**
+	 * Place a fallback marker if the theme runs either summary hook. The form
+	 * itself is printed in the footer, where it cannot nest in the cart form.
+	 *
+	 * @return void
+	 */
+	public function mark_summary_position() {
+		if ( $this->summary_marked || ! $this->should_load() ) {
+			return;
+		}
+
+		$this->summary_marked = true;
+		echo '<span class="mjy-summary-anchor" data-mjy-product="' . esc_attr( (string) get_queried_object_id() ) . '" hidden></span>';
+	}
+
+	/**
+	 * The shortcode uses the queried product on its own page, or a positive
+	 * product_id (id is an alias) on another page.
+	 *
+	 * @param array|string $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function shortcode( $atts = array() ) {
+		if ( ! $this->is_frontend_request() || ! function_exists( 'wc_get_product' ) ) {
+			return '';
+		}
+
+		$atts   = is_array( $atts ) ? $atts : array();
+		$has_id = array_key_exists( 'product_id', $atts ) || array_key_exists( 'id', $atts );
+		$raw_id = isset( $atts['product_id'] ) ? $atts['product_id'] : ( $atts['id'] ?? '' );
+		if ( isset( $atts['product_id'], $atts['id'] )
+			&& ( ! is_scalar( $atts['product_id'] ) || ! is_scalar( $atts['id'] ) || (string) $atts['product_id'] !== (string) $atts['id'] ) ) {
+			return '';
+		}
+
+		if ( $has_id ) {
+			if ( ! is_scalar( $raw_id ) ) {
+				return '';
+			}
+			$raw_id = trim( (string) $raw_id );
+			if ( ! preg_match( '/^[1-9][0-9]*$/', $raw_id ) || (string) (int) $raw_id !== $raw_id ) {
+				return '';
+			}
+			$product_id = (int) $raw_id;
+		} else {
+			$product_id = function_exists( 'is_product' ) && is_product() ? (int) get_queried_object_id() : 0;
+		}
+
+		$product = $product_id > 0 ? wc_get_product( $product_id ) : null;
+		$html    = $this->render_product_form( $product, 'shortcode' );
+		if ( '' !== $html ) {
+			$this->shortcode_products[ $product_id ] = true;
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Print one automatic form for the main product, unless an explicit form
+	 * for that product was already rendered. The script also deduplicates a
+	 * shortcode produced later in the same footer.
 	 *
 	 * @return void
 	 */
 	public function render_form() {
-		if ( ! $this->should_load() ) {
+		if ( $this->automatic_rendered || ! $this->should_load() ) {
 			return;
 		}
 
 		$product_id = (int) get_queried_object_id();
-		$product    = wc_get_product( $product_id );
-
-		if ( ! $product ) {
+		if ( isset( $this->shortcode_products[ $product_id ] ) ) {
 			return;
 		}
 
-		$variations = array();
-		if ( method_exists( $product, 'get_children' ) ) {
-			foreach ( $product->get_children() as $child_id ) {
-				$variation = wc_get_product( (int) $child_id );
-				if ( ! $variation ) {
-					continue;
-				}
-				$variations[] = array(
-					'id'       => (int) $child_id,
-					'label'    => \Mojoodyar\Support\Persian::normalize( (string) $variation->get_name() ),
-					'in_stock' => (bool) $variation->is_in_stock(),
-				);
-			}
+		$html = $this->render_product_form( wc_get_product( $product_id ), 'automatic' );
+		if ( '' !== $html ) {
+			$this->automatic_rendered = true;
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the view escapes its fields.
+		}
+	}
+
+	/**
+	 * Build a form for one validated product. Multiple shortcode instances are
+	 * intentional and get separate element IDs and variation state.
+	 *
+	 * @param object|null $product   Product.
+	 * @param string      $placement automatic|shortcode.
+	 * @return string
+	 */
+	private function render_product_form( $product, $placement ) {
+		if ( ! $this->product_is_eligible( $product ) ) {
+			return '';
 		}
 
-		$mjy_mode        = $this->channel_mode();
-		$default_channel = $this->default_channel();
-		$user_id         = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
+		$view = MOJODYAR_DIR . 'admin/views/frontend-form.php';
+		if ( ! is_readable( $view ) ) {
+			return '';
+		}
+
+		$product_id  = (int) $product->get_id();
+		$is_variable = $product->is_type( 'variable' );
+		$variations  = $is_variable ? $this->unavailable_variations_for( $product ) : array();
+		if ( $is_variable && empty( $variations ) ) {
+			return '';
+		}
+
+		$this->enqueue_assets();
+		$form_id           = 'mjy-form-' . ++self::$form_sequence;
+		$sync_with_product = function_exists( 'is_product' ) && is_product() && $product_id === (int) get_queried_object_id();
+		$default_channel   = $this->default_channel();
+		$user_id           = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
 
 		$prefill_email = '';
 		$prefill_phone = '';
@@ -312,12 +493,6 @@ final class Frontend {
 
 		$notice = $this->read_notice();
 
-		$view = MOJODYAR_DIR . 'admin/views/frontend-form.php';
-
-		if ( ! is_readable( $view ) ) {
-			return;
-		}
-
 		$settings = array(
 			'heading'     => (string) Settings::get( 'form_heading', '' ),
 			'intro'       => (string) Settings::get( 'form_intro', '' ),
@@ -331,7 +506,9 @@ final class Frontend {
 			'notice'      => $notice,
 		);
 
+		ob_start();
 		include $view;
+		return (string) ob_get_clean();
 	}
 
 	/**

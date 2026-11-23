@@ -48,7 +48,7 @@ final class Activator {
 		// be refused as a conflict.
 		Migration::from_legacy_brand();
 
-		Database::install();
+		$schema_ready = Database::install();
 		self::seed_options();
 		Capabilities::grant();
 		Scheduler::schedule_all();
@@ -60,7 +60,7 @@ final class Activator {
 			update_option( 'mojoodyar_snapshot_seeded', 'no', false );
 		}
 
-		if ( function_exists( 'update_option' ) ) {
+		if ( $schema_ready && function_exists( 'update_option' ) ) {
 			update_option( 'mojoodyar_version', MOJODYAR_VERSION, false );
 		}
 
@@ -107,11 +107,13 @@ final class Activator {
 			return;
 		}
 
-		// 2.0 renamed the product (Navidban -> Mojoodyar) and with it the table
+		// The product was renamed before the public release and with it the table
 		// prefix. Upgrading an old install must move the rows, not orphan them.
 		Migration::from_legacy_brand();
 
-		Database::install();
+		if ( ! Database::install() ) {
+			return;
+		}
 		Capabilities::grant();
 		Scheduler::schedule_all();
 		update_option( 'mojoodyar_version', MOJODYAR_VERSION, false );

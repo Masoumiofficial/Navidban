@@ -1,0 +1,25 @@
+{
+  "official_tag": "9.0.0",
+  "checked": {
+    "includes": {
+      "matched": 593,
+      "total": 593,
+      "official_tree": "89365bffa427d05f669c4ac87a5ceceab28d9798"
+    },
+    "templates": {
+      "matched": 154,
+      "total": 154,
+      "official_tree": "8ff8ace6534a52044aa5f9699f56cab5e629d94d"
+    },
+    "woocommerce.php": {
+      "matched": true,
+      "official_blob": "9255ead3ca45da7155ee8b20fbdcc2d239c93c66"
+    },
+    "assets/js/frontend/add-to-cart-variation.js": {
+      "matched": true,
+      "official_blob": "ba2ba97eb254a8d6fbdb6d5097f068eca4af8e37"
+    }
+  },
+  "mismatches": [],
+  "scope": "Selected PHP and variation JS only; vendor/packages/src and full ZIP not verified."
+}

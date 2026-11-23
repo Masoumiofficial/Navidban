@@ -103,7 +103,7 @@ final class Notifier {
 		$context         = self::build_context( $waitlist, $is_confirmation );
 
 		if ( $is_confirmation ) {
-			$subject = 'تأیید درخواست اعلان — ' . $context['site_name'];
+			$subject = 'تآیید درخواست اعلان — ' . $context['site_name'];
 			$body    = "سلام،\n\nبرای تکمیل ثبت درخواست اعلان «{$context['product_name']}» روی پیوند زیر بزنید:\n{$context['confirm_url']}\n\nاین پیوند تا {$context['ttl_hours']} ساعت معتبر است.";
 			if ( 'sms' === $channel ) {
 				$body = "تایید اعلان {$context['product_name']}: {$context['confirm_url']}";
@@ -137,9 +137,10 @@ final class Notifier {
 			)
 		);
 
-		// Only a restock message advances the subscriber to "notified".
+		// A delivery already in flight cannot be recalled, but must not overwrite
+		// an unsubscribe or a new registration made during the provider call.
 		if ( true === $result && ! $is_confirmation ) {
-			WaitlistRepository::set_status( (int) $waitlist['id'], 'notified' );
+			WaitlistRepository::mark_notified_current( $waitlist );
 		}
 
 		if ( true === $result ) {

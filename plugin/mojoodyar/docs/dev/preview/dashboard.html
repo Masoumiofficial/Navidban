@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>موجودیار 2.8.0 — داشبورد</title>
+<title>موجودیار 1.0.0 — داشبورد</title>
 <style>
 /* --- wordpress-ish page shell (preview only) --- */
 
@@ -38,10 +38,40 @@ body {
  *
  * Rules this file follows:
  *  - no external font/image request: the panel must work on an offline host;
+ *    Vazirmatn ships inside assets/fonts (SIL OFL 1.1, see assets/fonts/OFL.txt)
+ *    and is served from the plugin directory, never from a CDN;
  *  - every glass surface keeps a solid fallback colour, so the layout is still
  *    readable in browsers without backdrop-filter (Firefox < 103, old Safari);
  *  - contrast is checked against the *light* fallback, not against the blur.
  */
+
+/* Vazirmatn — Arabic/Persian subset, three weights, bundled. A clean install
+ * with a Latin-only admin font otherwise falls back to Tahoma and the panel
+ * looks like a different product from the screenshots. font-display: swap
+ * keeps the first paint immediate. */
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "Vazirmatn";
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("../fonts/vazirmatn-arabic-700-normal.woff2") format("woff2");
+}
 
 .mjy-wrap {
 	--mjy-primary: #0e5c55;
@@ -189,6 +219,11 @@ body {
 	line-height: 1.7;
 	color: #fff;
 	white-space: nowrap;
+	text-decoration: none;
+}
+
+a.mjy-chip:hover {
+	text-decoration: underline;
 }
 
 .mjy-chip--accent {
@@ -1062,6 +1097,15 @@ body {
 	font-size: 12px;
 	color: var(--mjy-ink-soft);
 	text-align: center;
+}
+
+.mjy-footer a {
+	color: var(--mjy-primary);
+	text-decoration: none;
+}
+
+.mjy-footer a:hover {
+	text-decoration: underline;
 }
 
 /* -------------------------------------------------------------------------
@@ -2194,19 +2238,19 @@ body {
 </head>
 <body>
 <p class="mjy-preview-note">
-    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 2.8.0.
+    پیش‌نمایش استاتیک از خروجی واقعی ویوها در نسخهٔ 1.0.0.
     این فایل برای بازبینی چشمی است و بخشی از بستهٔ انتشار نیست.
     فرم‌ها و دکمه‌ها در اینجا کار نمی‌کنند (بدون وردپرس).
 </p>
-<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — داشبورد<small>نگهبانِ خبرهای خوب فروشگاه شما</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۲.۸.۰</span><span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar" aria-current="page">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
-	
+<div class="wrap mjy-wrap" dir="rtl"><header class="mjy-hero"><span class="mjy-hero__mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5v3.2c0 .9-.3 1.6-.9 2.3L4.4 16h15.2l-1.2-1.5c-.6-.7-.9-1.4-.9-2.3V9A5.5 5.5 0 0 0 12 3.5Z" /><path d="M9.8 19a2.3 2.3 0 0 0 4.4 0" /></svg></span><div class="mjy-hero__text"><h1 class="mjy-hero__title">موجودیار — داشبورد<small>نگهبانِ خبرهای خوب فروشگاه شما</small></h1></div><div class="mjy-hero__meta"><span class="mjy-chip">نسخهٔ ۱.۰.۰</span><a class="mjy-chip mjy-chip--accent" href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a><a class="mjy-chip" href="https://github.com/Masoumiofficial/Navidban" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a></div></header><nav class="mjy-tabs-wrap" aria-label="بخش‌های موجودیار"><ul class="mjy-tabs"><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar" aria-current="page">داشبورد</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-stats">آمار</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش رویدادها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-waitlists">لیست انتظارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-settings">تنظیمات</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-tools">ابزارها</a></li><li><a href="https://shop.test/wp-admin/admin.php?page=mojoodyar-help">راهنما</a></li></ul></nav>
+
 	<div class="mjy-grid">
 		<div class="mjy-card">
-			<span class="mjy-card__label">در انتظار تأیید</span>
+			<span class="mjy-card__label">در انتظار تآیید</span>
 			<strong class="mjy-card__value">۰</strong>
 		</div>
 		<div class="mjy-card">
-			<span class="mjy-card__label">تأییدشده و در صف</span>
+			<span class="mjy-card__label">تآییدشده و در صف</span>
 			<strong class="mjy-card__value">۲</strong>
 		</div>
 		<div class="mjy-card">
@@ -2231,7 +2275,7 @@ body {
 				<tr><th>در حال ارسال</th><td>۰</td></tr>
 				<tr><th>ارسال‌شده</th><td>۰</td></tr>
 				<tr><th>ناموفق (پس از ۳ تلاش)</th><td>۰</td></tr>
-				<tr><th>ردشده (لغو/تأییدنشده)</th><td>۰</td></tr>
+				<tr><th>ردشده (لغو/تآییدنشده)</th><td>۰</td></tr>
 								<tr>
 					<th>قدیمی‌ترین پیام در انتظار</th>
 					<td>—</td>
@@ -2248,9 +2292,9 @@ body {
 						<span class="mjy-events__level">هشدار</span>
 						<span class="mjy-events__text">
 							<strong>ارسال پیام ناموفق بود</strong>
-							<em>کانال: پیامک — وضعیت ردیف: ناموفق (تلاش‌ها تمام شد) — تلاش شمارهٔ ۳ — خطای درگاه: شمارهٔ فرستنده تأیید نشده است</em>
+							<em>کانال: پیامک — وضعیت ردیف: ناموفق (تلاش‌ها تمام شد) — تلاش شمارهٔ ۳ — خطای درگاه: شمارهٔ فرستنده تآیید نشده است</em>
 						</span>
-						<span class="mjy-events__time">۶ آبان ۱۴۰۵</span>
+						<span class="mjy-events__time">۲ آذر ۱۴۰۵</span>
 					</li>
 									<li class="mjy-events__item mjy-events__item--security">
 						<span class="mjy-events__level">امنیتی</span>
@@ -2258,7 +2302,7 @@ body {
 							<strong>درخواست رد شد و ردیفی ساخته نشد</strong>
 							<em>دلیل: کد امنیتی فرم منقضی شده بود (صفحه از کش بارگذاری شده یا نشست تمام شده)</em>
 						</span>
-						<span class="mjy-events__time">۶ آبان ۱۴۰۵</span>
+						<span class="mjy-events__time">۲ آذر ۱۴۰۵</span>
 					</li>
 									<li class="mjy-events__item mjy-events__item--security">
 						<span class="mjy-events__level">امنیتی</span>
@@ -2266,10 +2310,10 @@ body {
 							<strong>درخواست رد شد و ردیفی ساخته نشد</strong>
 							<em>دلیل: همین مخاطب قبلاً برای همین محصول ثبت شده است</em>
 						</span>
-						<span class="mjy-events__time">۶ آبان ۱۴۰۵</span>
+						<span class="mjy-events__time">۲ آذر ۱۴۰۵</span>
 					</li>
 							</ul>
-		
+
 		<p class="mjy-log__more">
 			<a class="button" href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs">گزارش کامل رویدادها</a>
 							<a class="button button-secondary" href="https://shop.test/wp-admin/admin.php?page=mojoodyar-logs&level=security">
@@ -2293,7 +2337,7 @@ body {
 				(نمونهٔ حداکثر ۲۰۰ ردیف اخیر): <strong>۰٪</strong>
 			</p>
 			<p class="mjy-muted">این عدد بر پایهٔ تطابق ایمیل/موبایل صورتحساب سفارش محاسبه می‌شود؛ اگر مشتری با حساب دیگری خرید کند شمرده نمی‌شود.</p>
-		
+
 	</div>
 	<div class="mjy-panel">
 		<h2>ساختار پایگاه داده</h2>
@@ -2336,6 +2380,6 @@ body {
 		</table>
 
 	</div>
-	<p class="mjy-footer">موجودیار — محصولی از اتحاد وردپرس</p></div>
+	<p class="mjy-footer">موجودیار — محصولی از <a href="https://demo.etehadwp.com/mojoodyar/landing/" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a> | <a href="https://github.com/Masoumiofficial/Navidban" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a></p></div>
 </body>
 </html>

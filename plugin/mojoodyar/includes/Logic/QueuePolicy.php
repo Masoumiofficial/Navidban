@@ -25,9 +25,8 @@ final class QueuePolicy {
 	 * Default maximum delivery attempts before an item is marked failed.
 	 *
 	 * Used as the fallback of max_attempts(); the shop can change it in the
-	 * settings screen (1-5). Until 2.8.1 the setting existed and this constant
-	 * was the only thing read, so changing it did nothing - exactly the kind of
-	 * half-wired option that makes a panel untrustworthy.
+	 * settings screen (1-5). The constant is only the fallback for a shop that
+	 * has never saved the screen.
 	 *
 	 * @var int
 	 */

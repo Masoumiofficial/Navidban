@@ -1,0 +1,17 @@
+{
+  "assertions": 137,
+  "failures": 0,
+  "versions": {
+    "wp": "6.4.5",
+    "wc": "9.0.0",
+    "php": "8.3.36"
+  },
+  "themes": [
+    "Twenty Twenty-One 2.1",
+    "Twenty Twenty-Four 1.0"
+  ],
+  "storage": "Playground SQLite adapter; test-only ENGINE and channel ALTER DEFAULT skips; ADD denial simulated",
+  "browser": "jsdom 26.1.0, jQuery 3.7.1, real WC variation JS",
+  "mail": "pre_wp_mail intercepted; no external delivery",
+  "woocommerce_source": "provided externally via MOJOODYAR_WC_DIR; verify provenance separately"
+}

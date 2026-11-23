@@ -8,6 +8,7 @@
 
 namespace Mojoodyar;
 
+use Mojoodyar\Support\ProductAvailability;
 use Mojoodyar\Support\Validator;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,6 +46,12 @@ final class Subscribe {
 
 		$ip_hash = Consent::ip_hash();
 
+		// Never acknowledge a registration when a required schema upgrade has
+		// failed: doing so could create a row that the new queue cannot process.
+		if ( ! Database::schema_ready() ) {
+			return self::fail( 'schema_upgrade', 503, 'ثبت موقتاً در دسترس نیست. لطفاً با فروشگاه تماس بگیرید.', $ip_hash );
+		}
+
 		if ( 'restock' !== $event_type ) {
 			// Version 1.0 only ships the restock event.
 			$event_type = 'restock';
@@ -60,14 +67,34 @@ final class Subscribe {
 
 		$product = wc_get_product( $product_id );
 
-		if ( ! $product ) {
-			return self::fail( 'invalid_product', 404, 'محصول یافت نشد.', $ip_hash );
+		if ( ! ProductAvailability::public_product( $product ) ) {
+			return self::fail( 'invalid_product', 404, 'محصول یافت نشد یا در دسترس نیست.', $ip_hash );
 		}
 
-		// The form only exists for unavailable products; refuse anything else so
-		// the endpoint cannot be used to harvest addresses on buyable products.
-		if ( $product->is_in_stock() && ! self::variation_is_unavailable( $product_id, $variation_id ) ) {
-			return self::fail( 'product_available', 409, 'این محصول موجود است.', $ip_hash );
+		// Validate every supplied variation, including when the parent itself is
+		// out of stock. Otherwise a forged ID could attach a waitlist row and a
+		// stock snapshot to an unrelated or unavailable-for-selection variation.
+		$variation = null;
+		if ( $product->is_type( 'variable' ) ) {
+			if ( $variation_id <= 0 ) {
+				return self::fail( 'variation_required', 422, 'لطفاً تنوع ناموجود مورد نظر را انتخاب کنید.', $ip_hash );
+			}
+
+			$variation = wc_get_product( $variation_id );
+			$children  = method_exists( $product, 'get_children' ) ? array_map( 'intval', (array) $product->get_children() ) : array();
+			if ( ! in_array( $variation_id, $children, true ) || ! ProductAvailability::selectable_variation( $product, $variation ) ) {
+				return self::fail( 'invalid_variation', 422, 'این تنوع قابل انتخاب نیست. صفحه را تازه‌سازی کنید.', $ip_hash );
+			}
+			if ( $variation->is_in_stock() ) {
+				return self::fail( 'product_available', 409, 'این تنوع اکنون موجود است.', $ip_hash );
+			}
+		} else {
+			if ( 0 !== $variation_id ) {
+				return self::fail( 'invalid_variation', 422, 'این محصول تنوع انتخاب‌شده را ندارد.', $ip_hash );
+			}
+			if ( $product->is_in_stock() ) {
+				return self::fail( 'product_available', 409, 'این محصول موجود است.', $ip_hash );
+			}
 		}
 
 		// The name field is what turns a row into something a human can call
@@ -128,9 +155,10 @@ final class Subscribe {
 
 		$user_id = function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0;
 
+		$watched_product = $variation ? $variation : $product;
 		$stock_at_signup = 0;
-		if ( method_exists( $product, 'get_stock_quantity' ) ) {
-			$qty             = $product->get_stock_quantity();
+		if ( method_exists( $watched_product, 'get_stock_quantity' ) ) {
+			$qty             = $watched_product->get_stock_quantity();
 			$stock_at_signup = null === $qty ? 0 : (int) $qty;
 		}
 
@@ -142,17 +170,8 @@ final class Subscribe {
 		// "in stock" write as a first sighting and announces nothing - the exact
 		// "the row is in the waitlist but no SMS arrived" report.
 		if ( null === WaitlistRepository::snapshot_get( $product_id, $variation_id ) ) {
-			$watched = $product;
-
-			if ( $variation_id > 0 && function_exists( 'wc_get_product' ) ) {
-				$maybe_variation = wc_get_product( $variation_id );
-				if ( $maybe_variation ) {
-					$watched = $maybe_variation;
-				}
-			}
-
-			$watched_qty     = method_exists( $watched, 'get_stock_quantity' ) ? $watched->get_stock_quantity() : null;
-			$watched_managed = method_exists( $watched, 'managing_stock' ) ? (bool) $watched->managing_stock() : true;
+			$watched_qty     = method_exists( $watched_product, 'get_stock_quantity' ) ? $watched_product->get_stock_quantity() : null;
+			$watched_managed = method_exists( $watched_product, 'managing_stock' ) ? (bool) $watched_product->managing_stock() : true;
 
 			WaitlistRepository::snapshot_put(
 				$product_id,
@@ -189,7 +208,27 @@ final class Subscribe {
 			// that customer again through the form. Signing up again is a real
 			// expression of interest, so a row that is no longer waiting is
 			// revived (a row that is still pending/confirmed is left alone).
-			$revived = WaitlistRepository::reactivate( (int) $result['id'], $name, (bool) Settings::enabled( 'double_opt_in' ) );
+			$renewal_error = '';
+			$revived = WaitlistRepository::reactivate( (int) $result['id'], $name, (bool) Settings::enabled( 'double_opt_in' ), $channel, $renewal_error );
+			if ( '' !== $renewal_error ) {
+				Logger::log( 'warning', 'subscribe_failed', 'reason=' . $renewal_error, $ip_hash );
+				return self::fail( 'subscribe_failed', 500, 'ثبت انجام نشد. بعداً دوباره تلاش کنید.', $ip_hash );
+			}
+
+			$current = WaitlistRepository::get( (int) $result['id'] );
+			if ( ! is_array( $current ) ) {
+				return self::fail( 'subscribe_failed', 500, 'ثبت انجام نشد. بعداً دوباره تلاش کنید.', $ip_hash );
+			}
+			$needs_confirm = 'pending' === $current['status'];
+			if ( $needs_confirm && $revived ) {
+				$message = 'درخواست دوباره ثبت و پیام تآیید در صف قرار گرفت. پس از دریافت، پیوند آن را باز کنید.';
+			} elseif ( $needs_confirm ) {
+				$message = 'درخواست شما از قبل در انتظار تآیید است. پیوند تآیید قبلی را بررسی کنید یا با فروشگاه تماس بگیرید.';
+			} elseif ( $revived ) {
+				$message = 'دوباره در لیست انتظار این محصول قرار گرفتید. هنگام بازگشت موجودی، اعلان در صف قرار می‌گیرد.';
+			} else {
+				$message = 'شما از قبل در لیست انتظار این محصول هستید.';
+			}
 
 			Logger::log( 'info', 'subscribe_duplicate', 'product=' . $product_id . '|id=' . (int) $result['id'] . '|revived=' . ( $revived ? 'yes' : 'no' ), $ip_hash );
 
@@ -197,12 +236,10 @@ final class Subscribe {
 				'ok'      => true,
 				'code'    => 'already_subscribed',
 				'status'  => 200,
-				'message' => $revived
-					? 'دوباره در لیست انتظار این محصول قرار گرفتید. به‌محض بازگشت موجودی خبرتان می‌کنیم.'
-					: 'شما از قبل در لیست انتظار این محصول هستید؛ به‌محض بازگشت موجودی خبرتان می‌کنیم.',
+				'message' => $message,
 				'data'    => array(
 					'id'            => (int) $result['id'],
-					'needs_confirm' => false,
+					'needs_confirm' => $needs_confirm,
 					'already'       => true,
 					'revived'       => (bool) $revived,
 				),
@@ -224,7 +261,7 @@ final class Subscribe {
 			'code'    => $double ? 'confirmation_sent' : 'subscribed',
 			'status'  => 201,
 			'message' => $double
-				? 'یک پیام تأیید برای شما ارسال شد. برای تکمیل ثبت، پیوند داخل آن را باز کنید.'
+				? 'پیام تآیید در صف ارسال قرار گرفت. پس از دریافت، برای تکمیل ثبت پیوند داخل آن را باز کنید.'
 				: (string) Settings::get( 'success_message', '' ),
 			'data'    => array(
 				'id'          => (int) $result['id'],
@@ -254,29 +291,4 @@ final class Subscribe {
 		);
 	}
 
-	/**
-	 * Is a specific variation unavailable?
-	 *
-	 * @param int $product_id   Product ID.
-	 * @param int $variation_id Variation ID.
-	 * @return bool
-	 */
-	private static function variation_is_unavailable( $product_id, $variation_id ) {
-		if ( (int) $variation_id <= 0 ) {
-			return false;
-		}
-
-		$variation = wc_get_product( (int) $variation_id );
-
-		if ( ! $variation ) {
-			return false;
-		}
-
-		// The variation must belong to the product it claims.
-		if ( method_exists( $variation, 'get_parent_id' ) && (int) $variation->get_parent_id() !== (int) $product_id ) {
-			return false;
-		}
-
-		return ! $variation->is_in_stock();
-	}
 }

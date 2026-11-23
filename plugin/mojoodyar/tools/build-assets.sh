@@ -28,7 +28,12 @@ admin_js="assets/js/mojoodyar-admin.js"
 
 echo "=== Mojoodyar asset check ==="
 
-for f in "$front_css" "$front_js" "$admin_css" "$admin_js"; do
+fonts=(assets/fonts/vazirmatn-arabic-400-normal.woff2
+       assets/fonts/vazirmatn-arabic-500-normal.woff2
+       assets/fonts/vazirmatn-arabic-700-normal.woff2
+       assets/fonts/OFL.txt)
+
+for f in "$front_css" "$front_js" "$admin_css" "$admin_js" "${fonts[@]}"; do
 	if [ ! -f "$f" ]; then
 		echo "[FAIL] missing $f"
 		fail=1
@@ -48,7 +53,7 @@ gz_total=0
 for f in "$front_css" "$front_js"; do
 	[ -f "$f" ] || continue
 	raw=$(wc -c < "$f" | tr -d ' ')
-	gz=$(gzip -9 -c "$f" | wc -c | tr -d ' ')
+	gz=$(gzip -9 -n -c "$f" | wc -c | tr -d ' ')
 	raw_total=$((raw_total + raw))
 	gz_total=$((gz_total + gz))
 	printf '  %-34s %7s B raw  %7s B gzip\n' "$f" "$raw" "$gz"

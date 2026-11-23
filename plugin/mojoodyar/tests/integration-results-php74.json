@@ -1,8 +1,8 @@
 {
-    "plugin_version": "2.8.1",
+    "plugin_version": "1.0.0",
     "php_version": "7.4.33",
-    "generated_at": "2026-10-28T11:39:38+00:00",
-    "assertions": 444,
+    "generated_at": "2026-11-17T13:14:40+00:00",
+    "assertions": 625,
     "failures": 0,
     "pass_rate": 100,
     "groups": {
@@ -10,19 +10,39 @@
             "assertions": 12,
             "failures": 0
         },
+        "فرستندهٔ مستقل هر سایت": {
+            "assertions": 16,
+            "failures": 0
+        },
         "بارگذاری شرطی": {
             "assertions": 8,
             "failures": 0
         },
+        "جای‌گذاری خودکار و شورت‌کد": {
+            "assertions": 41,
+            "failures": 0
+        },
+        "انتخاب تنوع ناموجود": {
+            "assertions": 18,
+            "failures": 0
+        },
         "ثبت درخواست": {
-            "assertions": 20,
+            "assertions": 21,
+            "failures": 0
+        },
+        "اعتبارسنجی مالکیت و وضعیت تنوع": {
+            "assertions": 19,
+            "failures": 0
+        },
+        "ثبت درخواست — ادامه": {
+            "assertions": 3,
             "failures": 0
         },
         "ثبت یک‌مرحله‌ای (پیش‌فرض تازه)": {
             "assertions": 10,
             "failures": 0
         },
-        "تأیید و لغو اشتراک": {
+        "تآیید و لغو اشتراک": {
             "assertions": 7,
             "failures": 0
         },
@@ -90,6 +110,22 @@
             "assertions": 12,
             "failures": 0
         },
+        "اعلان دوباره پس از ارسال قبلی": {
+            "assertions": 22,
+            "failures": 0
+        },
+        "تآیید دومرحله‌ای در ثبت دوباره": {
+            "assertions": 17,
+            "failures": 0
+        },
+        "بازگشت امن خطای صف و تآیید منقضی": {
+            "assertions": 20,
+            "failures": 0
+        },
+        "توقف ایمن هنگام ارتقای ناقص جدول‌ها": {
+            "assertions": 14,
+            "failures": 0
+        },
         "گزارش رویدادها": {
             "assertions": 30,
             "failures": 0
@@ -106,7 +142,11 @@
             "assertions": 47,
             "failures": 0
         },
-        "مهاجرت از برند قدیم (۱.۰.x)": {
+        "زنجیرهٔ ثبت و اعلان تنوع": {
+            "assertions": 10,
+            "failures": 0
+        },
+        "مهاجرت از نسخهٔ آزمایشی": {
             "assertions": 17,
             "failures": 0
         }

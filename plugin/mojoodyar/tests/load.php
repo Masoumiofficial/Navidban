@@ -134,7 +134,10 @@ mjy_check( 'دستهٔ اول از سقف اندازهٔ دسته عبور نم�
 $GLOBALS['wpdb']->query( 'DELETE FROM ' . Queue::table() );
 
 $mjy_enqueue_start = microtime( true );
-$mjy_ids           = $GLOBALS['wpdb']->get_col( 'SELECT id FROM ' . WaitlistRepository::table() . ' ORDER BY id ASC LIMIT 1000' );
+// The first five subscribers were already notified by the fair-sending batch
+// above. Queue the next 1,000 confirmed rows so this batch-draining check does
+// not manufacture five intentionally invalid jobs for notified subscribers.
+$mjy_ids           = $GLOBALS['wpdb']->get_col( 'SELECT id FROM ' . WaitlistRepository::table() . ' ORDER BY id ASC LIMIT 1000 OFFSET 5' );
 
 foreach ( $mjy_ids as $mjy_id ) {
 	Queue::enqueue( (int) $mjy_id, 'email', 'restock:load' );
