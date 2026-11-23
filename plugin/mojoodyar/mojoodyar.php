@@ -7,7 +7,7 @@
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            اتحاد وردپرس
- * Author URI:        https://github.com/Masoumiofficial/Navidban
+ * Author URI:        https://demo.etehadwp.com/mojoodyar/landing/
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       mojoodyar

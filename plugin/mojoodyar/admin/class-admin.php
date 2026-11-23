@@ -797,7 +797,8 @@ final class Admin {
 		// converted segment by segment — otherwise "1.0.4" prints as "۱".
 		$mjy_version = implode( '.', array_map( array( Persian::class, 'number' ), explode( '.', (string) MOJODYAR_VERSION ) ) );
 		echo '<span class="mjy-chip">نسخهٔ ' . esc_html( $mjy_version ) . '</span>';
-		echo '<span class="mjy-chip mjy-chip--accent">اتحاد وردپرس</span>';
+		echo '<a class="mjy-chip mjy-chip--accent" href="' . esc_url_compat( 'https://demo.etehadwp.com/mojoodyar/landing/' ) . '" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a>';
+		echo '<a class="mjy-chip" href="' . esc_url_compat( 'https://github.com/Masoumiofficial/Navidban' ) . '" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a>';
 		echo '</div>';
 		echo '</header>';
 
@@ -815,7 +816,7 @@ final class Admin {
 	 * @return void
 	 */
 	private function close_screen() {
-		echo '<p class="mjy-footer">موجودیار — محصولی از اتحاد وردپرس</p>';
+		echo '<p class="mjy-footer">موجودیار — محصولی از <a href="' . esc_url_compat( 'https://demo.etehadwp.com/mojoodyar/landing/' ) . '" target="_blank" rel="noopener noreferrer">اتحاد وردپرس</a> | <a href="' . esc_url_compat( 'https://github.com/Masoumiofficial/Navidban' ) . '" target="_blank" rel="noopener noreferrer">دیدن خانهٔ افزونه</a></p>';
 		echo '</div>';
 	}
 

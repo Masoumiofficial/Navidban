@@ -235,7 +235,7 @@ body {
 /* Scoped under .mjy-form (0-2-0) so a theme's button rules — e.g.
    `.woocommerce button` (0-1-1) — cannot recolour the label dark on the
    dark gradient. A theme can still override with a more specific selector
-   or !important; the plugin never uses !important itself. */
+   or an important flag; the plugin itself never uses one. */
 .mjy-form .mjy-button {
 	display: inline-block;
 	padding: 0.75rem 1.6rem;

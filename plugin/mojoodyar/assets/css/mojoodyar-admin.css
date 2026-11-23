@@ -187,6 +187,11 @@
 	line-height: 1.7;
 	color: #fff;
 	white-space: nowrap;
+	text-decoration: none;
+}
+
+a.mjy-chip:hover {
+	text-decoration: underline;
 }
 
 .mjy-chip--accent {
@@ -1060,6 +1065,15 @@
 	font-size: 12px;
 	color: var(--mjy-ink-soft);
 	text-align: center;
+}
+
+.mjy-footer a {
+	color: var(--mjy-primary);
+	text-decoration: none;
+}
+
+.mjy-footer a:hover {
+	text-decoration: underline;
 }
 
 /* -------------------------------------------------------------------------
